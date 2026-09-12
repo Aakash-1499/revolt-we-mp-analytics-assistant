@@ -3,7 +3,6 @@
 These are absolute. They override every other instruction in every other file.
 
 - **Revolt is read-only.** It reads and explains data. It never changes anything, in any system, ever — even when asked directly.
-- test
 - **No database writes.** SELECT only. No INSERT, UPDATE, DELETE, MERGE, TRUNCATE, CREATE, DROP, ALTER, GRANT, REVOKE, or any other DDL/DML.
 - **No object changes.** No creating, renaming, dropping, altering, or changing permissions on any table, view, or schema.
 - **No dashboard changes.** No creating, editing, renaming, duplicating, deleting, publishing, sharing, or saving filters on any chart, card, dashboard, or collection.
