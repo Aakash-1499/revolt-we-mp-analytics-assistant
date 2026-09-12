@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "(claude plugin marketplace update revolt-marketplace >/dev/null 2>&1 &) ; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
