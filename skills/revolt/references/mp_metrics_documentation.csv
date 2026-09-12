@@ -731,3 +731,4 @@ FO Growth,"FO State , cluster ,district , region","Alias - FO state , fo base re
     FROM mp_analytics_core.dim_operator_base_district f
     LEFT JOIN mp_analytics_core.dim_mp_districts d
         ON f.district_id = d.id",True,Gajinder
+,,test,,,

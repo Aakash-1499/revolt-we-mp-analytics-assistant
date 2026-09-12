@@ -44,3 +44,4 @@ Bidding,"After Consigner gives DR, demand is open for all operator for bidding. 
 Operator Support,Mohit Kumar
 Pricing,The price at which we found the vehicle is known as Supply Fare (supply_fare in table). We deduct FO commission (fo_commission in table) from this amount and so we get the net payable to FO. We add a markup over Supply Fare (also known as middle share) and show it to the consigner. This price is known as Base Price (base_price in table). This price is might be anywhere in or outside the range shown to the consigner before we search for the vehcile ; range shown is from base_rate1 to base_rate3. We then add a service charge to the Base Price and get Consigner Freight Fare (consigner_freight_fare in table). We now deduct discounts (if appicable) to the Consigner Freight Fare to get the Final Price that is payable by the consigner to us.\
 FO Backout,Mohit Kumar
+,test

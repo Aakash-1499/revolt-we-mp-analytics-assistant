@@ -19,7 +19,7 @@
 | Leading Metric | Self explanatory | No |
 | Other Metrics | Self explanatory | No |
 | Android App Version<br>(In case of Forced Release) | Self explanatory | No |
-| iOS App Version<br>(In case of Forced Release) | Self explanatory | No |
+| iOS App Version<br>(In case of Forced Release) | Self explanatory test | No |
 
 ## Experiment Variants
 
