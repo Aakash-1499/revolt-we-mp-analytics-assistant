@@ -1,0 +1,46 @@
+Line of Business,Trucking Logistics
+Our Offering,A marketplace platform offering trucks for inter city demands only (we refer to this internally as MP business)
+Consigner App Platform,"Consigner App also known as 'Book Truck' app which has mandatory signup
+1. Android (>80% traffic)
+2. iOS
+3. Web (Consigner can only create demand and then has to resume journey from app)"
+Consigner Acquisition,"Organic
+Field Sales
+Digital Marketing"
+Key Terms,"Consigner: Users who have truck requirements
+Demand_id: This is generated for each demand created by consigner by providing origin, destination and vehicle type. The total count of demands might not represent the actual shipment requirements for a consigner as the consigner might make multiple demands for same requirement due to multiple issues - price browsing, consignee cancelled order, etc. Generally, we calculate most of the metrics at demand level but in few cases, we also calculate metrics at ODVT/CODVT/COD level.
+ODVT -  If we have to calculate a metric at ODVT level then it means replacing demand_id with combination of date,consigner_code, origin_id, destination_id and vt_id and then we can aggregate this id over any timeperiod or dimension.
+CODVT - If we have to calculate a metric at CODVT level then it means replacing demand_id with combination of date,consigner_code, origin_cluster_id, destination_id and vt_id and then we can aggregate this id over any timeperiod or dimension. We generally consider count of CODVTs to be a good represntation of actual shipment requirements of the consigner but we dont apply this by default to the metrics unless asked to do so.
+COD - If we have to calculate a metric at COD level then it means replacing demand_id with combination of date,consigner_code, origin_cluster_id and destination_id and then we can aggregate this id over any timeperiod or dimension."
+Consigner Attributes,Potential: This defines the #shipment requirements of the consigner per month. We dont have a way to figure this out with high accuracy. Right now there is an optional field in the app which can be filled in by the consigner < data ref>
+Consigner Journey,Lands on App > Signs up > Triggers Demand Flow > Inputs Origin district > Inputs Destination District > Browses through list of relevant truck types and their price range  (This step is known as VT Browsing) > Select one VT (Vehicle Type) > Provides loading location >
+Consigner Rating,Trip Ended >> Lands on my trip screen >> Pop-up shown for rating >> consiger select number of stars >> then select reasons what he like or dislike >> submit reason
+Consigner Support,"There are multiple entry point in app to ""Need Help"" button >> User selects a issue type >> Chat Screen >> Predifine FAQs"
+,
+FO (Fleet Operator) App Platform,"FO App also known as 'GPS' app which as mandatory signup
+1. Android (>80% traffic)
+2. iOS
+3. Web"
+Key Terms,"FO (Fleet Operator) : Users who own one or multiple trucks and registered on Wheelseye platform. Their truck attributes are generally not captured correctly as it is not of that vital importance.
+Sub FO: FOs who have subscribed to the MP subscription
+Ready FO - Sub FOs  who have also confirmed vehicle attributes for atleast 1 vehicle. The truck attributes become very critical in MP business, hence the requirement."
+FO Acquisition,"The Sister company (SAAS) has a huge pool of FOs registered on the wheelseye platform and a subset of these FOs actively use the IOT devices built by SAAS on a subscription basis.
+One of the important iOT device they offer is GPS sensor and SAAS captures each GPS ping of every truck with an active GPS subscription.
+MP leverages the GPS data in order to identify the right FOs they need to acquire for MP business. These FOs are reached out via app/whatsapp/call and offered to subscribe to the MP business. Once they successfuly subscribe, their FO App unlocks 'Loads' tab where the FOs can see all the live DRs (confirmed demands) and take action accordingly."
+FO Attributes,"Fleet size:  We classify FO based on the number of trucks they possess   SVO (1) / SFO (2–3) / MFO (4–24) / LFO (25–49) / XLFO (>50)
+Base Cluster: We have attributed a state to each FO based on the logic of the highest frequent origin for their GPS lanes."
+FO Journey,"Lands on App >> Open Loads Section >> Browse Loads through filters/others (Active Demands) >> View Loads (LDP) >> Pays token >> Selects Vehicle >> Placement >> Reaches Loading Point(AT_LOADING)
+ >> Pickups Material (IN_TRANSIT)>> Gets Advance Payment >> Delivery (Trip End) >> Uploads POD >> Gets Balance Payment"
+,
+,
+,
+Demand Journey,Consigner confirm VT > Consigner confirms Search Mode > Consigner provides loading and unloading address >
+,
+,
+,
+OpSearch,"This service identify all FOs within 120km who are eligible to place the respective demand. We have demand_id, operator_code, opsearch_score, and distance between operator and demand origin."
+Matching,"After Consigner gives DR, system target operators via notification with pre determined supply_fare. Operator give confirmation on DRs for placement."
+Bidding,"After Consigner gives DR, demand is open for all operator for bidding. Operator put thier price and submit. Minimum bid on DR wins."
+Operator Support,Mohit Kumar
+Pricing,The price at which we found the vehicle is known as Supply Fare (supply_fare in table). We deduct FO commission (fo_commission in table) from this amount and so we get the net payable to FO. We add a markup over Supply Fare (also known as middle share) and show it to the consigner. This price is known as Base Price (base_price in table). This price is might be anywhere in or outside the range shown to the consigner before we search for the vehcile ; range shown is from base_rate1 to base_rate3. We then add a service charge to the Base Price and get Consigner Freight Fare (consigner_freight_fare in table). We now deduct discounts (if appicable) to the Consigner Freight Fare to get the Final Price that is payable by the consigner to us.\
+FO Backout,Mohit Kumar

@@ -1,0 +1,14 @@
+{
+  "name": "revolt-marketplace",
+  "owner": {
+    "name": "Aakash Singh",
+    "email": "aakash.singh@wheelseye.com"
+  },
+  "plugins": [
+    {
+      "name": "revolt",
+      "source": "./",
+      "description": "Revolt - Wheelseye's read-only stakeholder analytics assistant over Redshift."
+    }
+  ]
+}
