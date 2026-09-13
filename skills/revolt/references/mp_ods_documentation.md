@@ -39,7 +39,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 23 | total_trips_loads | Total trips completed by the FO on this day. | 78 | — |
 | 24 | reverse_loads_trips | Count of reverse-load (return-leg) trips completed by the FO on this day. | 0 | — |
 | 25 | life_time_trips | Cumulative trips completed by the FO across their entire history on the marketplace. | 84 | — |
-| 26 | fleet_size | Fleet-size segment of the FO: SFO (Single FO), MFO (Multi-vehicle FO), LFO (Large FO).<br>XLFO>50<br>LFO-25-49,SFO 2-3,MFO 4-24 ,SVO 1 | SFO | — |
+| 26 | fleet_size | Fleet-size segment of the FO: SVO (Single Vehicle FO),SFO (Small FO), MFO (Multi-vehicle FO), LFO (Large FO),XLFO (Extra Large FO).<br>XLFO>=50<br>LFO-25-49,SFO 2-3,MFO 4-24 ,SVO 1 | SFO | — |
 | 27 | fo_base_region | "(do not use this )" | NCR | — |
 | 28 | first_trip_date | First Trip date of FO | 2022-10-03T12:04:04.649Z | ⚠ FIRST_TRIP_DATE — should be 'first_trip_date (NEEDS context prefix)' |
 | 29 | trips_till_date | Cumulative trips up to and including this event date. | 78 | — |
