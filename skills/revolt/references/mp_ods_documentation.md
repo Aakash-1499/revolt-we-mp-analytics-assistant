@@ -902,7 +902,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 ## 24_as_trip_payments
 
-**mp_analytics_core.as_trip_payments:** Owner
+**mp_analytics_core.fact_trip_payments:** Owner
 
 **Aniket:** Grain
 
