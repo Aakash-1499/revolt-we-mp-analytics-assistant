@@ -108,7 +108,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 50 | cod | Combination of Consigner_user_code,Demand_date,Origin_id,Destination_id | (NULL) | — |  |
 | 51 | codvt | Combination of Consigner_user_code,Demand_date,Origin_id,Destination_id,vehicle_type_id | (NULL) | — |  |
 | 52 | codvt_pricing | Do Not Use | (NULL) | — | ? |
-| 55 | base_price | This is supplyfare + middle share | (NULL) | — | ? |
+| 55 | base_price | Supply fare with our margin ('Middle Share') which should have been shown to the consignor in case there is zero non-coupon discount applicable. | (NULL) | — | ? |
 | 56 | base_rate1 | This is the lower end of the price range shown to the consigner before we start searching for the vehicle. It is derived by multiplying base_rate2 with a factor which might vary across ODVTs. | (NULL) | — | ? |
 | 57 | base_rate2 | This is the predicted consigner freight fare for the given ODVT.<br>It is derived by multiplying supply_l2 (predicted supply_fare for the given ODVT by our pricing model) with a factor which might vary across ODVTs. | (NULL) | — | ? |
 | 58 | base_rate3 | This is the upper end of the price range shown to the consigner before we start searching for the vehicle. It is derived by multiplying base_rate2 with a factor which might vary across ODVTs. | (NULL) | — | ? |
