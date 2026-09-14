@@ -900,7 +900,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 32 | addressed_expense | 1 if the expense has been addressed; 0 otherwise. | 1 | — | USE |
 | 33 | unique_flag | <TO VERIFY — internal flag in fact_payment_summary, possibly to dedupe demand_id rows during multi-trip scenarios> | 1 | — | USE |
 
-## 24_as_trip_payments
+## 24_fact_trip_payments
 
 **mp_analytics_core.fact_trip_payments:** Owner
 
