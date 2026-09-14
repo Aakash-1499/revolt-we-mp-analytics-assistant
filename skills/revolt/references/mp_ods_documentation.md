@@ -803,7 +803,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 12 | assigned_to | Agent or team to whom the ticket is assigned. | sumit.y@wheelseye.com | — | USE |
 | 13 | reporting_to | Escalation owner — usually a functional mailbox (aftertrip@, fo_kyc@, finance@, resolution_mp@). Good department proxy. | aftertrip@wheelseye.com | — | USE |
 | 14 | updated_by | User who last updated the ticket. | mohd.arsh@wheelseye.com | — | USE |
-| 15 | consigner_type | Classification of the consigner at time of demand (e.g., TOP, NORMAL). | SME_HP | — | USE |
+| 15 | consigner_type | Classification of the consigner at time of demand (New / Repeat). | SME_HP | — | USE |
 | 16 | a_hour | Hour-of-day 0–23 of creation — for shift/staffing analysis. | 9 | — | USE |
 | 17 | a_date | Creation date, stored as IST calendar date at UTC-midnight offset. Compare on date parts. | 2026-01-07 (= 8 Jan IST) | — | USE |
 | 18 | a_month | Month number 1–12. Peak Jul/Aug, trough Jan. | 1 | — | USE |
