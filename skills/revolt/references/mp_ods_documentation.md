@@ -211,8 +211,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 7 | tyre_count | Tyre count of the specific vehicle.  [Same data as 'tyre' in fact_consigner_demands_lead_source — STANDARDIZE naming] | 0 | ⚠ TYRE_COUNT — should be 'tyre_count' |
 | 8 | size_in_ft | Vehicle size in feet (length of the cargo body). | 0 | — |
 | 9 | tonnage | Vehicle tonnage capacity in metric tons. | 0 | — |
-| 10 | vt_pricing_id | <missing in Glossary> | -1 | — |
-| 11 | vt_id | <missing in Glossary> | -1 | — |
+| 10 | pricing_vt_id | Unique identifier of VT description aling with pricing logics. Joined with mp_analytics_core.dim_pricing_vt | -1 | — |
+| 11 | supply_vt_id | Vehicle type ID — canonical identifier combining body type, size, and tyre count. Joined with mp_analytics_core.fact_demand_vt | -1 | — |
 | 12 | vehicle_category | Coarse vehicle category code (e.g., 'LMV', 'HMV'). | LMV | — |
 | 13 | vehicle_category_desc | Human-readable description of the vehicle category (e.g., 'Agricultural Tractor(LMV)'). | Agricultural Tractor(LMV) | — |
 | 14 | vehicle_class | Vehicle class code (more specific than category, e.g., 'TRUCK'). | TRACTOR_AGRICULTURE | — |
