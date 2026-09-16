@@ -1015,3 +1015,132 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 21 | total_counts | Raw event fires collapsed into the row (1–3,459). SUM this, never COUNT(*), for true event volume. | 43 | — | USE |
 | 22 | min_timestamp | Epoch microseconds of earliest raw event in the group. | 1787432768248005 | — | USE |
 | 23 | max_timestamp | Epoch microseconds of latest raw event; equals min when total_counts=1. (max−min)/1e6 = dwell seconds. | 1787432948204071 | — | USE |
+
+## 26_fact_demands
+
+**mp_analytics_critical.fact_demands_full:** Owner
+
+**Gajinder:** Grain
+
+**demand_id:** Short description
+
+A demand-level fact table capturing the full lifecycle of a consigner's demand — creation, DR, placement, and trip outcome — across lane, consigner, vehicle-type, special-request, and pricing dimensions. It is serving as the master base for placement, fulfilment, and pricing dashboards.
+
+Columns (Description pulled from Glossary via VLOOKUP)
+
+| # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
+| --- | --- | --- | --- | --- | --- |
+| 1 | demand_id | Unique identifier of a demand created by a consigner. |  | — | USE |
+| 2 | demand_time | Exact timestamp when the demand was created. |  | — | USE |
+| 3 | app_version | App version at the time of the event. |  | — | USE |
+| 4 | app_platform | Origination platform of the consigner action (e.g., 'CONSIGNER_APP', 'web').  [Same data as 'platform' in fact_consigner_demands_lead_source — standardize naming] |  | — | USE |
+| 5 | experiment_ids | Variant details of the A/B experiment if live at demand level. |  |  | USE |
+| 6 | dr_type | Classification of the DR (BEST PRICE/QUICK CONFIRMATION) |  | — | USE |
+| 7 | dr_flag | Indicates if a Details Required (DR) was given by consigner <br>(1 = Yes, 0 = No) |  | — | USE |
+| 8 | dr_time | Timestamp when the demand became a DR (Details Required) — i.e., entered the supply matching pipeline. |  | — | USE |
+| 9 | demand_cancel_by_cx_time | Timestamp when the demand was cancelled by consigner. |  | — | USE |
+| 10 | demand_cancel_by_sys_time | Timestamp when the demand was cancelled by system. |  |  | USE |
+| 11 | plc_flag | Indicates if demand was placed with a vehicle (1 = Yes, 0 = No) |  | — | USE |
+| 12 | acceptance_flag | Consigner accepted the placement (1 = Yes, 0 = No). |  | — | USE |
+| 13 | auto_cancel_flag | After placement, consigner need to fill address details for demand. Acceptance is considered incomplete without this step. If consigner fails to update address within x minutes, then demand is cancel automatically (1 = Yes, 0 = No). |  | — | USE |
+| 14 | trip_flag | Indicates if the demand resulted in a trip (1 = Yes, 0 = No) |  | — | USE |
+| 15 | status | Demand status: EXPIRED (closed without a trip), FULFILLED (trip started), PENDING (active, searching vehicle). Consider all values by default. |  | — | USE |
+| 16 | plc_demand_type | Placement demand-type classification. |  | — | USE |
+| 17 | replacement_flag | Placed vehicle is replaced once for the demand (1 = Yes, 0 = No). |  | — | USE |
+| 18 | operator_induced_backout | Consignment cancelled due to FO reasons (1 = Yes, 0 = No). |  | — | USE |
+| 19 | operator_triggered_backout | Consignment cancelled by FO via the operator app (1 = Yes, 0 = No). |  | — | USE |
+| 20 | consigner_induced_backout | Consignment cancelled due to consigner reasons (1 = Yes, 0 = No). |  | — | USE |
+| 21 | consigner_triggered_backout | Consignment cancelled by consigner via the app (1 = Yes, 0 = No). |  | — | USE |
+| 22 | non_plc_reason | Reason a demand was not placed. |  | — | USE |
+| 23 | drop_points | Drop/destination points associated with the ticket's trip. |  | — | USE |
+| 24 | special_req | 1 = demand had a special request; 0 = no special request. Consider all values by default. |  | — | USE |
+| 25 | special_type | Type of special request: overheight / overweight / expressdeliverytat / opendala / extrawidth / extraperson / dieselvehicle. Consider all values by default. |  | — | USE |
+| 26 | pricing_special_req | 1/0 flag for special request per pricing VT definitions (overheight & overweight defined per pricing rules). |  | — | USE |
+| 27 | pricing_special_type | Type of special request per pricing definitions (overheight, overweight, expressdeliverytat, opendala, extrawidth, extraperson, dieselvehicle). |  | — | USE |
+| 28 | load_type | Load type: PTL (Part Truck Load) / FTL (Full Truck Load). |  | — | USE |
+| 29 | from_lat | Latitude of pickup location. |  | — | USE |
+| 30 | from_long | Longitude of pickup location. |  | — | USE |
+| 31 | to_lat | Latitude of drop location. |  | — | USE |
+| 32 | to_long | Longitude of drop location. |  | — | USE |
+| 33 | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — | USE |
+| 34 | shortest_route_distance | Straight-line distance between origin and destination. |  | — | USE |
+| 35 | consigner_user_code | Unique identifier of a consigner (CX / customer). WheelsEye internal code, typically starts with 'WE'.<br>It depicts the Unique code assigned to the consigner |  | — | USE |
+| 36 | consigner_payment_status | Consigner's ability to complete DR based on outstanding payment: RESTRICTED / UNRESTRICTED. Consider all values by default. |  | — | USE |
+| 37 | consigner_payment_status_at_dr | Consigner payment status (RESTRICTED/UNRESTRICTED) captured at the DR stage. |  | — | USE |
+| 38 | consigner_type | Classification of the consigner at time of demand (New / Repeat). |  | — | USE |
+| 39 | consigner_segment | Number of trips done by consigners (New, 1-4, 4+). |  | — | DNU |
+| 40 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). |  | — | USE |
+| 41 | tyre_count | Tyre count of the specific vehicle.  [Same data as 'tyre' in fact_consigner_demands_lead_source — STANDARDIZE naming] |  | — | USE |
+| 42 | size_in_ft | Vehicle size in feet (length of the cargo body). |  | — | USE |
+| 43 | tonnage | Vehicle tonnage capacity in metric tons. |  | — | USE |
+| 44 | pricing_vt_id | Unique identifier of VT description aling with pricing logics. Joined with mp_analytics_core.dim_pricing_vt |  | — | USE |
+| 45 | supply_vt_id | Vehicle type ID — canonical identifier combining body type, size, and tyre count. Joined with mp_analytics_core.fact_demand_vt |  | — | USE |
+| 46 | latest_consignment_id | Unique identifier of the latest consignment/placement wrt demand |  | — | USE |
+| 47 | total_consignments | Number of unique vehicles found for the demand. Count is >1 in case of operator backout. |  | — | USE |
+| 48 | origin_id | Internal ID of the demand's origin district |  | — | USE |
+| 49 | destination_id | Demand destination id |  | — | USE |
+| 50 | predicted_rate_flag | Indicates if predicted price exists (1 = Yes, 0 = No). |  | — | USE |
+| 51 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
+| 52 | l2 | Predicted consigner freight fare for the given ODVT. Derived by multiplying supply_l2 (predicted supply_fare from the pricing model) by a factor that may vary across ODVTs. |  | — | USE |
+| 53 | l3 | Upper end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
+
+## 27_fact_consignments
+
+**mp_analytics_critical.fact_consignments:** Owner
+
+**Gajinder:** Grain
+
+**consignment_id:** Short description
+
+A consignment-level fact table tracking the full placement-to-trip lifecycle — state transitions with timestamps, placement type/stage, backouts, and replacements. It carries the complete demand economics: consigner and operator fares, commissions, bonuses, discounts, ancillary charges (damage, penalty, detention, etc.), realised/expected P&L, and predicted price ranges — serving as the master base for placement, fulfilment, and pricing/P&L dashboards.
+
+Columns (Description pulled from Glossary via VLOOKUP)
+
+| # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
+| --- | --- | --- | --- | --- | --- |
+| 1 | consignment_id | Unique identifier of the consignment/placement. |  | — | USE |
+| 2 | consignment_code | Unique code assigned to the consignment/trip. Also in ss_1_mp_system_tickets. |  | — | USE |
+| 3 | consignment_time | Timestamp when consignment was created. |  | — | USE |
+| 4 | operator_code | Unique identifier of a fleet operator (FO). WheelsEye internal code, typically starts with 'WE'. |  | — | USE |
+| 5 | vehicle_id | Unique internal identifier of a specific vehicle in the WheelsEye system. |  | — | USE |
+| 6 | consignment_state | Status/state of the consignment. |  | — | USE |
+| 7 | consignment_rank | In case of multiple consignments for a single demand, represents order of consignment creation. |  | — | USE |
+| 8 | scheduled_time | Timestamp when vehicle is placed and waiting for consigner acceptance. |  | — | USE |
+| 9 | gtl_time | Timestamp when the vehicle started moving towards the loading point. |  | — | USE |
+| 10 | at_loading_time | Timestamp when the vehicle arrived at the loading point. |  | — | USE |
+| 11 | in_transit_time | Timestamp when the shipment moved to In-Transit. |  | — | USE |
+| 12 | at_unloading_time | Timestamp when the vehicle arrived at the unloading point. |  | — | USE |
+| 13 | trip_end_time | Timestamp when the trip officially ended. |  | — | USE |
+| 14 | backout_time | Timestamp when the consignment was cancelled. |  | — | USE |
+| 15 | demand_cancel_time | Timestamp when the demand was cancelled. |  | — | USE |
+| 16 | placement_type | Mode of placement: Manual or Automation. |  | — | USE |
+| 17 | operator_induced_backout | Consignment cancelled due to FO reasons (1 = Yes, 0 = No). |  | — | USE |
+| 18 | operator_triggered_backout | Consignment cancelled by FO via the operator app (1 = Yes, 0 = No). |  | — | USE |
+| 19 | consigner_induced_backout | Consignment cancelled due to consigner reasons (1 = Yes, 0 = No). |  | — | USE |
+| 20 | consigner_triggered_backout | Consignment cancelled by consigner via the app (1 = Yes, 0 = No). |  | — | USE |
+| 21 | replacement_consignment_id | Unique identifier of the consignment/placement that replaced the current consignment. |  | — | USE |
+| 22 | replacement_supplyfare | Supply fare of the consignment/placement that replaced the current consignment. |  | — | USE |
+| 23 | replacement_time | Timestamp when replacement consignment was created. |  | — | USE |
+| 24 | revenue | It is gross GMV. It is sum of all base prices plus service charge amount (base price*service charge rate) of the trips |  | — | USE |
+| 25 | payable_to_operator | Final price payable to operator post deducting fo commission |  | — | USE |
+| 26 | supplyfare | Final fare at which we got the vehicle |  | — | USE |
+| 27 | base_price | Supply fare with our margin ('Middle Share') which should have been shown to the consignor in case there is zero non-coupon discount applicable. |  | — | USE |
+| 29 | base_price_shown | Price shown to the consignor post non-coupons discounts. |  | — | USE |
+| 28 | final_price | This is the price shown to the consignor post non-coupon and coupon discounts. |  | — | USE |
+| 30 | payable_by_consigner | Final price owed by the consignor post the service charge. |  | — | USE |
+| 31 | freight_difference | Manual consigner price change. |  | — | USE |
+| 32 | service_charge | Commission charged to consigner over wfms_consigner_freight_fare. It is a % of base_price. |  | — | USE |
+| 33 | coupon_discount | These are discount given to consigner for damages, delays, service issues, new user discount, etc. These are visible to consigners. |  | — | USE |
+| 34 | noncoupon_discount | These are discount given to consigner to change their payble amount. These are not visible to consigners and could be a negative discount. |  |  |  |
+| 35 | fo_commission | Commission charged to operator. Flat amount based on vehicle type (vt_category) or fare amount. |  | — | USE |
+| 36 | token_forfeit | Penalty amount charged to the operator in case of backout. |  | — | USE |
+| 37 | net_take_rate | Realised net P&L on the demand (₹) wrt final freight fare. |  | — | USE |
+| 38 | gross_take_rate | Expected (pre-cost) P&L on the demand (₹) wrt final freight fare. |  | — | USE |
+| 39 | predicted_rate_flag | Indicates if predicted price exists (1 = Yes, 0 = No). |  | — | USE |
+| 40 | supply_l1 | Lower end of the supply fare range. |  | — | USE |
+| 41 | supply_l2 | Predicted supply fare for the given ODVT. |  | — | USE |
+| 42 | supply_l3 | Upper end of the supply fare range. |  | — | USE |
+| 43 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
+| 44 | l2 | Predicted consigner freight fare for the given ODVT. Derived by multiplying supply_l2 (predicted supply_fare from the pricing model) by a factor that may vary across ODVTs. |  | — | USE |
+| 45 | l3 | Upper end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
+| 46 | reference_id | <missing in Glossary> |  | — | DNU |
