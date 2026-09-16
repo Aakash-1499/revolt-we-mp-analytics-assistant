@@ -829,7 +829,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 **Ticket code:** Short description
 
----
+it consist all internal tickets/alerts created by system for trip management / flags
 
 Columns (Description pulled from Glossary via VLOOKUP)
 
