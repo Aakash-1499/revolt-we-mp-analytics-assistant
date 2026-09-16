@@ -467,9 +467,9 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 **Aniket:** Grain
 
-one demand posted for a PTL consignment (demand_id near-unique at 55,376; 50,483 consignments)
+**demand_id:** Short description
 
-**Short description:** Rows: 55,382 · Grain: one demand posted for a PTL consignment (demand_id near-unique at 55,376; 50,483 consignments). Span 2021-07-30 → 2026-08-19.
+Rows: 55,382 · Grain: one demand posted for a PTL consignment (demand_id near-unique at 55,376; 50,483 consignments). Span 2021-07-30 → 2026-08-19.
 
 Columns (Description pulled from Glossary via VLOOKUP)
 
