@@ -781,9 +781,9 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 **Mohit:** Grain
 
-one operator/trucker-side support ticket (111,791 unique; 7 duplicates flagged by rank_tkt=2)
+**ticket_code:** Short description
 
-**Short description:** Rows: 111,798 · Grain: one operator/trucker-side support ticket (111,791 unique; 7 duplicates flagged by rank_tkt=2). 56,545 trips. Span 2025-08-18 → 2026-08-19 IST.
+it consist all support tickets created for operators through App / Manual
 
 Columns (Description pulled from Glossary via VLOOKUP)
 
@@ -827,9 +827,9 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 **Mohit:** Grain
 
-one automatically-generated marketplace alert/exception ticket
+**Ticket code:** Short description
 
-**Short description:** ---
+---
 
 Columns (Description pulled from Glossary via VLOOKUP)
 
