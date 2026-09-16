@@ -1018,7 +1018,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 ## 26_fact_demands
 
-**mp_analytics_critical.fact_demands_full:** Owner
+**mp_analytics_core.fact_demands:** Owner
 
 **Gajinder:** Grain
 
@@ -1086,7 +1086,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 ## 27_fact_consignments
 
-**mp_analytics_critical.fact_consignments:** Owner
+**mp_analytics_core.fact_consignments:** Owner
 
 **Gajinder:** Grain
 
