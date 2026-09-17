@@ -1068,21 +1068,21 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 36 | consigner_payment_status | Consigner's ability to complete DR based on outstanding payment: RESTRICTED / UNRESTRICTED. Consider all values by default. |  | — | USE |
 | 37 | consigner_payment_status_at_dr | Consigner payment status (RESTRICTED/UNRESTRICTED) captured at the DR stage. |  | — | USE |
 | 38 | consigner_type | Classification of the consigner at time of demand (New / Repeat). |  | — | USE |
-| 39 | consigner_segment | Number of trips done by consigners (New, 1-4, 4+). |  | — | DNU |
-| 40 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). |  | — | USE |
-| 41 | tyre_count | Tyre count of the specific vehicle.  [Same data as 'tyre' in fact_consigner_demands_lead_source — STANDARDIZE naming] |  | — | USE |
-| 42 | size_in_ft | Vehicle size in feet (length of the cargo body). |  | — | USE |
-| 43 | tonnage | Vehicle tonnage capacity in metric tons. |  | — | USE |
-| 44 | pricing_vt_id | Unique identifier of VT description aling with pricing logics. Joined with mp_analytics_core.dim_pricing_vt |  | — | USE |
-| 45 | supply_vt_id | Vehicle type ID — canonical identifier combining body type, size, and tyre count. Joined with mp_analytics_core.fact_demand_vt |  | — | USE |
-| 46 | latest_consignment_id | Unique identifier of the latest consignment/placement wrt demand |  | — | USE |
-| 47 | total_consignments | Number of unique vehicles found for the demand. Count is >1 in case of operator backout. |  | — | USE |
-| 48 | origin_id | Internal ID of the demand's origin district |  | — | USE |
-| 49 | destination_id | Demand destination id |  | — | USE |
-| 50 | predicted_rate_flag | Indicates if predicted price exists (1 = Yes, 0 = No). |  | — | USE |
-| 51 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
-| 52 | l2 | Predicted consigner freight fare for the given ODVT. Derived by multiplying supply_l2 (predicted supply_fare from the pricing model) by a factor that may vary across ODVTs. |  | — | USE |
-| 53 | l3 | Upper end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
+| 39 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). |  | — | DNU |
+| 40 | tyre_count | Tyre count of the specific vehicle.  [Same data as 'tyre' in fact_consigner_demands_lead_source — STANDARDIZE naming] |  | — | USE |
+| 41 | size_in_ft | Vehicle size in feet (length of the cargo body). |  | — | USE |
+| 42 | tonnage | Vehicle tonnage capacity in metric tons. |  | — | USE |
+| 43 | pricing_vt_id | Unique identifier of VT description aling with pricing logics. Joined with mp_analytics_core.dim_pricing_vt |  | — | USE |
+| 44 | supply_vt_id | Vehicle type ID — canonical identifier combining body type, size, and tyre count. Joined with mp_analytics_core.fact_demand_vt |  | — | USE |
+| 45 | latest_consignment_id | Unique identifier of the latest consignment/placement wrt demand |  | — | USE |
+| 46 | total_consignments | Number of unique vehicles found for the demand. Count is >1 in case of operator backout. |  | — | USE |
+| 47 | origin_id | Internal ID of the demand's origin district |  | — | USE |
+| 48 | destination_id | Demand destination id |  | — | USE |
+| 49 | predicted_rate_flag | Indicates if predicted price exists (1 = Yes, 0 = No). |  | — | USE |
+| 50 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
+| 51 | l2 | Predicted consigner freight fare for the given ODVT. Derived by multiplying supply_l2 (predicted supply_fare from the pricing model) by a factor that may vary across ODVTs. |  | — | USE |
+| 52 | l3 | Upper end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
+|  |  | <missing in Glossary> |  | — | USE |
 
 ## 27_fact_consignments
 
