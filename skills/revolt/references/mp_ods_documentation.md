@@ -666,6 +666,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 **browsing_id:** Short description
 
+that table carries browsing_id as varchar, so cast. Also lane demand heatmaps, weight/service-type mix, and channel-wise funnel drop-off.
+
 Columns (Description pulled from Glossary via VLOOKUP)
 
 | # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
