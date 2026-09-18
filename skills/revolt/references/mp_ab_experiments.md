@@ -46,5 +46,4 @@
 | Cx Growth | Non-User Level | Variable take rate | 46228 | Live |  | 26 | TAKE_RATE_EXP_V4 |  | Demands |  |  |  |  |  |  |
 | Cx Growth | Non-User Level | Variable take rate | 46228 | Live |  | 27 | TAKE_RATE_EXP_V5 |  | Demands |  |  |  |  |  |  |
 | Cx Growth | Non-User Level | Variable take rate | 46228 | Live |  | 28 | TAKE_RATE_EXP_V6 |  | Demands |  |  |  |  |  |  |
-
-Cx Growth
+| Cx Growth | User Level | DR-Scheduler |  |  |  |  |  |  |  |  |  |  |  |  |  |
