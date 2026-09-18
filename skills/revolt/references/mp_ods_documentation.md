@@ -469,7 +469,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 **demand_id:** Short description
 
-Rows: 55,382 · Grain: one demand posted for a PTL consignment (demand_id near-unique at 55,376; 50,483 consignments). Span 2021-07-30 → 2026-08-19.
+PTL funnel (demand → placement → trip), on-time performance, and repeat-behaviour analysis by cx segment.
 
 Columns (Description pulled from Glossary via VLOOKUP)
 
