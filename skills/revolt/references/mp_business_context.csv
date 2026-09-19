@@ -7,15 +7,15 @@ Consigner App Platform,"Consigner App also known as 'Book Truck' app which has m
 Consigner Acquisition,"Organic
 Field Sales
 Digital Marketing"
-Key Terms,"Consigner: Users who have truck requirements
+Key Terms,"Consigner or Cx or Customer: Users who have truck requirements
 Demand_id: This is generated for each demand created by consigner by providing origin, destination and vehicle type. The total count of demands might not represent the actual shipment requirements for a consigner as the consigner might make multiple demands for same requirement due to multiple issues - price browsing, consignee cancelled order, etc. Generally, we calculate most of the metrics at demand level but in few cases, we also calculate metrics at ODVT/CODVT/COD level.
 ODVT -  If we have to calculate a metric at ODVT level then it means replacing demand_id with combination of date,consigner_code, origin_id, destination_id and vt_id and then we can aggregate this id over any timeperiod or dimension.
 CODVT - If we have to calculate a metric at CODVT level then it means replacing demand_id with combination of date,consigner_code, origin_cluster_id, destination_id and vt_id and then we can aggregate this id over any timeperiod or dimension. We generally consider count of CODVTs to be a good represntation of actual shipment requirements of the consigner but we dont apply this by default to the metrics unless asked to do so.
 COD - If we have to calculate a metric at COD level then it means replacing demand_id with combination of date,consigner_code, origin_cluster_id and destination_id and then we can aggregate this id over any timeperiod or dimension."
 Consigner Attributes,Potential: This defines the #shipment requirements of the consigner per month. We dont have a way to figure this out with high accuracy. Right now there is an optional field in the app which can be filled in by the consigner < data ref>
 Consigner Journey,Lands on App > Signs up > Triggers Demand Flow > Inputs Origin district > Inputs Destination District > Browses through list of relevant truck types and their price range  (This step is known as VT Browsing) > Select one VT (Vehicle Type) > Provides loading location >
-Consigner Rating,Trip Ended >> Lands on my trip screen >> Pop-up shown for rating >> consiger select number of stars >> then select reasons what he like or dislike >> submit reason
-Consigner Support,"There are multiple entry point in app to ""Need Help"" button >> User selects a issue type >> Chat Screen >> Predifine FAQs"
+Consigner Rating,"Trip Ended >> Lands on my trip screen >> Pop-up shown for rating >> consigner selects the rating from 1-5, 5 being the best >> then select reasons what he like or dislike >> submit reason"
+Consigner Support,"There are multiple entry points in app to ""Need Help"" button >> User selects a issue type >> Chat Screen >> Predifine FAQs"
 ,
 FO (Fleet Operator) App Platform,"FO App also known as 'GPS' app which as mandatory signup
 1. Android (>80% traffic)
