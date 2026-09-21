@@ -1070,7 +1070,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 36 | consigner_payment_status | Consigner's ability to complete DR based on outstanding payment: RESTRICTED / UNRESTRICTED. Consider all values by default. |  | — | USE |
 | 37 | consigner_payment_status_at_dr | Consigner payment status (RESTRICTED/UNRESTRICTED) captured at the DR stage. |  | — | USE |
 | 38 | consigner_type | Classification of the consigner at time of demand (New / Repeat). |  | — | USE |
-| 39 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). |  | — | DNU |
+| 39 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). |  | — | USE |
 | 40 | tyre_count | Tyre count of the specific vehicle.  [Same data as 'tyre' in fact_consigner_demands_lead_source — STANDARDIZE naming] |  | — | USE |
 | 41 | size_in_ft | Vehicle size in feet (length of the cargo body). |  | — | USE |
 | 42 | tonnage | Vehicle tonnage capacity in metric tons. |  | — | USE |
