@@ -136,7 +136,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 |  | placement_rn | DO NOT USE |  | — | DNU |
 |  | placement_rank | Sequence of trips for a user (ONLY for fulfilled demands)<br> Counts successful trips only<br> Ignores non-trip demands (sets them to 0) |  | — |  |
 |  | last_trip_time | Timestamp of the consigner's most recent completed trip prior to (or as of) this demand |  | — |  |
-|  | dr_type | Classification of the DR (BEST PRICE/QUICK CONFIRMATION) |  | — |  |
+|  | dr_type | Classification of the DR  eg BEST PRICE, QUICK CONFIRMATION, SCHEDULED, etc |  | — |  |
 |  | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — |  |
 |  | tyre | Tyre count of the requested vehicle on the demand.  [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] |  | ⚠ TYRE_COUNT — should be 'tyre_count' |  |
 |  | origin_id | Internal ID of the demand's origin district |  | — |  |
@@ -1037,7 +1037,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 3 | app_version | App version at the time of the event. |  | — | USE |
 | 4 | app_platform | Origination platform of the consigner action (e.g., 'CONSIGNER_APP', 'web').  [Same data as 'platform' in fact_consigner_demands_lead_source — standardize naming] |  | — | USE |
 | 5 | experiment_ids | Variant details of the A/B experiment if live at demand level. |  |  | USE |
-| 6 | dr_type | Classification of the DR (BEST PRICE/QUICK CONFIRMATION) |  | — | USE |
+| 6 | dr_type | Classification of the DR  eg BEST PRICE, QUICK CONFIRMATION, SCHEDULED, etc |  | — | USE |
 | 7 | dr_flag | Indicates if a Details Required (DR) was given by consigner <br>(1 = Yes, 0 = No) |  | — | USE |
 | 8 | dr_time | Timestamp when the demand became a DR (Details Required) — i.e., entered the supply matching pipeline. |  | — | USE |
 | 9 | demand_cancel_by_cx_time | Timestamp when the demand was cancelled by consigner. |  | — | USE |
