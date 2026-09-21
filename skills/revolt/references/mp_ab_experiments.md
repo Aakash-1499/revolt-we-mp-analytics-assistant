@@ -46,5 +46,5 @@
 | Cx Growth | Non-User Level | Variable take rate | 46228 | Live |  | 26 | TAKE_RATE_EXP_V4 |  | Demands |  |  |  |  |  |  |
 | Cx Growth | Non-User Level | Variable take rate | 46228 | Live |  | 27 | TAKE_RATE_EXP_V5 |  | Demands |  |  |  |  |  |  |
 | Cx Growth | Non-User Level | Variable take rate | 46228 | Live |  | 28 | TAKE_RATE_EXP_V6 |  | Demands |  |  |  |  |  |  |
-| Cx Growth | User Level | DR-Scheduler | 46228 | Live |  | 39 | BOOKING_MODE_V2 |  | Demands | % Plc to Trip | % Demand to DR |  |  |  |  |
-| Cx Growth | User Level | DR-Scheduler | 46228 | Live |  | 38 | BOOKING_MODE_V2_DEFAULT |  | Demands |  | % Demand to DR |  |  |  |  |
+| Cx Growth | User Level | DR-Scheduler | 46228 | Live |  | 39 | BOOKING_MODE_V2 |  | Demands | % Plc to Trip | % Demand to DR, % DR to Plc |  |  |  |  |
+| Cx Growth | User Level | DR-Scheduler | 46228 | Live |  | 38 | BOOKING_MODE_V2_DEFAULT |  | Demands | % Plc to Trip | % Demand to DR, % DR to Plc |  |  |  |  |
