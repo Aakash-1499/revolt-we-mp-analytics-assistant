@@ -47,4 +47,4 @@
 | Cx Growth | Non-User Level | Variable take rate | 46228 | Live |  | 27 | TAKE_RATE_EXP_V5 |  | Demands |  |  |  |  |  |  |
 | Cx Growth | Non-User Level | Variable take rate | 46228 | Live |  | 28 | TAKE_RATE_EXP_V6 |  | Demands |  |  |  |  |  |  |
 | Cx Growth | User Level | DR-Scheduler | 46282 | Live |  | 39 | BOOKING_MODE_V2 |  | Demands | % Plc to Trip | % Demand to DR, % DR to Plc |  |  |  |  |
-| Cx Growth | User Level | DR-Scheduler | 46282 | Live |  | 38 | BOOKING_MODE_V2_DEFAULT |  | Demands | % Plc to Trip | % Demand to DR, % DR to Plc |  |  |  |  |
+| Cx Growth | User Level | DR-Scheduler | 46282 | Live |  | 38 | BOOKING_MODE_V2_DEFAULT |  | Demands | % Plc to Trip | % Demand to DR, % DR to Plc |  | % Scheduled DRs '. Use dr_type as 'SCHEDULED' in fact_demands table |  |  |
