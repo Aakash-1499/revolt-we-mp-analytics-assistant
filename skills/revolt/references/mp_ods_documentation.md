@@ -214,7 +214,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 10 | pricing_vt_id | Unique identifier of VT description aling with pricing logics. Joined with mp_analytics_core.dim_pricing_vt | -1 | — |
 | 11 | supply_vt_id | Vehicle type ID — canonical identifier combining body type, size, and tyre count. Joined with mp_analytics_core.fact_demand_vt | -1 | — |
 | 12 | vehicle_category | Coarse vehicle category code (e.g., 'LMV', 'HMV'). | LMV | — |
-| 13 | vehicle_category_desc | Human-readable description of the vehicle category (e.g., 'Agricultural Tractor(LMV)'). | Agricultural Tractor(LMV) | — |
+| 13 | vehicle_category_desc | Detailed description of the vehicle category (e.g., 'Agricultural Tractor(LMV)'). | Agricultural Tractor(LMV) | — |
 | 14 | vehicle_class | Vehicle class code (more specific than category, e.g., 'TRUCK'). | TRACTOR_AGRICULTURE | — |
 
 ## 5_fact_operators_onb
