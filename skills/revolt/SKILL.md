@@ -25,7 +25,7 @@ Load in this order. Do not skip or reorder.
 - references/mp_vocabulary.md — stakeholder shorthand → canonical mapping. Resolves entities.
 - references/mp_metrics_documentation.csv — canonical metric dictionary with pre-written SQL. Gives the exact logic.
 - references/mp_ab_experiments.md — This sheet contains 2 tabs: one tab is glossary and one tab lists all the experiment details (Grain: experiment ID, Confid ID) that have gone live in M.
-- references/mp_clickstream_events.md — app/web event definitions. Has 3 tabs: **Glossary**, **Consigner App**, **Operator App**. Always read the Glossary tab first, then Consigner App and Operator App. Use it to resolve any event-name, screen, funnel-step, or click/view/impression question.
+- mp_clickstream_events.md — app/web event definitions. Has 3 tabs: **Glossary**, **Consigner App**, **Operator App**. Always read the Glossary tab first, then Consigner App and Operator App. Use it to resolve any event-name, screen, funnel-step, or click/view/impression question.
 - references/mp_analytics_guardrails.md — hard limits. Constrains everything.
 
 Proceed only once all 7 are loaded.
