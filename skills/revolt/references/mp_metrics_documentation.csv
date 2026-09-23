@@ -61,79 +61,81 @@ case when {{timeframe_type}} like 'DoD' then demand_date
          when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
 , count(distinct case when accepted is not null then demand_id end)*1.0/nullif(count(distinct demand_id),0)as ""% Plc to accepted""
 from (
-        select *
-        from mp_analytics_core.fact_consigner_demands_lead_source a 
-                left join (
-                        select demand_id, max(gtl_time) as accepted
-                        from mp_analytics_critical.fact_consignments
-                        group by demand_id
-                ) fc on a.demand_id = fc.demand_id
-                
-                
-                where plc_flag=1 
+		select a.*
+		, fc.accepted
+		, cx.auto_cancelled
+		, cx.demand_id as cancelled 
+		from mp_analytics_core.fact_consigner_demands_lead_source a 
+		left join (
+			select demand_id, max(gtl_time) as accepted
+			from mp_analytics_critical.fact_consignments
+			group by demand_id
+		) fc on a.demand_id = fc.demand_id
+		
+		left join (
+			select demand_id, max(case when cancel_remarks = 'AUTO_CANCELLED_NO_ACTIVITY' then cancel_time end) as auto_cancelled
+			from mp_analytics_core.fact_consignment_cancellations
+			group by demand_id
+		) cx on a.demand_id = cx.demand_id
+		
+		where plc_flag=1
 )
 group by 1",False,
-Consigner Growth,% Acceptance to Trip,% of accepted placements that converted into trips,"select demand_date
-, count(distinct case when trip_flag=1 then demand_id end)*1.0/nullif(count(distinct case when accepted is not null then demand_id end),0)as ""% Acceptance to Trip""
+Consigner Growth,% Acceptance to Trip,% of accepted placements that converted into trips,"select demand_date, count(distinct case when accepted is not null and auto_cancelled is null and trip_flag = 1 then demand_id end)*1.0/nullif(count(distinct case when accepted is not null and auto_cancelled is null then demand_id end),0) as ""% Acceptance to Trip""
 from (
-        select *
-        from (
-                select a.*, fc.accepted
-                from mp_analytics_core.fact_consigner_demands_lead_source a 
-                left join (
-                        select demand_id, max(gtl_time) as accepted
-                        from mp_analytics_critical.fact_consignments
-                        group by demand_id
-                ) fc on a.demand_id = fc.demand_id
-        where plc_flag=1 
+        select a.*
+                        , fc.accepted
+                        , cx.auto_cancelled
+                        , cx.demand_id as cancelled 
+                        from mp_analytics_core.fact_consigner_demands_lead_source a 
+                        left join (
+                                select demand_id, max(gtl_time) as accepted
+                                from mp_analytics_critical.fact_consignments
+                                group by demand_id
+                        ) fc on a.demand_id = fc.demand_id
+                        
+                        left join (
+                                select demand_id, max(case when cancel_remarks = 'AUTO_CANCELLED_NO_ACTIVITY' then cancel_time end) as auto_cancelled
+                                from mp_analytics_core.fact_consignment_cancellations
+                                group by demand_id
+                        ) cx on a.demand_id = cx.demand_id
+                        
+                        where plc_flag=1 
 )
 group by 1",False,
 Consigner Growth,"CX Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Operator,"select demand_date, 
  ,count(distinct case when cx_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_fo_induced""
-from (select a.*, acc.accepted
-                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
-                from mp_analytics_core.fact_consigner_demands_lead_source a 
-                join (
-                        select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
-                        from mp_analytics_critical.fact_consignments
-                        group by demand_id
-                        ) acc on a.demand_id = acc.demand_id
-                left join (
-                        select demand_id
-                        , max(case when cancelled_by ilike '%wheelseye.com' and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
-                        , max(case when cancelled_by ilike '%wheelseye.com' and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
-                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
-                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
-                        from mp_analytics_core.fact_consignment_cancellations
-                        group by demand_id
-                        ) cxl on a.demand_id = cxl.demand_id
-        )a
-group by 1",False,
-Consigner Growth,"CX Induced, FO Initiated GTL cancellation",% of accepted placements that got cancelled by Operator and induced party was Consigner,"select demand_date, 
- ,count(distinct case when fo_initiated_cx_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% fo_initiated_cx_induced""
-from (select a.*, acc.accepted
-                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as fo_initiated_cx_induced
-                from mp_analytics_core.fact_consigner_demands_lead_source a 
-                join (
-                        select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
-                        from mp_analytics_critical.fact_consignments
-                        group by demand_id
-                        ) acc on a.demand_id = acc.demand_id
-                left join (
-                        select demand_id
-                        , max(case when cancelled_by ilike '%wheelseye.com' and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
-                        , max(case when cancelled_by ilike '%wheelseye.com' and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
-                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
-                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
-                        from mp_analytics_core.fact_consignment_cancellations
-                        group by demand_id
-                        ) cxl on a.demand_id = cxl.demand_id
+from (
+		select a.*, acc.accepted
+		, case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
+		, case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
+		, case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
+		, min(a.demand_date) over (partition by 1) as min_demand_date
+		from mp_analytics_core.fact_consigner_demands_lead_source a 
+		join (
+			select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
+			from mp_analytics_critical.fact_consignments
+			group by demand_id
+			) acc on a.demand_id = acc.demand_id
+		left join (
+			select demand_id
+			, max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
+			, max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
+			, max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
+			, max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
+			from mp_analytics_core.fact_consignment_cancellations
+			group by demand_id
+			) cxl on a.demand_id = cxl.demand_id
         )a
 group by 1",False,
 Consigner Growth,"CX Initiated, CX Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Consigner,"select demand_date, 
- ,count(distinct case when cx_initiated_cx_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_cx_induced""
-from (select a.*, acc.accepted
-                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_cx_induced
+,count(distinct case when cx_initiated_cx_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_cx_induced""
+from (
+                select a.*, acc.accepted
+                , case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
+                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
+                , case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
+                , min(a.demand_date) over (partition by 1) as min_demand_date
                 from mp_analytics_core.fact_consigner_demands_lead_source a 
                 join (
                         select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
@@ -142,8 +144,8 @@ from (select a.*, acc.accepted
                         ) acc on a.demand_id = acc.demand_id
                 left join (
                         select demand_id
-                        , max(case when cancelled_by ilike '%wheelseye.com' and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
-                        , max(case when cancelled_by ilike '%wheelseye.com' and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
+                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
+                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
                         , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
                         , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
                         from mp_analytics_core.fact_consignment_cancellations
@@ -151,10 +153,14 @@ from (select a.*, acc.accepted
                         ) cxl on a.demand_id = cxl.demand_id
         )a
 group by 1",False,
-Consigner Growth,"FO Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Operator and induced party was Operator,"select demand_date, 
+Consigner Growth,"FO Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Operator and induced party was Operator,"select demand_date
  ,count(distinct case when fo_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% fo_initiated_fo_induced""
-from (select a.*, acc.accepted
-                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
+from (
+                select a.*, acc.accepted
+                , case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
+                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
+                , case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
+                , min(a.demand_date) over (partition by 1) as min_demand_date
                 from mp_analytics_core.fact_consigner_demands_lead_source a 
                 join (
                         select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
@@ -163,8 +169,8 @@ from (select a.*, acc.accepted
                         ) acc on a.demand_id = acc.demand_id
                 left join (
                         select demand_id
-                        , max(case when cancelled_by ilike '%wheelseye.com' and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
-                        , max(case when cancelled_by ilike '%wheelseye.com' and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
+                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
+                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
                         , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
                         , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
                         from mp_analytics_core.fact_consignment_cancellations
