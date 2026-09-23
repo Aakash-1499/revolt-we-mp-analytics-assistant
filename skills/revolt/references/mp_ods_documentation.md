@@ -1084,7 +1084,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 50 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
 | 51 | l2 | Predicted consigner freight fare for the given ODVT. Derived by multiplying supply_l2 (predicted supply_fare from the pricing model) by a factor that may vary across ODVTs. |  | — | USE |
 | 52 | l3 | Upper end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
-|  |  | <missing in Glossary> |  | — | USE |
+| 53 | price_browsing_id | 32-char hex UUID of the pricing-browse request. 2,943,311 distinct — the join key to downstream pricing/conversion. |  | — | USE |
 
 ## 27_fact_consignments
 
