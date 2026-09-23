@@ -482,7 +482,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 5 | demand_id | Unique identifier of a demand created by a consigner. | 2674174 | — | USE |
 | 6 | demand_status | Status of the demand (e.g.,PENDING<br>FULFILLED<br>EXPIRED). | FULFILLED | — | USE |
 | 7 | consignment_code | Unique code assigned to the consignment. | WE35392-2197975 | — | USE |
-| 8 | consignment_id | Unique identifier of the consignment/placement. | 2197975 | — | USE |
+| 8 | consignment_id | Unique identifier of the consignment. | 2197975 | — | USE |
 | 9 | operator_code | Unique identifier of a fleet operator (FO). WheelsEye internal code, typically starts with 'WE'. | WE5475326 | — | USE |
 | 10 | transporter_name | Name of the transporter / driver executing the trip. | DP WORLD | — | USE |
 | 11 | lr_number | Lorry Receipt / docket number. 40,120 distinct — only once manifested, so NULL on expired demands. | 1301526501 | — | USE |
@@ -1100,7 +1100,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 | # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
 | --- | --- | --- | --- | --- | --- |
-| 1 | consignment_id | Unique identifier of the consignment/placement. |  | — | USE |
+| 1 | consignment_id | Unique identifier of the consignment. |  | — | USE |
 | 2 | consignment_code | Unique code assigned to the consignment. |  | — | USE |
 | 3 | consignment_time | Timestamp when consignment was created. |  | — | USE |
 | 4 | operator_code | Unique identifier of a fleet operator (FO). WheelsEye internal code, typically starts with 'WE'. |  | — | USE |
