@@ -99,10 +99,10 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 38 | demand_city | City of the demand's origin. |  | — |  |
 | 39 | demand_cluster | Demand origin cluster | NOT AVAILABLE | — |  |
 | 42 | destination_id | District id of the demand's destination. Joined with id in mp_analytics_core.dim_mp_districts | (NULL) | — |  |
-| 43 | destination_cluster_id | Cluster id of the demand's destination. | (NULL) | — |  |
+| 43 | destination_cluster_id | Cluster id of the demand's destination. Derived from mp_analytics_core.dim_mp_districts. | (NULL) | — |  |
 | 44 | destination_region | Demand destination id | OTHERS | — |  |
 | 46 | destination_city | City of the demand's destination. | (NULL) | — |  |
-| 47 | destination_cluster | Cluster of the demand's destination. | OTHERS | — |  |
+| 47 | destination_cluster | Cluster of the demand's destination. Derived from mp_analytics_core.dim_mp_districts. | OTHERS | — |  |
 | 48 | vt_id | <missing in Glossary> | (NULL) | — |  |
 | 49 | vt_pricing_id | <missing in Glossary> | (NULL) | — | ? |
 | 50 | cod | Combination of Consigner_user_code,Demand_date,Origin_id,Destination_id | (NULL) | — |  |
@@ -140,7 +140,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 |  | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — |  |
 |  | tyre | Tyre count of the requested vehicle on the demand.  [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] |  | ⚠ TYRE_COUNT — should be 'tyre_count' |  |
 |  | origin_id | District id of the demand's origin. Joined with id in mp_analytics_core.dim_mp_districts |  | — |  |
-|  | origin_cluster_id | Cluster id of the demand's origin |  | — | DNU |
+|  | origin_cluster_id | Cluster id of the demand's origin. Derived from mp_analytics_core.dim_mp_districts. |  | — | DNU |
 |  | destination_state |  |  | — | DNU |
 |  | odvt | Origin × Destination × Vehicle Type key (pricing dimension WITHOUT the consigner). Combination of origin_id, destination_id, vehicle_type_id. |  | — |  |
 |  | odvt_pricing | DO NOT USE |  | — | DNU |
