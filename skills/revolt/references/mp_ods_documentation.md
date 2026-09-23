@@ -917,7 +917,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
 | --- | --- | --- | --- | --- | --- |
 | 1 | consigner_user_code | Unique identifier of a consigner (CX / customer). WheelsEye internal code, typically starts with 'WE'.<br>It depicts the Unique code assigned to the consigner | WE7554019 | — | USE |
-| 2 | customer_type | Type of consigner: SME_HP / BROKER / TRANSPORTER / ENTERPRISE / SME. Consider all values by default. | SME | — | USE |
+| 2 | customer_type | Type of consigner: SME_HP / BROKER / TRANSPORTER / ENTERPRISE / SME | SME | — | USE |
 | 3 | demand_time | Exact timestamp when the demand was created. | 2025-09-17 10:07:16 | — | USE |
 | 4 | demand_id | Unique identifier of a demand created by a consigner. | 3702392 | — | USE |
 | 5 | ptl_flag | Flag (0/1) marking whether the demand is a PTL (Part-Truck-Load) demand. | 1 | — | USE |
@@ -1055,15 +1055,15 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 21 | consigner_triggered_backout | Consignment cancelled by consigner via the app (1 = Yes, 0 = No). |  | — | USE |
 | 22 | non_plc_reason | Reason a demand was not placed. |  | — | USE |
 | 23 | drop_points | Drop/destination points associated with the demand. |  | — | USE |
-| 24 | special_req | 1 = demand had a special request; 0 = no special request. Consider all values by default. |  | — | USE |
-| 25 | special_type | Type of special request: overheight / overweight / expressdeliverytat / opendala / extrawidth / extraperson / dieselvehicle. Consider all values by default. |  | — | USE |
+| 24 | special_req | 1 = demand had a special request; 0 = no special request. |  | — | USE |
+| 25 | special_type | Type of special request (overheight, overweight, expressdeliverytat, opendala, extrawidth, extraperson, dieselvehicle). |  | — | USE |
 | 26 | pricing_special_req | 1/0 flag for special request per pricing VT definitions (overheight & overweight defined per pricing rules). |  | — | USE |
 | 27 | pricing_special_type | Type of special request per pricing definitions (overheight, overweight, expressdeliverytat, opendala, extrawidth, extraperson, dieselvehicle). |  | — | USE |
 | 28 | load_type | Load type: PTL (Part Truck Load) / FTL (Full Truck Load). |  | — | USE |
-| 29 | from_lat | Latitude of pickup location. |  | — | USE |
-| 30 | from_long | Longitude of pickup location. |  | — | USE |
-| 31 | to_lat | Latitude of drop location. |  | — | USE |
-| 32 | to_long | Longitude of drop location. |  | — | USE |
+| 29 | from_lat | Latitude of pickup/origin location. |  | — | USE |
+| 30 | from_long | Longitude of pickup/origin location. |  | — | USE |
+| 31 | to_lat | Latitude of drop/destination location. |  | — | USE |
+| 32 | to_long | Longitude of drop/destination location. |  | — | USE |
 | 33 | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — | USE |
 | 34 | shortest_route_distance | Straight-line distance between origin and destination. |  | — | USE |
 | 35 | consigner_user_code | Unique identifier of a consigner (CX / customer). WheelsEye internal code, typically starts with 'WE'.<br>It depicts the Unique code assigned to the consigner |  | — | USE |
