@@ -98,11 +98,11 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 37 | demand_state | State of the demand's origin. | DELHI NCR | — |  |
 | 38 | demand_city | City of the demand's origin. |  | — |  |
 | 39 | demand_cluster | Demand origin cluster | NOT AVAILABLE | — |  |
-| 42 | destination_id | Demand destination id | (NULL) | — |  |
-| 43 | destination_cluster_id | Demand destination cluster id | (NULL) | — |  |
+| 42 | destination_id | District id of the demand's destination. | (NULL) | — |  |
+| 43 | destination_cluster_id | Cluster id of the demand's destination. | (NULL) | — |  |
 | 44 | destination_region | Demand destination id | OTHERS | — |  |
 | 46 | destination_city | City of the demand's destination. | (NULL) | — |  |
-| 47 | destination_cluster | Demand destination cluster | OTHERS | — |  |
+| 47 | destination_cluster | Cluster of the demand's destination. | OTHERS | — |  |
 | 48 | vt_id | <missing in Glossary> | (NULL) | — |  |
 | 49 | vt_pricing_id | <missing in Glossary> | (NULL) | — | ? |
 | 50 | cod | Combination of Consigner_user_code,Demand_date,Origin_id,Destination_id | (NULL) | — |  |
@@ -1079,7 +1079,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 45 | latest_consignment_id | Unique identifier of the latest consignment/placement wrt demand |  | — | USE |
 | 46 | total_consignments | Number of unique vehicles found for the demand. Count is >1 in case of operator backout. |  | — | USE |
 | 47 | origin_id | Internal ID of the demand's origin district |  | — | USE |
-| 48 | destination_id | Demand destination id |  | — | USE |
+| 48 | destination_id | District id of the demand's destination. |  | — | USE |
 | 49 | predicted_rate_flag | Indicates if predicted price exists (1 = Yes, 0 = No). |  | — | USE |
 | 50 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
 | 51 | l2 | Predicted consigner freight fare for the given ODVT. Derived by multiplying supply_l2 (predicted supply_fare from the pricing model) by a factor that may vary across ODVTs. |  | — | USE |
