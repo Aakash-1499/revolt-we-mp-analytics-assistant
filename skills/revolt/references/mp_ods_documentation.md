@@ -98,7 +98,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 37 | demand_state | State of the demand's origin. | DELHI NCR | — |  |
 | 38 | demand_city | City of the demand's origin. |  | — |  |
 | 39 | demand_cluster | Demand origin cluster | NOT AVAILABLE | — |  |
-| 42 | destination_id | District id of the demand's destination. | (NULL) | — |  |
+| 42 | destination_id | District id of the demand's destination. Joined with id in mp_analytics_core.dim_mp_districts | (NULL) | — |  |
 | 43 | destination_cluster_id | Cluster id of the demand's destination. | (NULL) | — |  |
 | 44 | destination_region | Demand destination id | OTHERS | — |  |
 | 46 | destination_city | City of the demand's destination. | (NULL) | — |  |
@@ -139,7 +139,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 |  | dr_type | DO NOT USE |  | — |  |
 |  | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — |  |
 |  | tyre | Tyre count of the requested vehicle on the demand.  [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] |  | ⚠ TYRE_COUNT — should be 'tyre_count' |  |
-|  | origin_id | District id of the demand's origin |  | — |  |
+|  | origin_id | District id of the demand's origin. Joined with id in mp_analytics_core.dim_mp_districts |  | — |  |
 |  | origin_cluster_id | Cluster id of the demand's origin |  | — | DNU |
 |  | destination_state |  |  | — | DNU |
 |  | odvt | Origin × Destination × Vehicle Type key (pricing dimension WITHOUT the consigner). Combination of origin_id, destination_id, vehicle_type_id. |  | — |  |
@@ -1078,8 +1078,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 44 | supply_vt_id | Vehicle type ID — canonical identifier combining body type, size, and tyre count. Joined with mp_analytics_core.fact_demand_vt |  | — | USE |
 | 45 | latest_consignment_id | Unique identifier of the latest consignment/placement wrt demand |  | — | USE |
 | 46 | total_consignments | Number of unique vehicles found for the demand. Count is >1 in case of operator backout. |  | — | USE |
-| 47 | origin_id | District id of the demand's origin |  | — | USE |
-| 48 | destination_id | District id of the demand's destination. |  | — | USE |
+| 47 | origin_id | District id of the demand's origin. Joined with id in mp_analytics_core.dim_mp_districts |  | — | USE |
+| 48 | destination_id | District id of the demand's destination. Joined with id in mp_analytics_core.dim_mp_districts |  | — | USE |
 | 49 | predicted_rate_flag | Indicates if predicted price exists (1 = Yes, 0 = No). |  | — | USE |
 | 50 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
 | 51 | l2 | Predicted consigner freight fare for the given ODVT. Derived by multiplying supply_l2 (predicted supply_fare from the pricing model) by a factor that may vary across ODVTs. |  | — | USE |
