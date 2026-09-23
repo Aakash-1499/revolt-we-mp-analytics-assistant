@@ -1035,7 +1035,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 1 | demand_id | Unique identifier of a demand created by a consigner. |  | — | USE |
 | 2 | demand_time | Exact timestamp when the demand was created. |  | — | USE |
 | 3 | app_version | App version at the time of the event. |  | — | USE |
-| 4 | app_platform | Origination platform of the consigner action (e.g., 'CONSIGNER_APP', 'web').  [Same data as 'platform' in fact_consigner_demands_lead_source — standardize naming] |  | — | USE |
+| 4 | app_platform | Type of platform used to create a demand.<br>[Same data as 'platform' in fact_consigner_demands_lead_source — standardize naming] |  | — | USE |
 | 5 | experiment_ids | Variant details of the A/B experiment if live at demand level. |  |  | USE |
 | 6 | dr_type | Classification of the DR  eg BEST PRICE, QUICK CONFIRMATION, SCHEDULED, etc |  | — | USE |
 | 7 | dr_flag | Indicates if a Details Required (DR) was given by consigner <br>(1 = Yes, 0 = No) |  | — | USE |
