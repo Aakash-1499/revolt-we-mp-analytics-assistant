@@ -1036,7 +1036,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 2 | demand_time | Exact timestamp when the demand was created. |  | — | USE |
 | 3 | app_version | App version at the time of the event. |  | — | USE |
 | 4 | app_platform | Type of platform used to create a demand.<br>[Same data as 'platform' in fact_consigner_demands_lead_source — standardize naming] |  | — | USE |
-| 5 | experiment_ids | Variant details of the A/B experiment if live at demand level. |  |  | USE |
+| 5 | experiment_ids | Variant details of the A/B experiment if live at demand level. It contains experiment ids in list format. These ids are joined at exp_id in mp_analytics_core.dim_pricing_experiments. |  |  | USE |
 | 6 | dr_type | Classification of the DR  eg BEST PRICE, QUICK CONFIRMATION, SCHEDULED, etc |  | — | USE |
 | 7 | dr_flag | Indicates if a Details Required (DR) was given by consigner <br>(1 = Yes, 0 = No) |  | — | USE |
 | 8 | dr_time | Timestamp when the demand became a DR (Details Required) — i.e., entered the supply matching pipeline. |  | — | USE |
@@ -1067,8 +1067,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 33 | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — | USE |
 | 34 | shortest_route_distance | Straight-line distance between origin and destination. |  | — | USE |
 | 35 | consigner_user_code | Unique identifier of a consigner (CX / customer). WheelsEye internal code, typically starts with 'WE'.<br>It depicts the Unique code assigned to the consigner |  | — | USE |
-| 36 | consigner_payment_status | Consigner's ability to complete DR based on outstanding payment: RESTRICTED / UNRESTRICTED. Consider all values by default. |  | — | USE |
-| 37 | consigner_payment_status_at_dr | Consigner payment status (RESTRICTED/UNRESTRICTED) captured at the DR stage. |  | — | USE |
+| 36 | consigner_payment_status | Consigner's ability to complete DR based on outstanding payment: RESTRICTED / UNRESTRICTED. This is defined at the creation of demand. |  | — | USE |
+| 37 | consigner_payment_status_at_dr | Consigner's ability to complete DR based on outstanding payment: RESTRICTED / UNRESTRICTED. This is defined at the DR. |  | — | USE |
 | 38 | consigner_type | Classification of the consigner at time of demand (New / Repeat). |  | — | USE |
 | 39 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). |  | — | USE |
 | 40 | tyre_count | Tyre count of the specific vehicle.  [Same data as 'tyre' in fact_consigner_demands_lead_source — STANDARDIZE naming] |  | — | USE |
