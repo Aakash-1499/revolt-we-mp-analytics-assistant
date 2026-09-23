@@ -4,7 +4,7 @@ Consigner Growth,% Placement Cancellations (<30 mins),% placements cancelled by 
                         AND DATEDIFF('minute', last_plc_time, cx_plc_cancel_time) <= 30
                       THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 AND trip_flag = 0 THEN demand_id END), 0) AS pct_quick_cancel
-FROM mp_analytics_core.fact_consigner_demands_lead_source;",False,
+FROM mp_analytics_core.fact_consigner_demands_lead_source;",True,
 Consigner Growth,% DR Cancelled before Plc,% DR cancelled by consigner before placement,"WITH ss AS (
   select * 
         from(
@@ -32,7 +32,7 @@ select case when {{timeframe_type}} like 'DoD' then demand_date
         from mp_analytics_core.fact_consigner_demands_lead_source
                 left join base0 b0 on a.demand_id=b0.demand_id 
         )       
-    group by 1",False,
+    group by 1",True,
 Consigner Growth,% GTL Cancellations,% of placements cancelled post acceptance (ACCEPTED to CANCELLED state),"select 
 case when {{timeframe_type}} like 'DoD' then demand_date
          when {{timeframe_type}} like 'WoW' then demand_week
@@ -54,7 +54,7 @@ from (
                 
                 where plc_flag=1
       )
-group by 1",False,
+group by 1",True,
 Consigner Growth,% Plc to Acceptance,% of placements that were accepted by consigner (SCHEDULED to ACCEPTED state),"select 
 case when {{timeframe_type}} like 'DoD' then demand_date
          when {{timeframe_type}} like 'WoW' then demand_week
@@ -80,7 +80,7 @@ from (
 		
 		where plc_flag=1
 )
-group by 1",False,
+group by 1",True,
 Consigner Growth,% Acceptance to Trip,% of accepted placements that converted into trips,"select demand_date, count(distinct case when accepted is not null and auto_cancelled is null and trip_flag = 1 then demand_id end)*1.0/nullif(count(distinct case when accepted is not null and auto_cancelled is null then demand_id end),0) as ""% Acceptance to Trip""
 from (
         select a.*
@@ -102,7 +102,7 @@ from (
                         
                         where plc_flag=1 
 )
-group by 1",False,
+group by 1",True,
 Consigner Growth,"CX Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Operator,"select demand_date, 
  ,count(distinct case when cx_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_fo_induced""
 from (
@@ -127,7 +127,7 @@ from (
 			group by demand_id
 			) cxl on a.demand_id = cxl.demand_id
         )a
-group by 1",False,
+group by 1",True,
 Consigner Growth,"CX Initiated, CX Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Consigner,"select demand_date, 
 ,count(distinct case when cx_initiated_cx_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_cx_induced""
 from (
@@ -152,7 +152,7 @@ from (
                         group by demand_id
                         ) cxl on a.demand_id = cxl.demand_id
         )a
-group by 1",False,
+group by 1",True,
 Consigner Growth,"FO Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Operator and induced party was Operator,"select demand_date
  ,count(distinct case when fo_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% fo_initiated_fo_induced""
 from (
@@ -177,22 +177,48 @@ from (
                         group by demand_id
                         ) cxl on a.demand_id = cxl.demand_id
         )a
-group by 1",False,
-Consigner Growth,"Vehicle replacement post GTL Cancellation(Reason : CX Initiated,CX Induced)",% of post GTL cancellation that got re-placed (Cancellation by Consigner and induced party = Consigner),"select demand_date ,count(distinct case when conv=1 then demand_id end)*1.0/nullif(count(distinct case when backout=1 then demand_id end),0)as ""% cx_init_cx_ind_replaced""
-        
-from (select a.*, conv, backout 
-from fact_consigner_demands_lead_source a 
-                join (
-                        SELECT demand_id
-                        , MAX(CASE WHEN backout_party ilike '%consigner%' AND induced_reason ilike '%consigner%'  THEN 1 ELSE 0 END) AS backout 
-                        , MAX(CASE WHEN backout_party ilike '%consigner%' AND induced_reason ilike '%consigner%' and retry_flag = 1 AND plc_flag_post_retry = 1 THEN 1 ELSE 0 END) AS conv
-                        FROM analytics.fact_dr_cancellations
-                        WHERE acceptance = 1
-                        GROUP BY 1
-                      ) fo 
-on a.demand_id=fo.demand_id
-  )a 
-group by 1",False,
+group by 1",True,
+Consigner Growth,"Vehicle replacement post GTL Cancellation(Reason : CX Initiated,CX Induced)",% of post GTL cancellation that got re-placed (Cancellation by Consigner and induced party = Consigner),"with cx_cancel as (
+    select demand_id, min(cancel_time) as cx_cancel_time
+    from mp_analytics_core.fact_consignment_cancellations
+    where cancelled_by in ('consigner@wheelseye.com','SYSTEM')
+      and induced_party = 'Consigner'
+    group by 1
+),
+acc as (
+    select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
+    from mp_analytics_critical.fact_consignments
+    group by 1
+),
+repl as (
+    select c.demand_id,
+           max(case when f.consignment_time > c.cx_cancel_time then 1 else 0 end) as replaced
+    from cx_cancel c
+    join mp_analytics_critical.fact_consignments f on f.demand_id = c.demand_id
+    group by 1
+),
+fo as (
+    select c.demand_id,
+           1 as backout,
+           case when r.replaced = 1 then 1 else 0 end as conv
+    from cx_cancel c
+    join acc a on a.demand_id = c.demand_id and a.accepted = 1
+    left join repl r on r.demand_id = c.demand_id
+)
+select
+case when {{timeframe_type}} like 'DoD' then demand_date
+	 when {{timeframe_type}} like 'WoW' then demand_week
+	 when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
+, count(distinct case when conv = 1 then demand_id end)*1.0
+  / nullif(count(distinct case when backout = 1 then demand_id end),0) as ""% cx_init_cx_ind_replaced""
+from (select *
+	from (
+		select a.*, fo.conv, fo.backout
+		from mp_analytics_core.fact_consigner_demands_lead_source a
+		join fo on a.demand_id = fo.demand_id
+		)a
+					)
+group by 1,2",True,
 Consigner Exp and Services,% Restricted FS Cx (90 days active),"Aliases: % Restricted FS Cx; FS Restriction Rate.
 
 Avg % of FIELD-SALES customers (active on trips in last 90 days) whose restriction_status is 'RESTRICTED'.","SELECT AVG(daily_pct) FROM (
