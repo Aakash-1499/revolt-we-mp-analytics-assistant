@@ -28,6 +28,7 @@ It will not trigger on its own, however analytics-sounding your question is.
 | mp_vocabulary.md | stakeholder shorthand → canonical names |
 | mp_metrics_documentation.csv | metric dictionary with pre-written SQL |
 | mp_ab_experiments.md | live experiments, variants, config IDs |
+| mp_clickstream_events.md | Consigner App , Operator App Click Events |
 | mp_analytics_guardrails.md | hard limits on what Revolt may do |
 
 ## Staying current
