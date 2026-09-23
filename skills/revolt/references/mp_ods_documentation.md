@@ -136,7 +136,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 |  | placement_rn | DO NOT USE |  | — | DNU |
 |  | placement_rank | Sequence of trips for a user (ONLY for fulfilled demands)<br> Counts successful trips only<br> Ignores non-trip demands (sets them to 0) |  | — |  |
 |  | last_trip_time | Timestamp of the consigner's most recent completed trip prior to (or as of) this demand |  | — |  |
-|  | dr_type | Classification of the DR  eg BEST PRICE, QUICK CONFIRMATION, SCHEDULED, etc |  | — |  |
+|  | dr_type | DO NOT USE |  | — |  |
 |  | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — |  |
 |  | tyre | Tyre count of the requested vehicle on the demand.  [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] |  | ⚠ TYRE_COUNT — should be 'tyre_count' |  |
 |  | origin_id | Internal ID of the demand's origin district |  | — |  |
