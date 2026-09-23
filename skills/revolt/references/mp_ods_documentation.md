@@ -139,9 +139,9 @@ Columns (Description pulled from Glossary via VLOOKUP)
 |  | dr_type | DO NOT USE |  | — |  |
 |  | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — |  |
 |  | tyre | Tyre count of the requested vehicle on the demand.  [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] |  | ⚠ TYRE_COUNT — should be 'tyre_count' |  |
-|  | origin_id | Internal ID of the demand's origin district |  | — |  |
-|  | origin_cluster_id | Internal ID of the demand's origin cluster. |  | — | DNU |
-|  | destination_state | State of the demand's destination. |  | — | DNU |
+|  | origin_id | District id of the demand's origin |  | — |  |
+|  | origin_cluster_id | Cluster id of the demand's origin |  | — | DNU |
+|  | destination_state |  |  | — | DNU |
 |  | odvt | Origin × Destination × Vehicle Type key (pricing dimension WITHOUT the consigner). Combination of origin_id, destination_id, vehicle_type_id. |  | — |  |
 |  | odvt_pricing | DO NOT USE |  | — | DNU |
 |  | pnl | Realised net P&L on the demand (₹). Net of cost components. Used as numerator for % Net Take Rate. |  | — |  |
@@ -1078,7 +1078,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 44 | supply_vt_id | Vehicle type ID — canonical identifier combining body type, size, and tyre count. Joined with mp_analytics_core.fact_demand_vt |  | — | USE |
 | 45 | latest_consignment_id | Unique identifier of the latest consignment/placement wrt demand |  | — | USE |
 | 46 | total_consignments | Number of unique vehicles found for the demand. Count is >1 in case of operator backout. |  | — | USE |
-| 47 | origin_id | Internal ID of the demand's origin district |  | — | USE |
+| 47 | origin_id | District id of the demand's origin |  | — | USE |
 | 48 | destination_id | District id of the demand's destination. |  | — | USE |
 | 49 | predicted_rate_flag | Indicates if predicted price exists (1 = Yes, 0 = No). |  | — | USE |
 | 50 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
