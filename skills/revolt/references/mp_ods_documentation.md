@@ -1145,4 +1145,5 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 43 | l1 | Lower end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
 | 44 | l2 | Predicted consigner freight fare for the given ODVT. Derived by multiplying supply_l2 (predicted supply_fare from the pricing model) by a factor that may vary across ODVTs. |  | — | USE |
 | 45 | l3 | Upper end of the price range shown to the consigner before vehicle search starts. Derived by multiplying l2 by a factor that may vary across ODVTs. |  | — | USE |
-| 46 | reference_id | <missing in Glossary> |  | — | DNU |
+| 46 | reference_id | This is not relevent columns. DNU |  | — | DNU |
+| 47 | tds_metadata | Consignment TDS details information exist here. Only relevent for finance use |  | — | DNU |
