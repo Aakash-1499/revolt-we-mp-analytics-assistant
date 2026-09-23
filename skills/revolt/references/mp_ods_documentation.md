@@ -138,15 +138,15 @@ Columns (Description pulled from Glossary via VLOOKUP)
 |  | last_trip_time | Timestamp of the consigner's most recent completed trip prior to (or as of) this demand |  | — |  |
 |  | dr_type | DO NOT USE |  | — |  |
 |  | route_distance | Origin → destination route distance (km). Used as a filter (min_distance / max_distance) on the Placement and FO dashboards and to derive 'haul'. |  | — |  |
-|  | tyre | Tyre count of the requested vehicle on the demand.  [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] |  | ⚠ TYRE_COUNT — should be 'tyre_count' |  |
+|  | tyre | Tyre count of the requested vehicle on the demand. [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] |  | ⚠ TYRE_COUNT — should be 'tyre_count' |  |
 |  | origin_id | District id of the demand's origin. Joined with id in mp_analytics_core.dim_mp_districts |  | — |  |
 |  | origin_cluster_id | Cluster id of the demand's origin. Derived from mp_analytics_core.dim_mp_districts. |  | — | DNU |
-|  | destination_state |  |  | — | DNU |
+|  | destination_state | State of the demand's destination. Derived from mp_analytics_core.dim_mp_districts. |  | — | DNU |
 |  | odvt | Origin × Destination × Vehicle Type key (pricing dimension WITHOUT the consigner). Combination of origin_id, destination_id, vehicle_type_id. |  | — |  |
 |  | odvt_pricing | DO NOT USE |  | — | DNU |
-|  | pnl | Realised net P&L on the demand (₹). Net of cost components. Used as numerator for % Net Take Rate. |  | — |  |
-|  | pnl_expected | Expected (pre-cost) P&L on the demand (₹). Used as numerator for % Gross Take Rate. |  | — |  |
-|  | time_to_plc | Time in minutes between DR creation and the final placement on the demand. Used in '% DR to Plc (≤ L2 and ≤ 90 min)' metric. |  | — |  |
+|  | pnl | Realised net P&L on the demand (₹) wrt final freight fare. |  | — |  |
+|  | pnl_expected | Expected (pre-cost) P&L on the demand (₹) wrt final freight fare. |  | — |  |
+|  | time_to_plc | Time in minutes between DR creation and the final placement on the demand. |  | — |  |
 |  | opsearch_fo | Flag/count for FOs returned by the OpSearch (matching) algorithm for this demand. Used in North Star OpSearch-FO bucketing. |  | — | DNU |
 |  | supply_confidence | Do Not Use |  | — | DNU |
 |  | price_confidence | Do Not Use |  | — | DNU |
@@ -446,7 +446,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 9 | context | Contextual metadata or notes associated with the ticket. | "Payment. Map" | — | USE |
 | 10 | created_by | User who created the ticket. | neeraj.kumar@wheelseye.com / WE4687764 | — | USE |
 | 11 | right_issue | Corrected sub-issue after QA audit; NULL 77%. | VEHICLE NUMBER DIFFERENT | — | USE |
-| 12 | consignment_code | Unique code assigned to the consignment/trip. Also in ss_1_mp_system_tickets. | WE35392-2560793 | — | USE |
+| 12 | consignment_code | Unique code assigned to the consignment. | WE35392-2560793 | — | USE |
 | 13 | right_cat | Correct/validated category of the ticket issue (post-ops review). | DELAY | — | USE |
 | 14 | right_subject | Correct/validated subject of the ticket issue (post-ops review). | LOADING DELAY | — | USE |
 | 15 | sub_issue | Sub-category of the ticket issue. Also in ss_1_consignerservice_stats_table_pms. | DELAY_AT_LOADING | — | USE |
@@ -481,7 +481,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 4 | demand_time | Exact timestamp when the demand was created. | 2024-10-10 18:09:25.273 | — | USE |
 | 5 | demand_id | Unique identifier of a demand created by a consigner. | 2674174 | — | USE |
 | 6 | demand_status | Status of the demand (e.g.,PENDING<br>FULFILLED<br>EXPIRED). | FULFILLED | — | USE |
-| 7 | consignment_code | Unique code assigned to the consignment/trip. Also in ss_1_mp_system_tickets. | WE35392-2197975 | — | USE |
+| 7 | consignment_code | Unique code assigned to the consignment. | WE35392-2197975 | — | USE |
 | 8 | consignment_id | Unique identifier of the consignment/placement. | 2197975 | — | USE |
 | 9 | operator_code | Unique identifier of a fleet operator (FO). WheelsEye internal code, typically starts with 'WE'. | WE5475326 | — | USE |
 | 10 | transporter_name | Name of the transporter / driver executing the trip. | DP WORLD | — | USE |
@@ -549,7 +549,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | --- | --- | --- | --- | --- | --- |
 | 1 | vt_pricing_id | <missing in Glossary> | 3 | — | USE |
 | 2 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). | container | — | USE |
-| 3 | tyre | Tyre count of the requested vehicle on the demand.  [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 4 | — | USE |
+| 3 | tyre | Tyre count of the requested vehicle on the demand. [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 4 | — | USE |
 | 4 | min_size | Lower bound (inclusive) of body length band, in feet. 1 acts as an open floor. | 1 | — | USE |
 | 5 | max_size | Upper bound of body length band, in feet. 50 acts as an open ceiling. | 7 | — | USE |
 | 6 | min_tonnage | Lower bound of payload band, in tonnes (0–40). Bands step by .1 so they don't overlap. | 0 | — | USE |
@@ -572,7 +572,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | --- | --- | --- | --- | --- | --- |
 | 1 | id | Unique identifier of VT description aling with supply onboarding | 18 | — | USE |
 | 2 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). | open | — | USE |
-| 3 | tyre | Tyre count of the requested vehicle on the demand.  [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 6 | — | USE |
+| 3 | tyre | Tyre count of the requested vehicle on the demand. [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 6 | — | USE |
 | 4 | size | Exact body length in feet (not a range as in dim_pricing_vt). Spans 7–40; 32/22/40 most frequent. | 19 | — | USE |
 
 ## 16_fact_cx_vt_browsing
@@ -849,7 +849,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 10 | updated_by | User who last updated the ticket. | ashish.kr@wheelseye.com | — | USE |
 | 11 | source | Channel through which the ticket was raised (e.g., App, Call, Email). Also in ss_1_mp_system_tickets. | SYSTEM | — | USE |
 | 12 | demand_id | Unique identifier of a demand created by a consigner. | 0 | — | USE |
-| 13 | consignment_code | Unique code assigned to the consignment/trip. Also in ss_1_mp_system_tickets. | WE35392-2588877 | — | USE |
+| 13 | consignment_code | Unique code assigned to the consignment. | WE35392-2588877 | — | USE |
 | 14 | operator_code | Unique identifier of a fleet operator (FO). WheelsEye internal code, typically starts with 'WE'. | WE7117273 | — | USE |
 | 15 | resolve_time | Timestamp when the ticket was resolved. Also in ss_1_mp_system_tickets. | 2026-08-12 12:33:47 | — | USE |
 | 16 | assigned_to | Agent or team to whom the ticket is assigned. | damage@wheelseye.com | — | USE |
@@ -1054,7 +1054,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 20 | consigner_induced_backout | Consignment cancelled due to consigner reasons (1 = Yes, 0 = No). |  | — | USE |
 | 21 | consigner_triggered_backout | Consignment cancelled by consigner via the app (1 = Yes, 0 = No). |  | — | USE |
 | 22 | non_plc_reason | Reason a demand was not placed. |  | — | USE |
-| 23 | drop_points | Drop/destination points associated with the ticket's trip. |  | — | USE |
+| 23 | drop_points | Drop/destination points associated with the demand. |  | — | USE |
 | 24 | special_req | 1 = demand had a special request; 0 = no special request. Consider all values by default. |  | — | USE |
 | 25 | special_type | Type of special request: overheight / overweight / expressdeliverytat / opendala / extrawidth / extraperson / dieselvehicle. Consider all values by default. |  | — | USE |
 | 26 | pricing_special_req | 1/0 flag for special request per pricing VT definitions (overheight & overweight defined per pricing rules). |  | — | USE |
@@ -1101,7 +1101,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
 | --- | --- | --- | --- | --- | --- |
 | 1 | consignment_id | Unique identifier of the consignment/placement. |  | — | USE |
-| 2 | consignment_code | Unique code assigned to the consignment/trip. Also in ss_1_mp_system_tickets. |  | — | USE |
+| 2 | consignment_code | Unique code assigned to the consignment. |  | — | USE |
 | 3 | consignment_time | Timestamp when consignment was created. |  | — | USE |
 | 4 | operator_code | Unique identifier of a fleet operator (FO). WheelsEye internal code, typically starts with 'WE'. |  | — | USE |
 | 5 | vehicle_id | Unique internal identifier of a specific vehicle in the WheelsEye system. |  | — | USE |
