@@ -756,6 +756,7 @@ Expected (pre-cost) P&L divided by consigner freight fare on trips. Gross-minus-
   SUM(CASE WHEN trip_flag = 1 THEN pnl_expected END) * 1.0
   / NULLIF(SUM(CASE WHEN trip_flag = 1 THEN consigner_freight_fare END), 0) AS gross_take_rate
 FROM mp_analytics_core.fact_consigner_demands_lead_source",True,Gajinder
+Pricing,% Trip Gross Take Rate,,,False,
 Pricing,% Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
 
 Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","SELECT
