@@ -547,7 +547,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 | # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
 | --- | --- | --- | --- | --- | --- |
-| 1 | vt_pricing_id | <missing in Glossary> | 3 | — | USE |
+| 1 | pricing_vt_id | Unique identifier of VT description aling with pricing logics. Joined with mp_analytics_core.dim_pricing_vt | 3 | — | USE |
 | 2 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). | container | — | USE |
 | 3 | tyre | Tyre count of the requested vehicle on the demand. [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 4 | — | USE |
 | 4 | min_size | Lower bound (inclusive) of body length band, in feet. | 1 | — | USE |
@@ -555,8 +555,6 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 6 | min_tonnage | Lower bound of payload band, in tonnes. | 0 | — | USE |
 | 7 | max_tonnage | Upper bound of payload band, in tonnes. | 1.5 | — | USE |
 | 8 | veh_tyre_type | Grouped vehicle class for pricing roll-ups: TRAILER , 4_6 , 10_12_14 , LCV , SXL , MXL. | LCV | — | USE |
-
-
 
 ## 15_dim_supply_vt
 
@@ -572,12 +570,10 @@ Columns (Description pulled from Glossary via VLOOKUP)
 
 | # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
 | --- | --- | --- | --- | --- | --- |
-| 1 | id | Unique identifier of VT description aling with supply onboarding | 18 | — | USE |
+| 1 | supply_vt_id | Unique identifier of VT description aling with supply onboarding | 18 | — | USE |
 | 2 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). | open | — | USE |
 | 3 | tyre | Tyre count of the requested vehicle on the demand. [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 6 | — | USE |
 | 4 | size | Exact body length in feet. | 19 | — | USE |
-
-
 
 ## 16_fact_cx_vt_browsing
 
