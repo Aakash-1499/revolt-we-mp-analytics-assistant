@@ -761,8 +761,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 6 | event_category | It is space identifier on screen for event done on app. | trip_details | — | USE |
 | 7 | screen_name | It is name of the page event triggered. | at_loading | — | USE |
 | 8 | entity | It is used to save event attributes. Commonly, it contains demand_id. | {"ph":"","us":"google","uc":"Generic","um":"transport service"} | — | USE |
-| 9 | miscellaneous | Second payload, key:value pairs delimited by ::. Mostly blank. | up_src:man::up_idx:0 | — | USE |
-| 10 | target_product | Constant book_truck across all rows. | book_truck | — | DNU |
+| 9 | miscellaneous | It is used to save event attributes. Commonly saved as key:value pairs delimited by ::. | up_src:man::up_idx:0 | — | USE |
+| 10 | target_product | Product dentification for the event. <br>For consigner event tables = book_truck<br>For operator event tables = (generic, marketplace, login) | book_truck | — | DNU |
 | 11 | app_info_id | Bundle ID: com.wheelseye.consigner or '' (web). Confirms this is the consigner app. | com.wheelseye.consigner | — | USE |
 | 12 | event_platform | android (~71%), ios, mweb, '', web. | android | — | USE |
 | 13 | city | Geo-IP city, title-cased. Top: Delhi, Mumbai, Bengaluru, Ahmedabad, Pune. | Ghaziabad | — | USE |
@@ -1002,8 +1002,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 6 | event_category | It is space identifier on screen for event done on app. | top_nav | — | USE |
 | 7 | screen_name | It is name of the page event triggered. | choose_plan | — | USE |
 | 8 | entity | It is used to save event attributes. Commonly, it contains demand_id. | {"ph":"","us":"google","uc":"Generic","um":"transport service"} | — | USE |
-| 9 | miscellaneous | Second payload, key:value pairs delimited by ::. Mostly blank. | up_src:man::up_idx:0 | — | USE |
-| 10 | target_product | Constant book_truck across all rows. | book_truck | — | DNU |
+| 9 | miscellaneous | It is used to save event attributes. Commonly saved as key:value pairs delimited by ::. | up_src:man::up_idx:0 | — | USE |
+| 10 | target_product | Product dentification for the event. <br>For consigner event tables = book_truck<br>For operator event tables = (generic, marketplace, login) | book_truck | — | DNU |
 | 11 | app_info_id | Bundle ID: com.wheelseye.consigner or '' (web). Confirms this is the consigner app. | com.wheelseye.driver | — | USE |
 | 12 | app_version | App version at the time of the event. | 24.4.0 | — | USE |
 | 13 | device_id | 16-char hex device ID. 63,697 distinct vs 55,060 users — the only handle for logged-out sessions. | B014538B-903D-452F-8511-A23812351EE | — | USE |
