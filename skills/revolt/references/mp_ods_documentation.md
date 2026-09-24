@@ -763,19 +763,19 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 8 | entity | It is used to save event attributes. Commonly, it contains demand_id. | {"ph":"","us":"google","uc":"Generic","um":"transport service"} | — | USE |
 | 9 | miscellaneous | It is used to save event attributes. Commonly saved as key:value pairs delimited by ::. | up_src:man::up_idx:0 | — | USE |
 | 10 | target_product | Product dentification for the event. <br>For consigner event tables = book_truck<br>For operator event tables = (generic, marketplace, login) | book_truck | — | DNU |
-| 11 | app_info_id | Bundle ID: com.wheelseye.consigner or '' (web). Confirms this is the consigner app. | com.wheelseye.consigner | — | USE |
+| 11 | app_info_id | It identifies event triggered on app or web. | com.wheelseye.consigner | — | USE |
 | 12 | event_platform | android (~71%), ios, mweb, '', web. | android | — | USE |
-| 13 | city | Geo-IP city, title-cased. Top: Delhi, Mumbai, Bengaluru, Ahmedabad, Pune. | Ghaziabad | — | USE |
+| 13 | city | City where event was trigger. Source for this is bigquery. | Ghaziabad | — | USE |
 | 14 | region | Geo-IP state, title-cased. Top: Delhi, Mumbai, Bengaluru, Ahmedabad, Pune. | Karnataka | — | USE |
 | 15 | app_version | App version at the time of the event. | 17.5.0 | — | USE |
-| 16 | device_id | 16-char hex device ID. 63,697 distinct vs 55,060 users — the only handle for logged-out sessions. | 34dc7ef278efe177 | — | USE |
+| 16 | device_id | Unique identifier for device using app/web. | 34dc7ef278efe177 | — | USE |
 | 17 | source_utm | Install/visit attribution: google-play, whatsapp, organic, google, (not%20set) (URL-encoded). | google-play | — | USE |
 | 18 | campaign_utm | Campaign name; blank ~89%. Top: mp_eventBangMSME, sup_to_acq, Generic, Brand, retention_baseline. | Generic_Mumbai | — | USE |
 | 19 | medium_utm | UTM medium — for paid search this holds the keyword, not a medium. | organic | — | USE |
-| 20 | unique_session | Count of distinct sessions for the context that day (not a 0/1 flag). Range 0–135. | 1 | — | USE |
-| 21 | total_counts | Raw event fires collapsed into the row (1–3,459). SUM this, never COUNT(*), for true event volume. | 32 | — | USE |
-| 22 | min_timestamp | Epoch microseconds of earliest raw event in the group. | 1786961546350021 | — | USE |
-| 23 | max_timestamp | Epoch microseconds of latest raw event; equals min when total_counts=1. (max−min)/1e6 = dwell seconds. | 1786961659179048 | — | USE |
+| 20 | unique_session | Count of distinct sessions unique on event_date × user/device × event_name × action/category × screen × demand × payload × platform/version/UTM context. | 1 | — | USE |
+| 21 | total_counts | Number of times event fires unique on event_date × user/device × event_name × action/category × screen × demand × payload × platform/version/UTM context. | 32 | — | USE |
+| 22 | min_timestamp | Epoch microseconds of earliest raw event unique on event_date × user/device × event_name × action/category × screen × demand × payload × platform/version/UTM context. | 1786961546350021 | — | USE |
+| 23 | max_timestamp | Epoch microseconds of latest raw event unique on event_date × user/device × event_name × action/category × screen × demand × payload × platform/version/UTM context. | 1786961659179048 | — | USE |
 
 ## 21_fact_operator_tickets
 
@@ -1004,19 +1004,19 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 8 | entity | It is used to save event attributes. Commonly, it contains demand_id. | {"ph":"","us":"google","uc":"Generic","um":"transport service"} | — | USE |
 | 9 | miscellaneous | It is used to save event attributes. Commonly saved as key:value pairs delimited by ::. | up_src:man::up_idx:0 | — | USE |
 | 10 | target_product | Product dentification for the event. <br>For consigner event tables = book_truck<br>For operator event tables = (generic, marketplace, login) | book_truck | — | DNU |
-| 11 | app_info_id | Bundle ID: com.wheelseye.consigner or '' (web). Confirms this is the consigner app. | com.wheelseye.driver | — | USE |
+| 11 | app_info_id | It identifies event triggered on app or web. | com.wheelseye.driver | — | USE |
 | 12 | app_version | App version at the time of the event. | 24.4.0 | — | USE |
-| 13 | device_id | 16-char hex device ID. 63,697 distinct vs 55,060 users — the only handle for logged-out sessions. | B014538B-903D-452F-8511-A23812351EE | — | USE |
+| 13 | device_id | Unique identifier for device using app/web. | B014538B-903D-452F-8511-A23812351EE | — | USE |
 | 14 | vehicle_id | Unique internal identifier of a specific vehicle in the WheelsEye system. | VD{vehicleNo: DL1LAQ1703, vId: 3557500, isExpiring: false} | — | USE |
-| 15 | city | Geo-IP city, title-cased. Top: Delhi, Mumbai, Bengaluru, Ahmedabad, Pune. | New Delhi | — | USE |
+| 15 | city | City where event was trigger. Source for this is bigquery. | New Delhi | — | USE |
 | 16 | region | Name of region. Defined by grouping the districts on the basis of maturity of the Wheelseye Marketplace business. | Delhi Division | — | USE |
 | 17 | source_utm | Install/visit attribution: google-play, whatsapp, organic, google, (not%20set) (URL-encoded). | google-play | — | USE |
 | 18 | campaign_utm | Campaign name; blank ~89%. Top: mp_eventBangMSME, sup_to_acq, Generic, Brand, retention_baseline. | Generic_Mumbai | — | USE |
 | 19 | medium_utm | UTM medium — for paid search this holds the keyword, not a medium. | organic | — | USE |
-| 20 | unique_session | Count of distinct sessions for the context that day (not a 0/1 flag). Range 0–135. | 1 | — | USE |
-| 21 | total_counts | Raw event fires collapsed into the row (1–3,459). SUM this, never COUNT(*), for true event volume. | 43 | — | USE |
-| 22 | min_timestamp | Epoch microseconds of earliest raw event in the group. | 1787432768248005 | — | USE |
-| 23 | max_timestamp | Epoch microseconds of latest raw event; equals min when total_counts=1. (max−min)/1e6 = dwell seconds. | 1787432948204071 | — | USE |
+| 20 | unique_session | Count of distinct sessions unique on event_date × user/device × event_name × action/category × screen × demand × payload × platform/version/UTM context. | 1 | — | USE |
+| 21 | total_counts | Number of times event fires unique on event_date × user/device × event_name × action/category × screen × demand × payload × platform/version/UTM context. | 43 | — | USE |
+| 22 | min_timestamp | Epoch microseconds of earliest raw event unique on event_date × user/device × event_name × action/category × screen × demand × payload × platform/version/UTM context. | 1787432768248005 | — | USE |
+| 23 | max_timestamp | Epoch microseconds of latest raw event unique on event_date × user/device × event_name × action/category × screen × demand × payload × platform/version/UTM context. | 1787432948204071 | — | USE |
 
 ## 26_fact_demands
 
