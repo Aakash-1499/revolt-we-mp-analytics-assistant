@@ -751,15 +751,7 @@ Expected (pre-cost) P&L divided by consigner freight fare on trips. Gross-minus-
 FROM mp_analytics_core.fact_consigner_demands_lead_source",True,Gajinder
 FO Growth,"FO State , cluster ,district , region","Alias - FO state , fo base region , states , cluster , district
 
- to find fo state , cluster and district , fo region related use this metrics","SELECT DISTINCT
-        f.operator_code,
-        CASE
-            WHEN d.region = 'NCR'    THEN 'NCR'
-            WHEN d.region = 'ROI'    THEN 'ROI'
-            WHEN d.region = 'OTHERS' THEN 'OTHERS'
-            ELSE 'FO BASE NA'
-        END AS region_type
-
-    FROM mp_analytics_core.dim_operator_base_district f
-    LEFT JOIN mp_analytics_core.dim_mp_districts d
-        ON f.district_id = d.id",True,Gajinder
+ to find fo state , cluster and district , fo region related use this metrics","select a.operator_code, b.district, b.cluster, b.region, b.tier
+from mp_analytics_core.dim_operator_base_district a
+left join mp_analytics_core.dim_mp_districts b
+ON a.district_id = b.district_id",True,Gajinder
