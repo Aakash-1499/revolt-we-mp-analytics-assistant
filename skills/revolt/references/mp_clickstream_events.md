@@ -2,24 +2,20 @@
 
 ## Glossary
 
-| Field | Description | Mandatory |
+Field
+
+| Flow/ Feature Name | Defines the POD who designed the experiment like Cx Growth, Cx Payments, FO Growth, etc. | Yes |
 | --- | --- | --- |
-| POD | Defines the POD who designed the experiment like Cx Growth, Cx Payments, FO Growth, etc. | Yes |
-| Experiment Type | Defines whether experiment is live at user level or not (Non user level = demand level) | Yes |
-| Experiment Name | Defines the common name of the experiment by which it is mostly referred. | Yes |
-| Start Date | The date experiment went live on product | Yes |
-| Current Status | This is self explanatory (Live/ 100% Scaled/ Rolled Back) | Yes |
-| 100% Scaled Up Date<br>or<br>Rolled Back Date |  | No |
-| Config iD | Unique id attached to a variant of the experiment. It might repeat across experiments. | Yes |
-| Variant Name | Test /Control/ <User defined> | Yes |
-| Data Filters | Defines any hard filter that has to be used while calculating any metric for comparing variant performance eg. 'Demands where VT is Trailers' means we only have to consider demands where vehicle type is trailers | No |
-| Top of the Funnel | Defines the traffic metric for the experiment | Yes |
-| Success Metric | Self explanatory | No |
-| Guardrail Metric | Self explanatory | No |
-| Leading Metric | Self explanatory | No |
-| Other Metrics | Self explanatory | No |
-| Android App Version<br>(In case of Forced Release) | Self explanatory | No |
-| iOS App Version<br>(In case of Forced Release) | Self explanatory | No |
+| Describe Screen | Defines whether experiment is live at user level or not (Non user level = demand level) | Yes |
+| Describe User Action | Defines the common name of the experiment by which it is mostly referred. | Yes |
+| Event name | The date experiment went live on product | Yes |
+| Event action | This is self explanatory (Live/ 100% Scaled/ Rolled Back) | Yes |
+| Event Category |  | No |
+| Screen name | Unique id attached to a variant of the experiment. It might repeat across experiments. | Yes |
+| Demand_id | Test /Control/ <User defined> | Yes |
+| Entity id | Defines any hard filter that has to be used while calculating any metric for comparing variant performance eg. 'Demands where VT is Trailers' means we only have to consider demands where vehicle type is trailers | No |
+| Miscellaneous | Defines the traffic metric for the experiment | Yes |
+| user_code | Self explanatory | No |
 
 ## Consigner App
 
