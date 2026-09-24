@@ -10,8 +10,8 @@ How to read 'Consigner App' tab
 | --- | --- | --- |
 | Flow/ Feature Name | Defines the flow name or the feature name by which it is commonly addressed eg. Signup flow, Demand flow, VIP Pass feature | Yes |
 | Describe Screen | Defines the name of the screen where the event gets triggerred | Yes |
-| Describe User Action | Defines the common name of the experiment by which it is mostly referred. | Yes |
-| Event name | The date experiment went live on product | Yes |
+| Describe User Action | Defines the user action or system action that causes the event to trigger | Yes |
+| Event name | Defines the name of the event | Yes |
 | Event action | This is self explanatory (Live/ 100% Scaled/ Rolled Back) | Yes |
 | Event Category |  | No |
 | Screen name | Unique id attached to a variant of the experiment. It might repeat across experiments. | Yes |
@@ -22,7 +22,7 @@ How to read 'Consigner App' tab
 
 ## Consigner App
 
-| Flow/ Feature Name | Describe Screen | Describe User Action | Event name | Event action | Event Category | Screen name | Demand_id | Entity id | Miscellaneous | user_code |
+| Flow/ Feature Name | Describe Screen | Describe User Action | Event Name | Event Action | Event Category | Screen Name | Demand ID | Entity id | Miscellaneous | user_code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Signup Flow | Login/Signup | Impression | v1_offer_signup_screen | view |  | offer_screen | False |  |  | False |
 | Signup Flow | Basic Details | Impression | v1_basic_details | view |  | sign_up_basic_details | False |  |  | False |
