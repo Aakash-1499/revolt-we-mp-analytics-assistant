@@ -524,11 +524,11 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | # | Column | Description (from Glossary) | Sample value | ⚠ Standardization | use_flag |
 | --- | --- | --- | --- | --- | --- |
 | 1 | id | Unique identifier of district's. <br>This columns will be joined on origin_id, destination_id, district_id, ect. | 1 | — | USE |
-| 2 | key | Natural join key in STATE_weye_DISTRICT format (literal _weye_ separator). 793 distinct, no nulls. | BIHAR_weye_JAMUI | — | USE |
+| 2 | key | Natural join key in STATE_weye_DISTRICT format (literal _weye_ separator). Exists in mp_analytics_core.dim_mp_districts | BIHAR_weye_JAMUI | — | USE |
 | 3 | name | Name of district. | PATNA_BIHAR | — | USE |
 | 4 | state | Name of district's state. | BIHAR | — | USE |
 | 5 | cluster_id | Unique identifier of district's cluster. <br>This columns will be joined on origin_cluster_id, destination_cluster_id, ect. | 2 | — | USE |
-| 6 | cluster | Name of the parent cluster = name of the district at cluster_id. 107 distinct. | PURNIA_BIHAR | — | USE |
+| 6 | cluster | Name of the cluster. It is group of districts. | PURNIA_BIHAR | — | USE |
 | 7 | ncr_flag | NCR if the demand origin is in the NCR region; Non_NCR otherwise. | Non_NCR | — | USE |
 | 8 | region | Coarse business region: OTHERS (708), ROI (61), NCR (24). | OTHERS | — | USE |
 | 9 | tier | City tier: Tier4 (371), Tier3 (317), Tier2 (75), Tier1 (30). | Tier3 | — | USE |
