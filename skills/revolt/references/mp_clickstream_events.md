@@ -2,11 +2,14 @@
 
 ## Glossary
 
-Field
+**Overview:** This sheet lists the clickstream event details for Markeplace related journeys on the consigner and operator apps/website
 
-| Flow/ Feature Name | Defines the POD who designed the experiment like Cx Growth, Cx Payments, FO Growth, etc. | Yes |
+How to read 'Consigner App' tab
+
+| Field | Description | Mandatory |
 | --- | --- | --- |
-| Describe Screen | Defines whether experiment is live at user level or not (Non user level = demand level) | Yes |
+| Flow/ Feature Name | Defines the flow name or the feature name by which it is commonly addressed eg. Signup flow, Demand flow, VIP Pass feature | Yes |
+| Describe Screen | Defines the name of the screen where the event gets triggerred | Yes |
 | Describe User Action | Defines the common name of the experiment by which it is mostly referred. | Yes |
 | Event name | The date experiment went live on product | Yes |
 | Event action | This is self explanatory (Live/ 100% Scaled/ Rolled Back) | Yes |
