@@ -1,224 +1,4 @@
 Category,Metric,Meaning / Logic,SQL,Verified,Owner
-Consigner Growth,% Placement Cancellations (<30 mins),% placements cancelled by consigner within 30 minutes of placement,"SELECT
-  COUNT(DISTINCT CASE WHEN plc_flag = 1 AND trip_flag = 0
-                        AND DATEDIFF('minute', last_plc_time, cx_plc_cancel_time) <= 30
-                      THEN demand_id END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 AND trip_flag = 0 THEN demand_id END), 0) AS pct_quick_cancel
-FROM mp_analytics_core.fact_consigner_demands_lead_source;",True,
-Consigner Growth,% DR Cancelled before Plc,% DR cancelled by consigner before placement,"WITH ss AS (
-  select * 
-        from(
-                select 
-                a.demand_id,
-                a.sub_status,
-                a.created_by,
-                case when a.sub_status like 'DR%' then a.created end as dr_status_time,
-                max(dr_status_time) over (partition by a.demand_id) as max_dr_status_time,
-                lag(a.created) over (partition by a.demand_id order by a.created) as prev_created_time
-                from mp_analytics_core.fact_demand_sub_status a
-                where a.created >= '2025-10-01'
-                ) a
-        where prev_created_time = max_dr_status_time
-)
-select case when {{timeframe_type}} like 'DoD' then demand_date
-                when {{timeframe_type}} like 'WoW' then demand_week
-                when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
-        , count(distinct case when plc_flag = 0 and reason='CX_cancelled' then demand_id end)*1.0/nullif(count(distinct case when dr_flag = 1 then demand_id end),0) as ""% DR(Cx Cancel)""
-
-    from (
-        select a.*
-                , case when (b0.sub_status='CANCELLED' and b0.created_by!='consigner@wheelseye.com') or b0.sub_status in ('FREIGHT_PFC') then 'Vehicle_Not_Found' 
-                              when b0.sub_status='CANCELLED' and b0.created_by='consigner@wheelseye.com' then 'CX_cancelled' end as reason   
-        from mp_analytics_core.fact_consigner_demands_lead_source
-                left join base0 b0 on a.demand_id=b0.demand_id 
-        )       
-    group by 1",True,
-Consigner Growth,% GTL Cancellations,% of placements cancelled post acceptance (ACCEPTED to CANCELLED state),"select 
-case when {{timeframe_type}} like 'DoD' then demand_date
-         when {{timeframe_type}} like 'WoW' then demand_week
-         when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
-, count(distinct case when accepted<cancelled then demand_id end)*1.0/nullif(count(distinct case when accepted is not null then demand_id end),0)as ""% Plc Accepted then cancelled""
-from (
-        select * from mp_analytics_core.fact_consigner_demands_lead_source a 
-        left join (
-                        select demand_id, min(gtl_time) as accepted
-                        from mp_analytics_critical.fact_consignments
-                        group by demand_id
-                ) fc on a.demand_id = fc.demand_id
-                
-                left join (
-                        select demand_id, min(cancel_time) as cancelled 
-                        from mp_analytics_core.fact_consignment_cancellations
-                        group by demand_id
-                ) cx on a.demand_id = cx.demand_id
-                
-                where plc_flag=1
-      )
-group by 1",True,
-Consigner Growth,% Plc to Acceptance,% of placements that were accepted by consigner (SCHEDULED to ACCEPTED state),"select 
-case when {{timeframe_type}} like 'DoD' then demand_date
-         when {{timeframe_type}} like 'WoW' then demand_week
-         when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
-, count(distinct case when accepted is not null then demand_id end)*1.0/nullif(count(distinct demand_id),0)as ""% Plc to accepted""
-from (
-		select a.*
-		, fc.accepted
-		, cx.auto_cancelled
-		, cx.demand_id as cancelled 
-		from mp_analytics_core.fact_consigner_demands_lead_source a 
-		left join (
-			select demand_id, max(gtl_time) as accepted
-			from mp_analytics_critical.fact_consignments
-			group by demand_id
-		) fc on a.demand_id = fc.demand_id
-		
-		left join (
-			select demand_id, max(case when cancel_remarks = 'AUTO_CANCELLED_NO_ACTIVITY' then cancel_time end) as auto_cancelled
-			from mp_analytics_core.fact_consignment_cancellations
-			group by demand_id
-		) cx on a.demand_id = cx.demand_id
-		
-		where plc_flag=1
-)
-group by 1",True,
-Consigner Growth,% Acceptance to Trip,% of accepted placements that converted into trips,"select demand_date, count(distinct case when accepted is not null and auto_cancelled is null and trip_flag = 1 then demand_id end)*1.0/nullif(count(distinct case when accepted is not null and auto_cancelled is null then demand_id end),0) as ""% Acceptance to Trip""
-from (
-        select a.*
-                        , fc.accepted
-                        , cx.auto_cancelled
-                        , cx.demand_id as cancelled 
-                        from mp_analytics_core.fact_consigner_demands_lead_source a 
-                        left join (
-                                select demand_id, max(gtl_time) as accepted
-                                from mp_analytics_critical.fact_consignments
-                                group by demand_id
-                        ) fc on a.demand_id = fc.demand_id
-                        
-                        left join (
-                                select demand_id, max(case when cancel_remarks = 'AUTO_CANCELLED_NO_ACTIVITY' then cancel_time end) as auto_cancelled
-                                from mp_analytics_core.fact_consignment_cancellations
-                                group by demand_id
-                        ) cx on a.demand_id = cx.demand_id
-                        
-                        where plc_flag=1 
-)
-group by 1",True,
-Consigner Growth,"CX Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Operator,"select demand_date, 
- ,count(distinct case when cx_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_fo_induced""
-from (
-		select a.*, acc.accepted
-		, case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
-		, case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
-		, case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
-		, min(a.demand_date) over (partition by 1) as min_demand_date
-		from mp_analytics_core.fact_consigner_demands_lead_source a 
-		join (
-			select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
-			from mp_analytics_critical.fact_consignments
-			group by demand_id
-			) acc on a.demand_id = acc.demand_id
-		left join (
-			select demand_id
-			, max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
-			, max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
-			, max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
-			, max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
-			from mp_analytics_core.fact_consignment_cancellations
-			group by demand_id
-			) cxl on a.demand_id = cxl.demand_id
-        )a
-group by 1",True,
-Consigner Growth,"CX Initiated, CX Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Consigner,"select demand_date, 
-,count(distinct case when cx_initiated_cx_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_cx_induced""
-from (
-                select a.*, acc.accepted
-                , case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
-                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
-                , case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
-                , min(a.demand_date) over (partition by 1) as min_demand_date
-                from mp_analytics_core.fact_consigner_demands_lead_source a 
-                join (
-                        select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
-                        from mp_analytics_critical.fact_consignments
-                        group by demand_id
-                        ) acc on a.demand_id = acc.demand_id
-                left join (
-                        select demand_id
-                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
-                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
-                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
-                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
-                        from mp_analytics_core.fact_consignment_cancellations
-                        group by demand_id
-                        ) cxl on a.demand_id = cxl.demand_id
-        )a
-group by 1",True,
-Consigner Growth,"FO Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Operator and induced party was Operator,"select demand_date
- ,count(distinct case when fo_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% fo_initiated_fo_induced""
-from (
-                select a.*, acc.accepted
-                , case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
-                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
-                , case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
-                , min(a.demand_date) over (partition by 1) as min_demand_date
-                from mp_analytics_core.fact_consigner_demands_lead_source a 
-                join (
-                        select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
-                        from mp_analytics_critical.fact_consignments
-                        group by demand_id
-                        ) acc on a.demand_id = acc.demand_id
-                left join (
-                        select demand_id
-                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
-                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
-                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
-                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
-                        from mp_analytics_core.fact_consignment_cancellations
-                        group by demand_id
-                        ) cxl on a.demand_id = cxl.demand_id
-        )a
-group by 1",True,
-Consigner Growth,"Vehicle replacement post GTL Cancellation(Reason : CX Initiated,CX Induced)",% of post GTL cancellation that got re-placed (Cancellation by Consigner and induced party = Consigner),"with cx_cancel as (
-    select demand_id, min(cancel_time) as cx_cancel_time
-    from mp_analytics_core.fact_consignment_cancellations
-    where cancelled_by in ('consigner@wheelseye.com','SYSTEM')
-      and induced_party = 'Consigner'
-    group by 1
-),
-acc as (
-    select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
-    from mp_analytics_critical.fact_consignments
-    group by 1
-),
-repl as (
-    select c.demand_id,
-           max(case when f.consignment_time > c.cx_cancel_time then 1 else 0 end) as replaced
-    from cx_cancel c
-    join mp_analytics_critical.fact_consignments f on f.demand_id = c.demand_id
-    group by 1
-),
-fo as (
-    select c.demand_id,
-           1 as backout,
-           case when r.replaced = 1 then 1 else 0 end as conv
-    from cx_cancel c
-    join acc a on a.demand_id = c.demand_id and a.accepted = 1
-    left join repl r on r.demand_id = c.demand_id
-)
-select
-case when {{timeframe_type}} like 'DoD' then demand_date
-	 when {{timeframe_type}} like 'WoW' then demand_week
-	 when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
-, count(distinct case when conv = 1 then demand_id end)*1.0
-  / nullif(count(distinct case when backout = 1 then demand_id end),0) as ""% cx_init_cx_ind_replaced""
-from (select *
-	from (
-		select a.*, fo.conv, fo.backout
-		from mp_analytics_core.fact_consigner_demands_lead_source a
-		join fo on a.demand_id = fo.demand_id
-		)a
-					)
-group by 1,2",True,
 Consigner Exp and Services,% Restricted FS Cx (90 days active),"Aliases: % Restricted FS Cx; FS Restriction Rate.
 
 Avg % of FIELD-SALES customers (active on trips in last 90 days) whose restriction_status is 'RESTRICTED'.","SELECT AVG(daily_pct) FROM (
@@ -261,10 +41,72 @@ Consigner Growth,# Trips,"Aliases: # Fulfilled placements
 Demands that got converted into trips . Same multi-grain logic as # Demands.","SELECT COUNT(DISTINCT demand_id)
 FROM fact_consigner_demands_lead_source
 WHERE trip_flag = 1;",True,Ekta
+Consigner Growth,% Acceptance to Trip,% of accepted placements that converted into trips,"select demand_date, count(distinct case when accepted is not null and auto_cancelled is null and trip_flag = 1 then demand_id end)*1.0/nullif(count(distinct case when accepted is not null and auto_cancelled is null then demand_id end),0) as ""% Acceptance to Trip""
+from (
+        select a.*
+                        , fc.accepted
+                        , cx.auto_cancelled
+                        , cx.demand_id as cancelled 
+                        from mp_analytics_core.fact_consigner_demands_lead_source a 
+                        left join (
+                                select demand_id, max(gtl_time) as accepted
+                                from mp_analytics_critical.fact_consignments
+                                group by demand_id
+                        ) fc on a.demand_id = fc.demand_id
+                        
+                        left join (
+                                select demand_id, max(case when cancel_remarks = 'AUTO_CANCELLED_NO_ACTIVITY' then cancel_time end) as auto_cancelled
+                                from mp_analytics_core.fact_consignment_cancellations
+                                group by demand_id
+                        ) cx on a.demand_id = cx.demand_id
+                        
+                        where plc_flag=1 
+)
+group by 1",True,
+Consigner Growth,% Auto Placements,% placements that got placed through the Auto-placement engine,"SELECT
+  COUNT(DISTINCT CASE WHEN plc_flag = 1 AND auto_plc = 'YES' THEN demand_id END) * 1.0
+  / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 THEN demand_id END), 0) AS pct_auto_plc
+FROM fact_consigner_demands_lead_source;",True,Ekta
+Consigner Growth,% Auto Trips,% trips that got placed through the Auto-placement engine,"SELECT
+  COUNT(DISTINCT CASE WHEN trip_flag = 1 AND auto_plc = 'YES' THEN demand_id END) * 1.0
+  / NULLIF(COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END), 0) AS pct_auto_trips
+FROM fact_consigner_demands_lead_source;",True,Ekta
 Consigner Growth,% Demand to DR,% Demands with confirmed DRs,"SELECT
   COUNT(DISTINCT CASE WHEN dr_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT demand_id), 0) AS pct_demand_to_dr
 FROM fact_consigner_demands_lead_source;",True,Ekta
+Consigner Growth,% Demand to Trip,%Demands that got converted into trips,"SELECT
+  COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END) * 1.0
+  / NULLIF(COUNT(DISTINCT demand_id), 0) AS pct_demand_to_trip
+FROM fact_consigner_demands_lead_source;",True,Ekta
+Consigner Growth,% DR Cancelled before Plc,% DR cancelled by consigner before placement,"WITH ss AS (
+  select * 
+        from(
+                select 
+                a.demand_id,
+                a.sub_status,
+                a.created_by,
+                case when a.sub_status like 'DR%' then a.created end as dr_status_time,
+                max(dr_status_time) over (partition by a.demand_id) as max_dr_status_time,
+                lag(a.created) over (partition by a.demand_id order by a.created) as prev_created_time
+                from mp_analytics_core.fact_demand_sub_status a
+                where a.created >= '2025-10-01'
+                ) a
+        where prev_created_time = max_dr_status_time
+)
+select case when {{timeframe_type}} like 'DoD' then demand_date
+                when {{timeframe_type}} like 'WoW' then demand_week
+                when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
+        , count(distinct case when plc_flag = 0 and reason='CX_cancelled' then demand_id end)*1.0/nullif(count(distinct case when dr_flag = 1 then demand_id end),0) as ""% DR(Cx Cancel)""
+
+    from (
+        select a.*
+                , case when (b0.sub_status='CANCELLED' and b0.created_by!='consigner@wheelseye.com') or b0.sub_status in ('FREIGHT_PFC') then 'Vehicle_Not_Found' 
+                              when b0.sub_status='CANCELLED' and b0.created_by='consigner@wheelseye.com' then 'CX_cancelled' end as reason   
+        from mp_analytics_core.fact_consigner_demands_lead_source
+                left join base0 b0 on a.demand_id=b0.demand_id 
+        )       
+    group by 1",True,
 Consigner Growth,% DR to Plc,% DRs that got placed,"SELECT
   COUNT(DISTINCT CASE WHEN plc_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN dr_flag = 1 THEN demand_id END), 0) AS pct_dr_to_plc
@@ -280,27 +122,64 @@ Consigner Growth,% DR to Trip,% DRs that got converted into trips,"SELECT
   COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN dr_flag = 1 THEN demand_id END), 0) AS pct_dr_to_trip
 FROM fact_consigner_demands_lead_source;",True,Ekta
+Consigner Growth,% GTL Cancellations,% of placements cancelled post acceptance (ACCEPTED to CANCELLED state),"select 
+case when {{timeframe_type}} like 'DoD' then demand_date
+         when {{timeframe_type}} like 'WoW' then demand_week
+         when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
+, count(distinct case when accepted<cancelled then demand_id end)*1.0/nullif(count(distinct case when accepted is not null then demand_id end),0)as ""% Plc Accepted then cancelled""
+from (
+        select * from mp_analytics_core.fact_consigner_demands_lead_source a 
+        left join (
+                        select demand_id, min(gtl_time) as accepted
+                        from mp_analytics_critical.fact_consignments
+                        group by demand_id
+                ) fc on a.demand_id = fc.demand_id
+                
+                left join (
+                        select demand_id, min(cancel_time) as cancelled 
+                        from mp_analytics_core.fact_consignment_cancellations
+                        group by demand_id
+                ) cx on a.demand_id = cx.demand_id
+                
+                where plc_flag=1
+      )
+group by 1",True,
+Consigner Growth,% Placement Cancellations (<30 mins),% placements cancelled by consigner within 30 minutes of placement,"SELECT
+  COUNT(DISTINCT CASE WHEN plc_flag = 1 AND trip_flag = 0
+                        AND DATEDIFF('minute', last_plc_time, cx_plc_cancel_time) <= 30
+                      THEN demand_id END) * 1.0
+  / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 AND trip_flag = 0 THEN demand_id END), 0) AS pct_quick_cancel
+FROM mp_analytics_core.fact_consigner_demands_lead_source;",True,
+Consigner Growth,% Plc to Acceptance,% of placements that were accepted by consigner (SCHEDULED to ACCEPTED state),"select 
+case when {{timeframe_type}} like 'DoD' then demand_date
+         when {{timeframe_type}} like 'WoW' then demand_week
+         when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
+, count(distinct case when accepted is not null then demand_id end)*1.0/nullif(count(distinct demand_id),0)as ""% Plc to accepted""
+from (
+		select a.*
+		, fc.accepted
+		, cx.auto_cancelled
+		, cx.demand_id as cancelled 
+		from mp_analytics_core.fact_consigner_demands_lead_source a 
+		left join (
+			select demand_id, max(gtl_time) as accepted
+			from mp_analytics_critical.fact_consignments
+			group by demand_id
+		) fc on a.demand_id = fc.demand_id
+		
+		left join (
+			select demand_id, max(case when cancel_remarks = 'AUTO_CANCELLED_NO_ACTIVITY' then cancel_time end) as auto_cancelled
+			from mp_analytics_core.fact_consignment_cancellations
+			group by demand_id
+		) cx on a.demand_id = cx.demand_id
+		
+		where plc_flag=1
+)
+group by 1",True,
 Consigner Growth,% Plc to Trip (Cx),%Placements that got converted into trips,"SELECT
   COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 THEN demand_id END), 0) AS pct_plc_to_trip
 FROM fact_consigner_demands_lead_source;",True,Ekta
-Consigner Growth,% Demand to Trip,%Demands that got converted into trips,"SELECT
-  COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END) * 1.0
-  / NULLIF(COUNT(DISTINCT demand_id), 0) AS pct_demand_to_trip
-FROM fact_consigner_demands_lead_source;",True,Ekta
-Consigner Growth,% Auto Placements,% placements that got placed through the Auto-placement engine,"SELECT
-  COUNT(DISTINCT CASE WHEN plc_flag = 1 AND auto_plc = 'YES' THEN demand_id END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 THEN demand_id END), 0) AS pct_auto_plc
-FROM fact_consigner_demands_lead_source;",True,Ekta
-Consigner Growth,% Auto Trips,% trips that got placed through the Auto-placement engine,"SELECT
-  COUNT(DISTINCT CASE WHEN trip_flag = 1 AND auto_plc = 'YES' THEN demand_id END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END), 0) AS pct_auto_trips
-FROM fact_consigner_demands_lead_source;",True,Ekta
-Consigner Growth,Trips / Customer,Avg trips per trip active consigner,"SELECT
-  sum(DISTINCT case when trip_flag=1 then demand_id end) * 1.0
-  / NULLIF(COUNT(DISTINCT case when trip_flag=1 then customer_code end), 0) AS trips_per_cx
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",True,Ekta
 Consigner Growth,%App adoption,% Active consigners on app version,"SELECT
   count(DISTINCT case when WHEN cast(split_part(app_version,'.',1) as int)*10000
          + cast(split_part(app_version,'.',2) as int)*100
@@ -309,6 +188,233 @@ Consigner Growth,%App adoption,% Active consigners on app version,"SELECT
   / NULLIF(COUNT(DISTINCT user_code end), 0) AS perc_app_adoption
 FROM mp_analytics_core.fact_cx_event_l3m
 WHERE app_version IS NOT NULL AND app_version <> ''",True,Ekta
+Consigner Growth,"CX Initiated, CX Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Consigner,"select demand_date, 
+,count(distinct case when cx_initiated_cx_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_cx_induced""
+from (
+                select a.*, acc.accepted
+                , case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
+                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
+                , case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
+                , min(a.demand_date) over (partition by 1) as min_demand_date
+                from mp_analytics_core.fact_consigner_demands_lead_source a 
+                join (
+                        select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
+                        from mp_analytics_critical.fact_consignments
+                        group by demand_id
+                        ) acc on a.demand_id = acc.demand_id
+                left join (
+                        select demand_id
+                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
+                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
+                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
+                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
+                        from mp_analytics_core.fact_consignment_cancellations
+                        group by demand_id
+                        ) cxl on a.demand_id = cxl.demand_id
+        )a
+group by 1",True,
+Consigner Growth,"CX Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Operator,"select demand_date, 
+ ,count(distinct case when cx_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_fo_induced""
+from (
+		select a.*, acc.accepted
+		, case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
+		, case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
+		, case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
+		, min(a.demand_date) over (partition by 1) as min_demand_date
+		from mp_analytics_core.fact_consigner_demands_lead_source a 
+		join (
+			select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
+			from mp_analytics_critical.fact_consignments
+			group by demand_id
+			) acc on a.demand_id = acc.demand_id
+		left join (
+			select demand_id
+			, max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
+			, max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
+			, max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
+			, max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
+			from mp_analytics_core.fact_consignment_cancellations
+			group by demand_id
+			) cxl on a.demand_id = cxl.demand_id
+        )a
+group by 1",True,
+Consigner Growth,"FO Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Operator and induced party was Operator,"select demand_date
+ ,count(distinct case when fo_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% fo_initiated_fo_induced""
+from (
+                select a.*, acc.accepted
+                , case when acc.accepted = 1 and cxl.cx_cx = 1 then 1 else 0 end as cx_initiated_cx_induced
+                , case when acc.accepted = 1 and cxl.cx_fo = 1 then 1 else 0 end as cx_initiated_fo_induced
+                , case when acc.accepted = 1 and cxl.fo_fo = 1 then 1 else 0 end as fo_initiated_fo_induced
+                , min(a.demand_date) over (partition by 1) as min_demand_date
+                from mp_analytics_core.fact_consigner_demands_lead_source a 
+                join (
+                        select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
+                        from mp_analytics_critical.fact_consignments
+                        group by demand_id
+                        ) acc on a.demand_id = acc.demand_id
+                left join (
+                        select demand_id
+                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Consigner' then 1 else 0 end) as cx_cx
+                        , max(case when cancelled_by in ('consigner@wheelseye.com','SYSTEM') and induced_party = 'Operator'  then 1 else 0 end) as cx_fo
+                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Operator'  then 1 else 0 end) as fo_fo
+                        , max(case when cancelled_by = 'OPERATOR_APP'        and induced_party = 'Consigner'  then 1 else 0 end) as fo_cx
+                        from mp_analytics_core.fact_consignment_cancellations
+                        group by demand_id
+                        ) cxl on a.demand_id = cxl.demand_id
+        )a
+group by 1",True,
+Consigner Growth,Trips / Customer,Avg trips per trip active consigner,"SELECT
+  sum(DISTINCT case when trip_flag=1 then demand_id end) * 1.0
+  / NULLIF(COUNT(DISTINCT case when trip_flag=1 then customer_code end), 0) AS trips_per_cx
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED';",True,Ekta
+Consigner Growth,"Vehicle replacement post GTL Cancellation(Reason : CX Initiated,CX Induced)",% of post GTL cancellation that got re-placed (Cancellation by Consigner and induced party = Consigner),"with cx_cancel as (
+    select demand_id, min(cancel_time) as cx_cancel_time
+    from mp_analytics_core.fact_consignment_cancellations
+    where cancelled_by in ('consigner@wheelseye.com','SYSTEM')
+      and induced_party = 'Consigner'
+    group by 1
+),
+acc as (
+    select demand_id, max(case when gtl_time is not null then 1 else 0 end) as accepted
+    from mp_analytics_critical.fact_consignments
+    group by 1
+),
+repl as (
+    select c.demand_id,
+           max(case when f.consignment_time > c.cx_cancel_time then 1 else 0 end) as replaced
+    from cx_cancel c
+    join mp_analytics_critical.fact_consignments f on f.demand_id = c.demand_id
+    group by 1
+),
+fo as (
+    select c.demand_id,
+           1 as backout,
+           case when r.replaced = 1 then 1 else 0 end as conv
+    from cx_cancel c
+    join acc a on a.demand_id = c.demand_id and a.accepted = 1
+    left join repl r on r.demand_id = c.demand_id
+)
+select
+case when {{timeframe_type}} like 'DoD' then demand_date
+	 when {{timeframe_type}} like 'WoW' then demand_week
+	 when {{timeframe_type}} like 'MoM' then demand_month end as ""Day/Week/Month""
+, count(distinct case when conv = 1 then demand_id end)*1.0
+  / nullif(count(distinct case when backout = 1 then demand_id end),0) as ""% cx_init_cx_ind_replaced""
+from (select *
+	from (
+		select a.*, fo.conv, fo.backout
+		from mp_analytics_core.fact_consigner_demands_lead_source a
+		join fo on a.demand_id = fo.demand_id
+		)a
+					)
+group by 1,2",True,
+Consigner Payments,% Billing to DR,"Aliases: Billing → DR %.
+
+Of demands in billing (billing_flag = '1'), % with booking_confirmation_status = '1'. Billing confirmation rate.","SELECT
+  100.0 * SUM(CASE WHEN TRIM(booking_confirmation_status) = '1' THEN 1 ELSE 0 END)
+  / NULLIF(COUNT(*), 0) AS pct_billing_to_dr
+FROM analytics.fact_payment_summary
+WHERE billing_flag = '1';",False,
+Consigner Payments,% Credit Cost,"Aliases: Credit Cost %; Cost of Credit.
+
+Credit cost as % of receivable — cost of extending credit to consigners.","SELECT
+  100.0 * SUM(demand_credit_cost) / NULLIF(SUM(receivable_before_settlement), 0) AS pct_credit_cost
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED';",False,
+Consigner Payments,% Delay Charges,"Aliases: % Delay Chargers (dashboard typo); % Late Fees.
+
+Delay charges collected as % of receivable (penalty fees on late payments).","SELECT
+  100.0 * SUM(delay_amount) / NULLIF(SUM(receivable_before_settlement), 0)
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED';",False,
+Consigner Payments,% Gross NPA,"Aliases: Gross NPA; GNPA.
+
+Gross non-performing receivable as % of receivable, for the ≥90-day past-due cohort. Early-warning credit-health signal.","SELECT
+  100.0 * SUM(demand_gross_npa) / NULLIF(SUM(receivable_before_settlement), 0) AS gross_npa
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 90;",False,
+Consigner Payments,% Net NPA,"Aliases: Net NPA; NNPA.
+
+Net NPA (after recoveries/provisions) as % of receivable, for the ≥180-day past-due cohort. Headline credit-health indicator.","SELECT
+  100.0 * SUM(demand_net_npa) / NULLIF(SUM(receivable_before_settlement), 0) AS net_npa
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 180;",False,
+Consigner Payments,% Payment Cost,"Aliases: Overall Cost %; All-In Payment Cost.
+
+Composite cost % over receivable for ≥180-day past-due cohort: (Net NPA + Credit Cost + Sales Team Cost + Central Cost + Legal Cost + |Discount| − Fee − Delay) / Receivable.","SELECT
+  100.0 * SUM((demand_net_npa + demand_credit_cost + sales_team_cost
+               + central_cost + legal_cost + ABS(payment_discount))
+             - (payment_mode_fee + delay_amount))
+  / NULLIF(SUM(receivable_before_settlement), 0) AS pct_payment_cost
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 180;",False,
+Consigner Payments,% Payment Discount,"Aliases: Discount %; % Cx Discount.
+
+Discount given to consigners as % of receivable.","SELECT
+  100.0 * SUM(ABS(payment_discount)) / NULLIF(SUM(receivable_before_settlement), 0)
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED';",False,
+Consigner Payments,% Payment Fee,"Aliases: % Fee Earned; Payment Fee Revenue %.
+
+Payment-mode fee earned as % of receivable (revenue line for Wheelseye, offsets cost).","SELECT
+  100.0 * SUM(payment_mode_fee) / NULLIF(SUM(receivable_before_settlement), 0)
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED';",False,
+Consigner Payments,% Recovery (Due+15),"Aliases: Due+15 Recovery; 15-Day Recovery.
+
+Of receivable ≥15 days past due, % recovered within 15 days of due date.","SELECT
+  100.0 * SUM(ABS(recovered_within_15_days)) / NULLIF(SUM(receivable_before_settlement), 0)
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 15;",False,
+Consigner Payments,% Recovery (Due+30),"Aliases: Due+30 Recovery; 30-Day Recovery.
+
+Of receivable ≥30 days past due, % recovered within 30 days of due date.","SELECT
+  100.0 * SUM(ABS(recovered_within_30_days)) / NULLIF(SUM(receivable_before_settlement), 0)
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 30;",False,
+Consigner Payments,% Recovery (within Due date),"Aliases: On-Time Recovery %; Within Due Date Collection.
+
+Of receivable due, % recovered on or before the due date.","SELECT
+  100.0 * SUM(ABS(recovered_within_due_date)) / NULLIF(SUM(receivable_before_settlement), 0)
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED';",False,
+Consigner Payments,% Revenue Share (Advance+Paul+Bank),"Aliases: Advance Revenue Share; % Upfront Revenue.
+
+% of total receivable from Advance, Paul, and Bank billing modes (billing_submode in A4, A2, A0, F1, F2, F3, F4, F5, C1).","SELECT
+  100.0 * SUM(CASE WHEN billing_submode IN ('A4','A2','A0','F1','F2','F3','F4','F5','C1')
+                   THEN receivable_before_settlement ELSE 0 END)
+  / NULLIF(SUM(receivable_before_settlement), 0) AS pct_advance_share
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED';",False,
+Consigner Payments,Billing Type : Level Payment Summary,"Aliases: Billing Type Summary; Per-Plan Payment Health.
+
+Per-billing-type table: due amount, % contribution, avg DSO, recovery within due, recovery within due+30/15/90/180, Gross NPA, Net NPA. No sales/region split available.","-- See Payment Plan Usage CASE for billing_type mapping.
+SELECT billing_type,
+       SUM(receivable_before_settlement) AS due_amount,
+       AVG(demand_dso) AS avg_dso,
+       100.0 * SUM(ABS(recovered_within_due_date))
+         / NULLIF(SUM(receivable_before_settlement), 0) AS recovery_within_due,
+       100.0 * SUM(ABS(CASE WHEN days_since_due >= 90 THEN demand_gross_npa END))
+         / NULLIF(SUM(CASE WHEN days_since_due >= 90 THEN receivable_before_settlement END), 0) AS gross_npa
+       -- ... rest analogously ...
+FROM fact_payment_summary
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 0
+GROUP BY billing_type;",False,
+Consigner Payments,MoM Cost Scorecard,"Aliases: MoM Cost : New; Cost & Recovery Scorecard; Cost Summary Table.
+
+Combined cost-and-recovery table — per interval: total trips, %_cross_180_days, tilldate received %, tilldate pending %, recovery within due+7/15/30/45/180/240, Gross NPA, Net NPA, Credit Cost, Collection Cost (Central+Sales), Collection Cost (Legal), Discount, Payment Fee, Delay Amount, and Overall Cost %.","-- Each column = its own ratio over receivable, with its own days_since_due cohort filter.
+-- Overall Cost % = Net NPA + Credit Cost + Collection (Central+Sales) + Collection (Legal)
+--                + Overall Discount − Payment Fee − Delay Amount.
+SELECT date_trunc('month', due_date) AS month,
+       100.0 * SUM(ABS(CASE WHEN days_since_due >= 30 THEN recovered_within_30_days END))
+         / NULLIF(SUM(CASE WHEN days_since_due >= 30 THEN receivable_before_settlement END), 0) AS recovery_30,
+       -- ... other columns analogously ...
+       (net_npa + credit_cost + central_sales_collection + legal_collection + discount
+        - payment_fee - delay) AS overall_cost_pct
+FROM analytics.fact_payment_summary
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 0
+GROUP BY 1;",False,
 Consigner Payments,Payment Plan Usage,"Aliases: Billing Type Mix; Payment Mode Distribution.
 
 Distribution of receivable by Billing Type segment (Pay At Loading / Pay At Unloading / Bank / 10-15 / 15-22 / 30-37 / 40-45 / 60-67 / 70-75 Days Credit). The payment-plan mix per period.","SELECT
@@ -337,112 +443,6 @@ For each Trip Rank, % of demands in each utilisation bucket (0-25k / 25-50k / 50
 --   + wfms_consigner_demand_transaction (status='DONE', deleted=false) — signed by category
 -- For each demand: utilization = GREATEST(0, running SUM of signed transactions up to demand_date)
 -- Bucket utilisation, then cumulative % within each trip_rank.",False,
-Consigner Payments,% Billing to DR,"Aliases: Billing → DR %.
-
-Of demands in billing (billing_flag = '1'), % with booking_confirmation_status = '1'. Billing confirmation rate.","SELECT
-  100.0 * SUM(CASE WHEN TRIM(booking_confirmation_status) = '1' THEN 1 ELSE 0 END)
-  / NULLIF(COUNT(*), 0) AS pct_billing_to_dr
-FROM analytics.fact_payment_summary
-WHERE billing_flag = '1';",False,
-Consigner Payments,% Revenue Share (Advance+Paul+Bank),"Aliases: Advance Revenue Share; % Upfront Revenue.
-
-% of total receivable from Advance, Paul, and Bank billing modes (billing_submode in A4, A2, A0, F1, F2, F3, F4, F5, C1).","SELECT
-  100.0 * SUM(CASE WHEN billing_submode IN ('A4','A2','A0','F1','F2','F3','F4','F5','C1')
-                   THEN receivable_before_settlement ELSE 0 END)
-  / NULLIF(SUM(receivable_before_settlement), 0) AS pct_advance_share
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
-Consigner Payments,% Recovery (within Due date),"Aliases: On-Time Recovery %; Within Due Date Collection.
-
-Of receivable due, % recovered on or before the due date.","SELECT
-  100.0 * SUM(ABS(recovered_within_due_date)) / NULLIF(SUM(receivable_before_settlement), 0)
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
-Consigner Payments,% Recovery (Due+15),"Aliases: Due+15 Recovery; 15-Day Recovery.
-
-Of receivable ≥15 days past due, % recovered within 15 days of due date.","SELECT
-  100.0 * SUM(ABS(recovered_within_15_days)) / NULLIF(SUM(receivable_before_settlement), 0)
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 15;",False,
-Consigner Payments,% Recovery (Due+30),"Aliases: Due+30 Recovery; 30-Day Recovery.
-
-Of receivable ≥30 days past due, % recovered within 30 days of due date.","SELECT
-  100.0 * SUM(ABS(recovered_within_30_days)) / NULLIF(SUM(receivable_before_settlement), 0)
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 30;",False,
-Consigner Payments,% Payment Cost,"Aliases: Overall Cost %; All-In Payment Cost.
-
-Composite cost % over receivable for ≥180-day past-due cohort: (Net NPA + Credit Cost + Sales Team Cost + Central Cost + Legal Cost + |Discount| − Fee − Delay) / Receivable.","SELECT
-  100.0 * SUM((demand_net_npa + demand_credit_cost + sales_team_cost
-               + central_cost + legal_cost + ABS(payment_discount))
-             - (payment_mode_fee + delay_amount))
-  / NULLIF(SUM(receivable_before_settlement), 0) AS pct_payment_cost
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 180;",False,
-Consigner Payments,% Credit Cost,"Aliases: Credit Cost %; Cost of Credit.
-
-Credit cost as % of receivable — cost of extending credit to consigners.","SELECT
-  100.0 * SUM(demand_credit_cost) / NULLIF(SUM(receivable_before_settlement), 0) AS pct_credit_cost
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
-Consigner Payments,% Gross NPA,"Aliases: Gross NPA; GNPA.
-
-Gross non-performing receivable as % of receivable, for the ≥90-day past-due cohort. Early-warning credit-health signal.","SELECT
-  100.0 * SUM(demand_gross_npa) / NULLIF(SUM(receivable_before_settlement), 0) AS gross_npa
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 90;",False,
-Consigner Payments,% Net NPA,"Aliases: Net NPA; NNPA.
-
-Net NPA (after recoveries/provisions) as % of receivable, for the ≥180-day past-due cohort. Headline credit-health indicator.","SELECT
-  100.0 * SUM(demand_net_npa) / NULLIF(SUM(receivable_before_settlement), 0) AS net_npa
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 180;",False,
-Consigner Payments,% Payment Discount,"Aliases: Discount %; % Cx Discount.
-
-Discount given to consigners as % of receivable.","SELECT
-  100.0 * SUM(ABS(payment_discount)) / NULLIF(SUM(receivable_before_settlement), 0)
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
-Consigner Payments,% Payment Fee,"Aliases: % Fee Earned; Payment Fee Revenue %.
-
-Payment-mode fee earned as % of receivable (revenue line for Wheelseye, offsets cost).","SELECT
-  100.0 * SUM(payment_mode_fee) / NULLIF(SUM(receivable_before_settlement), 0)
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
-Consigner Payments,% Delay Charges,"Aliases: % Delay Chargers (dashboard typo); % Late Fees.
-
-Delay charges collected as % of receivable (penalty fees on late payments).","SELECT
-  100.0 * SUM(delay_amount) / NULLIF(SUM(receivable_before_settlement), 0)
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
-Consigner Payments,MoM Cost Scorecard,"Aliases: MoM Cost : New; Cost & Recovery Scorecard; Cost Summary Table.
-
-Combined cost-and-recovery table — per interval: total trips, %_cross_180_days, tilldate received %, tilldate pending %, recovery within due+7/15/30/45/180/240, Gross NPA, Net NPA, Credit Cost, Collection Cost (Central+Sales), Collection Cost (Legal), Discount, Payment Fee, Delay Amount, and Overall Cost %.","-- Each column = its own ratio over receivable, with its own days_since_due cohort filter.
--- Overall Cost % = Net NPA + Credit Cost + Collection (Central+Sales) + Collection (Legal)
---                + Overall Discount − Payment Fee − Delay Amount.
-SELECT date_trunc('month', due_date) AS month,
-       100.0 * SUM(ABS(CASE WHEN days_since_due >= 30 THEN recovered_within_30_days END))
-         / NULLIF(SUM(CASE WHEN days_since_due >= 30 THEN receivable_before_settlement END), 0) AS recovery_30,
-       -- ... other columns analogously ...
-       (net_npa + credit_cost + central_sales_collection + legal_collection + discount
-        - payment_fee - delay) AS overall_cost_pct
-FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 0
-GROUP BY 1;",False,
-Consigner Payments,Billing Type : Level Payment Summary,"Aliases: Billing Type Summary; Per-Plan Payment Health.
-
-Per-billing-type table: due amount, % contribution, avg DSO, recovery within due, recovery within due+30/15/90/180, Gross NPA, Net NPA. No sales/region split available.","-- See Payment Plan Usage CASE for billing_type mapping.
-SELECT billing_type,
-       SUM(receivable_before_settlement) AS due_amount,
-       AVG(demand_dso) AS avg_dso,
-       100.0 * SUM(ABS(recovered_within_due_date))
-         / NULLIF(SUM(receivable_before_settlement), 0) AS recovery_within_due,
-       100.0 * SUM(ABS(CASE WHEN days_since_due >= 90 THEN demand_gross_npa END))
-         / NULLIF(SUM(CASE WHEN days_since_due >= 90 THEN receivable_before_settlement END), 0) AS gross_npa
-       -- ... rest analogously ...
-FROM fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 0
-GROUP BY billing_type;",False,
 FO Exp and Services,% Onboarding Trips on Credit,"Aliases: % New FO Trips on Credit.
 
 Of trips by Onboarding FOs (trip_rank ≤ 4) in the first 15/30/45/60 days post first trip, % that used a credit billing mode (billing_submode contains 'W').","SELECT
@@ -456,22 +456,29 @@ WHERE demand_status = 'FULFILLED'
 FO Exp and Services,% Retention Trips on Credit,"Aliases: % Repeat FO Trips on Credit.
 
 Same as Onboarding Trips on Credit but for Retention FOs (trip_rank > 4).","-- Same shape as % Onboarding Trips on Credit, with WHERE trip_rank > 4.",False,
+FO Growth,# Acquired FOs,"Aliases: # 1st Trip FOs; # Newly Tripped FOs, Onboarded FO, Activated
+
+FOs who completed their FIRST trip in the period. Counted on the first event_date where trips_till_date > 0.","SELECT COUNT(DISTINCT operator_code)
+FROM (
+  SELECT operator_code, MIN(event_date) AS first_trip_date
+  FROM fact_operators_mp_events
+  WHERE trips_till_date > 0
+  GROUP BY operator_code
+) t
+WHERE first_trip_date BETWEEN :start_date AND :end_date;",True,Aakash
+FO Growth,# Acquired FOs - 2nd Trip,"Aliases: # 2nd Trip FOs.
+
+FOs who reached their 2nd trip (trips_till_date > 1). Depth-of-acquisition metric.","SELECT COUNT(DISTINCT operator_code)
+FROM (
+  SELECT operator_code, MIN(event_date) AS second_trip_date
+  FROM fact_operators_mp_events
+  WHERE trips_till_date > 1
+  GROUP BY operator_code
+) t
+WHERE second_trip_date BETWEEN :start_date AND :end_date;",True,Aakash
 FO Growth,# FO Visitors,"Aliases:  # FOs Landed on MP; Active Base
 
 Distinct Fleet Operators (FOs) who landed on the MP section of the Operator App at any point in the period. The denominator for nearly every FO-side conversion %.","SELECT COUNT(DISTINCT operator_code)
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
-FO Growth,# WAU,"Aliases: Weekly Active Users; # 7-Day Active FOs,WOW
-
-Distinct Visitors active in the last 7 days of the period. Subset of # Visitors.","SELECT COUNT(DISTINCT operator_code)
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1
-  AND event_date >= CURRENT_DATE - 7;",True,Aakash
-FO Growth,% WAU,"Aliases: % Weekly Active.
-
-# WAU divided by # Visitors. Tells you what share of the cumulative base is currently active.","SELECT
-  COUNT(DISTINCT CASE WHEN event_date >= CURRENT_DATE - 7 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_wau
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1;",True,Aakash
 FO Growth,# LDP FO,"Aliases: # Load Detail Page Viewers; # LDP FOs, Load FOs 
@@ -480,6 +487,73 @@ Distinct FOs who viewed at least one Load Detail Page (is_checked_loads > 0). Br
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
   AND is_checked_loads > 0;",True,Aakash
+FO Growth,# Ready FOs,"Aliases: Ready FOs 
+
+Distinct FOs whose ready_date is not null AND mp_status = 'MP Ready' — sourced from analytics.fact_operators_onb. Different source from events-based # Ready FO; numbers will not tie out.","SELECT COUNT(DISTINCT operator_code)
+FROM analytics.fact_operators_onb
+WHERE ready_date IS NOT NULL
+  AND mp_status = 'MP Ready';",True,Aakash
+FO Growth,# Ready FOs Vehicle,"Aliases: # Trucks of Ready FOs, Vehicles of Reday fo Verfied or not verified
+Total truck-class vehicles owned by Ready FOs (sum of vehicles per FO, not distinct FO count).","SELECT SUM(v.veh_count)
+FROM analytics.fact_operators_onb f
+JOIN (
+  SELECT operator_code, COUNT(vehicle_number) AS veh_count
+  FROM analytics.fact_vehicle_info
+  WHERE vehicle_class = 'TRUCK'
+  GROUP BY operator_code
+) v ON f.operator_code = v.operator_code
+WHERE f.ready_date IS NOT NULL
+  AND f.mp_status = 'MP Ready';",True,Aakash
+FO Growth,# Ready FOs Verified Vehicle,"Aliases: # Verified Vehicles of Ready FOs.
+
+Variant of # Ready FOs Vehicle, restricted to vehicles with verified attributes.",-- Same as # Ready FOs Vehicle but vehicle filter restricted to verified rows.,True,Aakash
+FO Growth,# Subscribed FOs,"Aliases: # New Subscribers; # Subs FOs, Who have taken Subscription
+
+Distinct FOs who had a successful subscription transaction within the period (apollo_subscription, deleted=false, transaction_status=SUCCESS), exposed via fact_operators_onb.","SELECT COUNT(DISTINCT operator_code)
+FROM analytics.fact_operators_onb
+WHERE sub_date BETWEEN :start_date AND :end_date;",True,Aakash
+FO Growth,# Token Paid FO,"Aliases: # Plc FO (at FO level); # Token Paid FOs (first token paid for Acquisition tab).
+
+Distinct FOs who paid a token for at least one load (is_token_paid > 0). Commercial-intent volume metric.","SELECT COUNT(DISTINCT operator_code)
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1
+  AND is_token_paid > 0;",True,Aakash
+FO Growth,# Trip FO,"Aliases: # FOs with Trip; # Tripping FOs , Trip FO
+
+Distinct FOs who completed at least one trip (total_trips_loads > 0).","SELECT COUNT(DISTINCT operator_code)
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1
+  AND total_trips_loads > 0;",True,Aakash
+FO Growth,# WAU,"Aliases: Weekly Active Users; # 7-Day Active FOs,WOW
+
+Distinct Visitors active in the last 7 days of the period. Subset of # Visitors.","SELECT COUNT(DISTINCT operator_code)
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1
+  AND event_date >= CURRENT_DATE - 7;",True,Aakash
+FO Growth,% Acquired to 2nd Trip,"Aliases: % 1st → 2nd Trip (30/60/180D).
+
+Of FOs acquired (1st trip), % who did 2nd trip within 30/60/180 days of 1st trip.","SELECT
+  COUNT(DISTINCT CASE WHEN second_trip_date <= first_trip_date + 30 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_2nd_30d
+FROM (
+  SELECT operator_code,
+         MIN(CASE WHEN trips_till_date >= 1 THEN event_date END) AS first_trip_date,
+         MIN(CASE WHEN trips_till_date >= 2 THEN event_date END) AS second_trip_date
+  FROM fact_operators_mp_events
+  GROUP BY operator_code
+) c
+WHERE first_trip_date IS NOT NULL;",True,Aakash
+FO Growth,% Acquired to 3rd Trip,"Aliases: % 1st → 3rd Trip (30/60/180D).
+
+Of FOs acquired, % who completed 3 trips within 30/60/180 days of 1st trip.",-- Same shape as % Acquired to 2nd Trip but with trips_till_date >= 3 for the third_trip_date.,True,Aakash
+FO Growth,% Bid Feature FO,"Aliases: % Bidding Adoption; % FO using Bidding.,BID FOs
+
+Share of Visitors who submitted a bid on at least one load (count_of_loads_bid_submit > 0). Data starts Dec-2025.","SELECT
+  COUNT(DISTINCT CASE WHEN count_of_loads_bid_submit > 0 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_bid_fo
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1
+  AND event_date >= '2025-12-01';",True,Aakash
 FO Growth,% LDP FO,"Aliases: % Visitor to LDP; % Load Detail Page FO.
 
 # LDP FO / # Visitors — share of base that browsed at least one load.","SELECT
@@ -487,12 +561,47 @@ FO Growth,% LDP FO,"Aliases: % Visitor to LDP; % Load Detail Page FO.
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_ldp
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1;",True,Aakash
-FO Growth,# Ready FOs,"Aliases: Ready FOs 
+FO Growth,% LDP to Token Paid,"Aliases: % Load Detail to Token; LDP→Plc%.
 
-Distinct FOs whose ready_date is not null AND mp_status = 'MP Ready' — sourced from analytics.fact_operators_onb. Different source from events-based # Ready FO; numbers will not tie out.","SELECT COUNT(DISTINCT operator_code)
-FROM analytics.fact_operators_onb
-WHERE ready_date IS NOT NULL
-  AND mp_status = 'MP Ready';",True,Aakash
+# Token Paid FO / # LDP FO — browse-to-pay conversion at FO level.","SELECT
+  COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT CASE WHEN is_checked_loads > 0 THEN operator_code END), 0) AS pct_ldp_to_token
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1;",True,Aakash
+FO Growth,% Matching Feature FO,"Aliases: % Matching Adoption.
+
+Share of Visitors who used the matching feature (is_checked_loads_matching > 0). Data starts Jun-2025.","SELECT
+  COUNT(DISTINCT CASE WHEN is_checked_loads_matching > 0 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_matching
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1
+  AND event_date >= '2025-06-01';",True,Aakash
+FO Growth,% ODVT Filter FO,"Aliases: % Filter Usage FO; % FO using ODVT Filter.
+
+Share of Visitors who applied a loading or unloading filter (Origin-Destination-Vehicle-Type).","SELECT
+  COUNT(DISTINCT CASE WHEN is_loading_filter_used = 1
+                        OR is_unloading_filter_used = 1
+                      THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_filter_used
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1;",True,Aakash
+FO Growth,% Onboarding Rate (Subs → 1st Trip),"Aliases: % Sub to Trip (7D / 30D / Lifetime).
+
+Of Subscribed FOs, % who completed first trip within the selected window (7D / 30D / Lifetime variants).","SELECT
+  s.sub_date_window,
+  COUNT(DISTINCT CASE WHEN e.event_date <= s.sub_date + 7 AND e.trips_till_date > 0
+                      THEN s.operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT s.operator_code), 0) AS pct_sub_to_trip_7d
+FROM analytics.fact_operators_onb s
+LEFT JOIN fact_operators_mp_events e ON s.operator_code = e.operator_code
+WHERE s.has_sub = 1
+GROUP BY s.sub_date_window;",True,Aakash
+FO Growth,% Plc to Trip (FO),"Aliases: % Placement to Trip FO.
+
+# Trip FO / # Plc FO — % of paying FOs who actually completed a trip.","SELECT
+  COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT CASE WHEN total_placed_loads > 0 THEN operator_code END), 0) AS pct_plc_to_trip
+FROM fact_operators_mp_events;",True,Aakash
 FO Growth,% Ready FO,"Aliases: % Visitor to Ready.
 
 # Ready FO / # Visitors — share of base that completed the readiness gate.","SELECT
@@ -519,110 +628,9 @@ SELECT
 FROM (SELECT DISTINCT operator_code FROM fact_operators_mp_events WHERE landed_on_mp = 1) v
 LEFT JOIN ready r ON v.operator_code = r.operator_code
 LEFT JOIN recent_plc p ON v.operator_code = p.operator_code;",True,Aakash
-FO Growth,# Ready FOs Vehicle,"Aliases: # Trucks of Ready FOs, Vehicles of Reday fo Verfied or not verified
-Total truck-class vehicles owned by Ready FOs (sum of vehicles per FO, not distinct FO count).","SELECT SUM(v.veh_count)
-FROM analytics.fact_operators_onb f
-JOIN (
-  SELECT operator_code, COUNT(vehicle_number) AS veh_count
-  FROM analytics.fact_vehicle_info
-  WHERE vehicle_class = 'TRUCK'
-  GROUP BY operator_code
-) v ON f.operator_code = v.operator_code
-WHERE f.ready_date IS NOT NULL
-  AND f.mp_status = 'MP Ready';",True,Aakash
-FO Growth,# Ready FOs Verified Vehicle,"Aliases: # Verified Vehicles of Ready FOs.
-
-Variant of # Ready FOs Vehicle, restricted to vehicles with verified attributes.",-- Same as # Ready FOs Vehicle but vehicle filter restricted to verified rows.,True,Aakash
-FO Growth,# Token Paid FO,"Aliases: # Plc FO (at FO level); # Token Paid FOs (first token paid for Acquisition tab).
-
-Distinct FOs who paid a token for at least one load (is_token_paid > 0). Commercial-intent volume metric.","SELECT COUNT(DISTINCT operator_code)
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1
-  AND is_token_paid > 0;",True,Aakash
-FO Growth,% Token Paid FO,"Aliases: % Plc FO; % Visitor to Token Paid.
-
-# Token Paid FO / # Visitors. Share of base that committed via token payment.","SELECT
-  COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_token_paid
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
-FO Growth,% LDP to Token Paid,"Aliases: % Load Detail to Token; LDP→Plc%.
-
-# Token Paid FO / # LDP FO — browse-to-pay conversion at FO level.","SELECT
-  COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN is_checked_loads > 0 THEN operator_code END), 0) AS pct_ldp_to_token
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
-FO Growth,% Token Paid to Plc,"Aliases: % Token to Placement.
-
-# Plc FO / # Token Paid FO. Note: in most readings Plc and Token Paid are synonymous;","SELECT
-  COUNT(DISTINCT CASE WHEN total_placed_loads > 0 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END), 0) AS pct_token_to_plc
-FROM fact_operators_mp_events;",True,Aakash
-FO Growth,# Trip FO,"Aliases: # FOs with Trip; # Tripping FOs , Trip FO
-
-Distinct FOs who completed at least one trip (total_trips_loads > 0).","SELECT COUNT(DISTINCT operator_code)
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1
-  AND total_trips_loads > 0;",True,Aakash
-FO Growth,% Trip FO,"Aliases: % Visitor to Trip; % Trip Conversion.,Trip FO
-
-# Trip FO / # Visitors — end-to-end Visitor → Trip conversion at FO level.","SELECT
-  COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_trip_fo
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
-FO Growth,% Plc to Trip (FO),"Aliases: % Placement to Trip FO.
-
-# Trip FO / # Plc FO — % of paying FOs who actually completed a trip.","SELECT
-  COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN total_placed_loads > 0 THEN operator_code END), 0) AS pct_plc_to_trip
-FROM fact_operators_mp_events;",True,Aakash
 FO Growth,% Reverse Trip FO,"Aliases: % FO doing Reverse Leg.
 
 Share of Trip FOs who completed at least one reverse trip (reverse_loads_trips = 1). Denominator is Trip FOs (not Visitors).","SELECT
-  COUNT(DISTINCT CASE WHEN reverse_loads_trips = 1 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END), 0) AS pct_reverse
-FROM fact_operators_mp_events;",True,Aakash
-FO Growth,# Acquired FOs,"Aliases: # 1st Trip FOs; # Newly Tripped FOs, Onboarded FO, Activated
-
-FOs who completed their FIRST trip in the period. Counted on the first event_date where trips_till_date > 0.","SELECT COUNT(DISTINCT operator_code)
-FROM (
-  SELECT operator_code, MIN(event_date) AS first_trip_date
-  FROM fact_operators_mp_events
-  WHERE trips_till_date > 0
-  GROUP BY operator_code
-) t
-WHERE first_trip_date BETWEEN :start_date AND :end_date;",True,Aakash
-FO Growth,# Acquired FOs - 2nd Trip,"Aliases: # 2nd Trip FOs.
-
-FOs who reached their 2nd trip (trips_till_date > 1). Depth-of-acquisition metric.","SELECT COUNT(DISTINCT operator_code)
-FROM (
-  SELECT operator_code, MIN(event_date) AS second_trip_date
-  FROM fact_operators_mp_events
-  WHERE trips_till_date > 1
-  GROUP BY operator_code
-) t
-WHERE second_trip_date BETWEEN :start_date AND :end_date;",True,Aakash
-FO Growth,# Subscribed FOs,"Aliases: # New Subscribers; # Subs FOs, Who have taken Subscription
-
-Distinct FOs who had a successful subscription transaction within the period (apollo_subscription, deleted=false, transaction_status=SUCCESS), exposed via fact_operators_onb.","SELECT COUNT(DISTINCT operator_code)
-FROM analytics.fact_operators_onb
-WHERE sub_date BETWEEN :start_date AND :end_date;",True,Aakash
-FO Growth,% Onboarding Rate (Subs → 1st Trip),"Aliases: % Sub to Trip (7D / 30D / Lifetime).
-
-Of Subscribed FOs, % who completed first trip within the selected window (7D / 30D / Lifetime variants).","SELECT
-  s.sub_date_window,
-  COUNT(DISTINCT CASE WHEN e.event_date <= s.sub_date + 7 AND e.trips_till_date > 0
-                      THEN s.operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT s.operator_code), 0) AS pct_sub_to_trip_7d
-FROM analytics.fact_operators_onb s
-LEFT JOIN fact_operators_mp_events e ON s.operator_code = e.operator_code
-WHERE s.has_sub = 1
-GROUP BY s.sub_date_window;",True,Aakash
-FO Growth,% Acquired to 2nd Trip,"Aliases: % 1st → 2nd Trip (30/60/180D).
-
-Of FOs acquired (1st trip), % who did 2nd trip within 30/60/180 days of 1st trip.","SELECT
   COUNT(DISTINCT CASE WHEN second_trip_date <= first_trip_date + 30 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_2nd_30d
 FROM (
@@ -633,22 +641,50 @@ FROM (
   GROUP BY operator_code
 ) c
 WHERE first_trip_date IS NOT NULL;",True,Aakash
-FO Growth,% Acquired to 3rd Trip,"Aliases: % 1st → 3rd Trip (30/60/180D).
+FO Growth,% Token Paid FO,"Aliases: % Plc FO; % Visitor to Token Paid.
 
-Of FOs acquired, % who completed 3 trips within 30/60/180 days of 1st trip.",-- Same shape as % Acquired to 2nd Trip but with trips_till_date >= 3 for the third_trip_date.,True,Aakash
-FO Growth,Trip per FO,"Aliases: Trips / Customer (FO side); # Trip Per FO.
+# Token Paid FO / # Visitors. Share of base that committed via token payment.","SELECT
+  COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_token_paid
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1;",True,Aakash
+FO Growth,% Token Paid to Plc,"Aliases: % Token to Placement.
 
-Avg trips per Trip-FO: SUM(total_trips_loads where >0) / COUNT(DISTINCT FO where trips>0).","SELECT
-  SUM(CASE WHEN total_trips_loads > 0 THEN total_trips_loads END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END), 0) AS trips_per_fo
+# Plc FO / # Token Paid FO. Note: in most readings Plc and Token Paid are synonymous;","SELECT
+  COUNT(DISTINCT CASE WHEN total_placed_loads > 0 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END), 0) AS pct_token_to_plc
 FROM fact_operators_mp_events;",True,Aakash
-FO Growth,Token per FO,"Aliases: Tokens / Customer; # Token Per FO.
+FO Growth,% Trip FO,"Aliases: % Visitor to Trip; % Trip Conversion.,Trip FO
 
-Avg token-paid loads per Token-Paid FO. Underlying column is historically doubled — use card output, don't recompute.","SELECT
-  SUM(CASE WHEN is_token_paid > 0 THEN is_token_paid_loads END) * 1.0
-  / NULLIF(COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END), 0) AS tokens_per_fo
-FROM fact_operators_mp_events;
--- WARN: is_token_paid_loads is doubled in source; dashboard divides accordingly.",True,Aakash
+# Trip FO / # Visitors — end-to-end Visitor → Trip conversion at FO level.","SELECT
+  COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_trip_fo
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1;",True,Aakash
+FO Growth,% VA Feature FO,"Aliases: % Vehicle Availability Feature Usage.
+
+Share of Visitors who marked Vehicle Available OR Vehicle Not Available (used the VA feature). Data starts Nov-2025.","SELECT
+  COUNT(DISTINCT CASE WHEN is_marked_veh_available = 1
+                        OR is_marked_veh_not_available = 1
+                      THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_va_feature
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1
+  AND event_date >= '2025-11-01';",True,Aakash
+FO Growth,% Vehicle Available,"Aliases: % VA Positive Mark; % FO marked Available.,Vehicle Available Marked
+
+Share of Visitors who explicitly marked vehicle as Available (is_marked_veh_available = 1 , 0 for is_marked_veh_not_available) — positive-intent only, excludes 'Not Available' marks.","SELECT
+  COUNT(DISTINCT CASE WHEN is_marked_veh_available = 1 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_va_positive
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1;",True,Aakash
+FO Growth,% WAU,"Aliases: % Weekly Active.
+
+# WAU divided by # Visitors. Tells you what share of the cumulative base is currently active.","SELECT
+  COUNT(DISTINCT CASE WHEN event_date >= CURRENT_DATE - 7 THEN operator_code END) * 1.0
+  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_wau
+FROM fact_operators_mp_events
+WHERE landed_on_mp = 1;",True,Aakash
 FO Growth,Churned FOs,"Aliases: % Churn; Lapsed FOs.
 
 Of Trip FOs in the cohort month, count and % whose LAST trip date is more than 1 month before today — i.e., have stopped tripping.","WITH cohort AS (
@@ -688,48 +724,25 @@ SELECT
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
 GROUP BY fo_segment;",True,Aakash
-FO Growth,% Bid Feature FO,"Aliases: % Bidding Adoption; % FO using Bidding.,BID FOs
+FO Growth,"FO State , cluster ,district , region","Alias - FO state , fo base region , states , cluster , district
 
-Share of Visitors who submitted a bid on at least one load (count_of_loads_bid_submit > 0). Data starts Dec-2025.","SELECT
-  COUNT(DISTINCT CASE WHEN count_of_loads_bid_submit > 0 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_bid_fo
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1
-  AND event_date >= '2025-12-01';",True,Aakash
-FO Growth,% VA Feature FO,"Aliases: % Vehicle Availability Feature Usage.
+ to find fo state , cluster and district , fo region related use this metrics","select a.operator_code, b.district, b.cluster, b.region, b.tier
+from mp_analytics_core.dim_operator_base_district a
+left join mp_analytics_core.dim_mp_districts b
+ON a.district_id = b.district_id",True,Gajinder
+FO Growth,Token per FO,"Aliases: Tokens / Customer; # Token Per FO.
 
-Share of Visitors who marked Vehicle Available OR Vehicle Not Available (used the VA feature). Data starts Nov-2025.","SELECT
-  COUNT(DISTINCT CASE WHEN is_marked_veh_available = 1
-                        OR is_marked_veh_not_available = 1
-                      THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_va_feature
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1
-  AND event_date >= '2025-11-01';",True,Aakash
-FO Growth,% Vehicle Available,"Aliases: % VA Positive Mark; % FO marked Available.,Vehicle Available Marked
+Avg token-paid loads per Token-Paid FO. Underlying column is historically doubled — use card output, don't recompute.","SELECT
+  SUM(CASE WHEN is_token_paid > 0 THEN is_token_paid_loads END) * 1.0
+  / NULLIF(COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END), 0) AS tokens_per_fo
+FROM fact_operators_mp_events;
+-- WARN: is_token_paid_loads is doubled in source; dashboard divides accordingly.",True,Aakash
+FO Growth,Trip per FO,"Aliases: Trips / Customer (FO side); # Trip Per FO.
 
-Share of Visitors who explicitly marked vehicle as Available (is_marked_veh_available = 1 , 0 for is_marked_veh_not_available) — positive-intent only, excludes 'Not Available' marks.","SELECT
-  COUNT(DISTINCT CASE WHEN is_marked_veh_available = 1 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_va_positive
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
-FO Growth,% Matching Feature FO,"Aliases: % Matching Adoption.
-
-Share of Visitors who used the matching feature (is_checked_loads_matching > 0). Data starts Jun-2025.","SELECT
-  COUNT(DISTINCT CASE WHEN is_checked_loads_matching > 0 THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_matching
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1
-  AND event_date >= '2025-06-01';",True,Aakash
-FO Growth,% ODVT Filter FO,"Aliases: % Filter Usage FO; % FO using ODVT Filter.
-
-Share of Visitors who applied a loading or unloading filter (Origin-Destination-Vehicle-Type).","SELECT
-  COUNT(DISTINCT CASE WHEN is_loading_filter_used = 1
-                        OR is_unloading_filter_used = 1
-                      THEN operator_code END) * 1.0
-  / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_filter_used
-FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+Avg trips per Trip-FO: SUM(total_trips_loads where >0) / COUNT(DISTINCT FO where trips>0).","SELECT
+  SUM(CASE WHEN total_trips_loads > 0 THEN total_trips_loads END) * 1.0
+  / NULLIF(COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END), 0) AS trips_per_fo
+FROM fact_operators_mp_events;",True,Aakash
 FO Growth,Visitors - Vehicle Attributes - Collection,"Aliases: % Vehicle Attributes Collected; Vehicle Attr by Source.
 
 Of Subscribed Visitors (Apr-2026 onwards), % who had vehicle attributes (number, body, length, tyre) collected — split by collection point: Onboarding flow / Token flow / Homepage. Also reports % vehicles verified.","-- Visitors scope: landed_on_mp = 1 AND fo_sub_type = 'Subs' from 2026-04-01.
@@ -737,21 +750,15 @@ Of Subscribed Visitors (Apr-2026 onwards), % who had vehicle attributes (number,
 --   web_active_loads, web_confirm_load, web_preffered_vehicle.
 -- Output: % attr verified overall, split by Onboarding flow / Token flow / Homepage,
 --         and % vehicles verified (apollo_operator_vehicle.attribute_verified_by NOT NULL).",True,Aakash
-Pricing,% Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
-
-Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","SELECT
-  SUM(CASE WHEN trip_flag = 1 THEN pnl END) * 1.0
-  / NULLIF(SUM(CASE WHEN trip_flag = 1 THEN consigner_freight_fare END), 0) AS net_take_rate
-FROM mp_analytics_core.fact_consigner_demands_lead_source",True,Gajinder
 Pricing,% Gross Take Rate,"Aliases: Gross TR; % Gross Margin per Trip, pnl_wo_discount, Take Rate (without Discount)
 
 Expected (pre-cost) P&L divided by consigner freight fare on trips. Gross-minus-Net ≈ operating cost ratio per trip.","SELECT
   SUM(CASE WHEN trip_flag = 1 THEN pnl_expected END) * 1.0
   / NULLIF(SUM(CASE WHEN trip_flag = 1 THEN consigner_freight_fare END), 0) AS gross_take_rate
 FROM mp_analytics_core.fact_consigner_demands_lead_source",True,Gajinder
-FO Growth,"FO State , cluster ,district , region","Alias - FO state , fo base region , states , cluster , district
+Pricing,% Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
 
- to find fo state , cluster and district , fo region related use this metrics","select a.operator_code, b.district, b.cluster, b.region, b.tier
-from mp_analytics_core.dim_operator_base_district a
-left join mp_analytics_core.dim_mp_districts b
-ON a.district_id = b.district_id",True,Gajinder
+Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","SELECT
+  SUM(CASE WHEN trip_flag = 1 THEN pnl END) * 1.0
+  / NULLIF(SUM(CASE WHEN trip_flag = 1 THEN consigner_freight_fare END), 0) AS net_take_rate
+FROM mp_analytics_core.fact_consigner_demands_lead_source",True,Gajinder
