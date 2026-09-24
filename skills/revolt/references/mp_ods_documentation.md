@@ -556,6 +556,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 7 | max_tonnage | Upper bound of payload band, in tonnes. | 1.5 | — | USE |
 | 8 | veh_tyre_type | Grouped vehicle class for pricing roll-ups: TRAILER , 4_6 , 10_12_14 , LCV , SXL , MXL. | LCV | — | USE |
 
+
+
 ## 15_dim_supply_vt
 
 **mp_analytics_core.dim_supply_vt:** Owner
@@ -574,6 +576,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 2 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). | open | — | USE |
 | 3 | tyre | Tyre count of the requested vehicle on the demand. [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 6 | — | USE |
 | 4 | size | Exact body length in feet. | 19 | — | USE |
+
+
 
 ## 16_fact_cx_vt_browsing
 
