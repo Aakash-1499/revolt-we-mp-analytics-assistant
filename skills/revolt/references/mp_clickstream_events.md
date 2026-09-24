@@ -4,7 +4,7 @@
 
 **Overview:** This sheet lists the clickstream event details for Markeplace related journeys on the consigner and operator apps/website
 
-**How to read 'Consigner App' tab:** The below table lists all the fields and their meanings. The field names
+**How to read 'Consigner App' tab:** The below table lists all the fields, their meanings and the equivalent mapping names that can be used to join with similar fields in the 'mp_analytics_core.fact_cx_events_l3m' table
 
 | Field | Description | Mapping_name |
 | --- | --- | --- |
@@ -12,16 +12,13 @@
 | Describe Screen | Defines the name of the screen where the event gets triggerred |  |
 | Describe User Action | Defines the user action or system action that causes the event to trigger |  |
 | Event name | Defines the name of the event | eventname |
-| Event action | This is self explanatory (Live/ 100% Scaled/ Rolled Back) |  |
-
-Event Category
-
-| Screen name | Unique id attached to a variant of the experiment. It might repeat across experiments. | col_3 |
-| --- | --- | --- |
-| Demand_id | Test /Control/ <User defined> |  |
-| Entity id | Defines any hard filter that has to be used while calculating any metric for comparing variant performance eg. 'Demands where VT is Trailers' means we only have to consider demands where vehicle type is trailers |  |
-| Miscellaneous | Defines the traffic metric for the experiment |  |
-| user_code | Self explanatory |  |
+| Event action | Defines the name of the event | event_action |
+| Event Category | Defines the name of the event | event_category |
+| Screen name | Defines the name of the event | screen_name |
+| Demand ID | Defines the name of the event | demand_id |
+| Entity id | Defines the name of the event | entity_id |
+| Miscellaneous | Defines the name of the event | miscellaneous |
+| user_code | Defines the name of the event | user_code |
 
 ## Consigner App
 
