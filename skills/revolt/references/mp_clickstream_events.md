@@ -4,7 +4,8 @@
 
 **Overview:** This sheet lists the clickstream event details for Markeplace related journeys on the consigner and operator apps/website
 
-**How to read 'Consigner App' tab:** The below table lists all the fields, their meanings and the equivalent mapping names that can be used to join with similar fields in the 'mp_analytics_core.fact_cx_events_l3m' table
+**How to read 'Consigner App' tab:** The below table lists all the fields, their meanings and the equivalent mapping names that can be used to join with similar fields in the 'mp_analytics_core.fact_cx_events_l3m' table.
+The fields 'Flow/ Feature Name', 'Describe Screen', 'Describe User Action' are defined in this sheet to describe and classify the events  and not present in any database table.
 
 | Field | Description | Mapping_name |
 | --- | --- | --- |
@@ -12,8 +13,8 @@
 | Describe Screen | Defines the name of the screen where the event gets triggerred |  |
 | Describe User Action | Defines the user action or system action that causes the event to trigger |  |
 | Event name | Defines the name of the event | eventname |
-| Event action | Defines the name of the event | event_action |
-| Event Category | Defines the name of the event | event_category |
+| Event action | Defines the action type:  Click or View | event_action |
+| Event Category | Defines the event category | event_category |
 | Screen name | Defines the name of the event | screen_name |
 | Demand ID | Defines the name of the event | demand_id |
 | Entity id | Defines the name of the event | entity_id |
