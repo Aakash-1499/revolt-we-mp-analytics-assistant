@@ -4,21 +4,24 @@
 
 **Overview:** This sheet lists the clickstream event details for Markeplace related journeys on the consigner and operator apps/website
 
-How to read 'Consigner App' tab
+**How to read 'Consigner App' tab:** The below table lists all the fields and their meanings. The field names
 
-| Field | Description | Mandatory |
+| Field | Description | Mapping_name |
 | --- | --- | --- |
-| Flow/ Feature Name | Defines the flow name or the feature name by which it is commonly addressed eg. Signup flow, Demand flow, VIP Pass feature | Yes |
-| Describe Screen | Defines the name of the screen where the event gets triggerred | Yes |
-| Describe User Action | Defines the user action or system action that causes the event to trigger | Yes |
-| Event name | Defines the name of the event | Yes |
-| Event action | This is self explanatory (Live/ 100% Scaled/ Rolled Back) | Yes |
-| Event Category |  | No |
-| Screen name | Unique id attached to a variant of the experiment. It might repeat across experiments. | Yes |
-| Demand_id | Test /Control/ <User defined> | Yes |
-| Entity id | Defines any hard filter that has to be used while calculating any metric for comparing variant performance eg. 'Demands where VT is Trailers' means we only have to consider demands where vehicle type is trailers | No |
-| Miscellaneous | Defines the traffic metric for the experiment | Yes |
-| user_code | Self explanatory | No |
+| Flow/ Feature Name | Defines the flow name or the feature name by which it is commonly addressed eg. Signup flow, Demand flow, VIP Pass feature |  |
+| Describe Screen | Defines the name of the screen where the event gets triggerred |  |
+| Describe User Action | Defines the user action or system action that causes the event to trigger |  |
+| Event name | Defines the name of the event | eventname |
+| Event action | This is self explanatory (Live/ 100% Scaled/ Rolled Back) |  |
+
+Event Category
+
+| Screen name | Unique id attached to a variant of the experiment. It might repeat across experiments. | col_3 |
+| --- | --- | --- |
+| Demand_id | Test /Control/ <User defined> |  |
+| Entity id | Defines any hard filter that has to be used while calculating any metric for comparing variant performance eg. 'Demands where VT is Trailers' means we only have to consider demands where vehicle type is trailers |  |
+| Miscellaneous | Defines the traffic metric for the experiment |  |
+| user_code | Self explanatory |  |
 
 ## Consigner App
 
