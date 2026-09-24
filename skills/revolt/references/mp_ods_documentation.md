@@ -530,8 +530,8 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 5 | cluster_id | Unique identifier of district's cluster. <br>This columns will be joined on origin_cluster_id, destination_cluster_id, ect. | 2 | — | USE |
 | 6 | cluster | Name of the cluster. It is group of districts. | PURNIA_BIHAR | — | USE |
 | 7 | ncr_flag | NCR if the demand origin is in the NCR region; Non_NCR otherwise. | Non_NCR | — | USE |
-| 8 | region | Coarse business region: OTHERS (708), ROI (61), NCR (24). | OTHERS | — | USE |
-| 9 | tier | City tier: Tier4 (371), Tier3 (317), Tier2 (75), Tier1 (30). | Tier3 | — | USE |
+| 8 | region | Name of region. Defined by grouping the districts on the basis of maturity of the Wheelseye Marketplace business. | OTHERS | — | USE |
+| 9 | tier | City tier: Tier4 , Tier3 , Tier2 , Tier1. | Tier3 | — | USE |
 
 ## 14_dim_pricing_vt
 
@@ -550,11 +550,11 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 1 | vt_pricing_id | <missing in Glossary> | 3 | — | USE |
 | 2 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). | container | — | USE |
 | 3 | tyre | Tyre count of the requested vehicle on the demand. [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 4 | — | USE |
-| 4 | min_size | Lower bound (inclusive) of body length band, in feet. 1 acts as an open floor. | 1 | — | USE |
-| 5 | max_size | Upper bound of body length band, in feet. 50 acts as an open ceiling. | 7 | — | USE |
-| 6 | min_tonnage | Lower bound of payload band, in tonnes (0–40). Bands step by .1 so they don't overlap. | 0 | — | USE |
-| 7 | max_tonnage | Upper bound of payload band, in tonnes (1.5–48). | 1.5 | — | USE |
-| 8 | veh_tyre_type | Grouped vehicle class for pricing roll-ups: TRAILER (48), 4_6 (19), 10_12_14 (13), Other (6), LCV (5), SXL (2), MXL (2). | LCV | — | USE |
+| 4 | min_size | Lower bound (inclusive) of body length band, in feet. | 1 | — | USE |
+| 5 | max_size | Upper bound of body length band, in feet. | 7 | — | USE |
+| 6 | min_tonnage | Lower bound of payload band, in tonnes. | 0 | — | USE |
+| 7 | max_tonnage | Upper bound of payload band, in tonnes. | 1.5 | — | USE |
+| 8 | veh_tyre_type | Grouped vehicle class for pricing roll-ups: TRAILER , 4_6 , 10_12_14 , LCV , SXL , MXL. | LCV | — | USE |
 
 ## 15_dim_supply_vt
 
@@ -573,7 +573,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 1 | id | Unique identifier of VT description aling with supply onboarding | 18 | — | USE |
 | 2 | body_type | Body type of the vehicle (e.g., 'Open', 'Container', 'Trailer'). | open | — | USE |
 | 3 | tyre | Tyre count of the requested vehicle on the demand. [Same data as 'tyre_count' in fact_vehicle_info — STANDARDIZE naming] | 6 | — | USE |
-| 4 | size | Exact body length in feet (not a range as in dim_pricing_vt). Spans 7–40; 32/22/40 most frequent. | 19 | — | USE |
+| 4 | size | Exact body length in feet. | 19 | — | USE |
 
 ## 16_fact_cx_vt_browsing
 
@@ -756,11 +756,11 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 1 | event_date | Calendar date of the event (or timestamp when the event occurred). | 2026-08-17 | — | USE |
 | 2 | user_code | Consigner user code | WE2477229 | — | USE |
 | 3 | demand_id | Unique identifier of a demand created by a consigner. | 4826862 | — | USE |
-| 4 | event_name | Tracked event key. v1_ = current app, bt_ = book-truck notifications. Top: v1_to_api, v1_from_api, v1_home_page, v1_pin_drag, v1_select_add, v1_start_ab_testing_flow. | v1_add_lr | — | USE |
-| 5 | event_action | Interaction type, 3 values: view, click, api. | click | — | USE |
-| 6 | event_category | UI grouping; blank for the plurality. Top populated: add_input, bottom_nav, map_view, top_nav, trip_details, ab_testing, sent. | trip_details | — | USE |
-| 7 | screen_name | Screen where the event fired — maps the demand-creation funnel: home_page → loading/unloading_add_selection → tonnage_req → demand_price_range. | at_loading | — | USE |
-| 8 | entity | Free-form payload, blank ~96%. Either JSON attribution {"ph","us","uc","um"} or key:value.<br>Commonly, it contains demand_id | {"ph":"","us":"google","uc":"Generic","um":"transport service"} | — | USE |
+| 4 | event_name | Name of the event trigger on certain action on app. | v1_add_lr | — | USE |
+| 5 | event_action | Type of action done on app : Click, View, Scroll. | click | — | USE |
+| 6 | event_category | It is space identifier on screen for event done on app. | trip_details | — | USE |
+| 7 | screen_name | It is name of the page event triggered. | at_loading | — | USE |
+| 8 | entity | It is used to save event attributes. Commonly, it contains demand_id. | {"ph":"","us":"google","uc":"Generic","um":"transport service"} | — | USE |
 | 9 | miscellaneous | Second payload, key:value pairs delimited by ::. Mostly blank. | up_src:man::up_idx:0 | — | USE |
 | 10 | target_product | Constant book_truck across all rows. | book_truck | — | DNU |
 | 11 | app_info_id | Bundle ID: com.wheelseye.consigner or '' (web). Confirms this is the consigner app. | com.wheelseye.consigner | — | USE |
@@ -997,11 +997,11 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 1 | event_date | Calendar date of the event (or timestamp when the event occurred). | 2026-08-17 | — | USE |
 | 2 | operator_code | Unique identifier of a fleet operator (FO). WheelsEye internal code, typically starts with 'WE'. | WE723012 | — | USE |
 | 3 | demand_id | Unique identifier of a demand created by a consigner. | 4826862 | — | USE |
-| 4 | event_name | Tracked event key. v1_ = current app, bt_ = book-truck notifications. Top: v1_to_api, v1_from_api, v1_home_page, v1_pin_drag, v1_select_add, v1_start_ab_testing_flow. | v1_back_btn | — | USE |
-| 5 | event_action | Interaction type, 3 values: view, click, api. | click | — | USE |
-| 6 | event_category | UI grouping; blank for the plurality. Top populated: add_input, bottom_nav, map_view, top_nav, trip_details, ab_testing, sent. | top_nav | — | USE |
-| 7 | screen_name | Screen where the event fired — maps the demand-creation funnel: home_page → loading/unloading_add_selection → tonnage_req → demand_price_range. | choose_plan | — | USE |
-| 8 | entity | Free-form payload, blank ~96%. Either JSON attribution {"ph","us","uc","um"} or key:value.<br>Commonly, it contains demand_id | {"ph":"","us":"google","uc":"Generic","um":"transport service"} | — | USE |
+| 4 | event_name | Name of the event trigger on certain action on app. | v1_back_btn | — | USE |
+| 5 | event_action | Type of action done on app : Click, View, Scroll. | click | — | USE |
+| 6 | event_category | It is space identifier on screen for event done on app. | top_nav | — | USE |
+| 7 | screen_name | It is name of the page event triggered. | choose_plan | — | USE |
+| 8 | entity | It is used to save event attributes. Commonly, it contains demand_id. | {"ph":"","us":"google","uc":"Generic","um":"transport service"} | — | USE |
 | 9 | miscellaneous | Second payload, key:value pairs delimited by ::. Mostly blank. | up_src:man::up_idx:0 | — | USE |
 | 10 | target_product | Constant book_truck across all rows. | book_truck | — | DNU |
 | 11 | app_info_id | Bundle ID: com.wheelseye.consigner or '' (web). Confirms this is the consigner app. | com.wheelseye.driver | — | USE |
@@ -1009,7 +1009,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 13 | device_id | 16-char hex device ID. 63,697 distinct vs 55,060 users — the only handle for logged-out sessions. | B014538B-903D-452F-8511-A23812351EE | — | USE |
 | 14 | vehicle_id | Unique internal identifier of a specific vehicle in the WheelsEye system. | VD{vehicleNo: DL1LAQ1703, vId: 3557500, isExpiring: false} | — | USE |
 | 15 | city | Geo-IP city, title-cased. Top: Delhi, Mumbai, Bengaluru, Ahmedabad, Pune. | New Delhi | — | USE |
-| 16 | region | Coarse business region: OTHERS (708), ROI (61), NCR (24). | Delhi Division | — | USE |
+| 16 | region | Name of region. Defined by grouping the districts on the basis of maturity of the Wheelseye Marketplace business. | Delhi Division | — | USE |
 | 17 | source_utm | Install/visit attribution: google-play, whatsapp, organic, google, (not%20set) (URL-encoded). | google-play | — | USE |
 | 18 | campaign_utm | Campaign name; blank ~89%. Top: mp_eventBangMSME, sup_to_acq, Generic, Brand, retention_baseline. | Generic_Mumbai | — | USE |
 | 19 | medium_utm | UTM medium — for paid search this holds the keyword, not a medium. | organic | — | USE |
