@@ -43,13 +43,13 @@ The rest of the fields are present in the mentioned table
 | Signup Flow | Trip Potential Input |  | v1_back | click |  | sign_up_expected_trip_count | False |  |  | False |
 | Signup Flow | Trip Potential Input |  | v1_success_bottomsheet | view |  | sign_up_expected_trip_count | False |  |  | False |
 | Signup Flow | Insurance Opt in |  | v1_pricing_type | click | insurance_pricing | insurance | True |  | type:fragile/non-fragile | False |
-| Signup Flow |  |  | v1_update_pricing | click | Insurance | <dynamic_screen> | True |  |  | False |
-| Signup Flow |  |  | v1_view_pricing | click | Insurance | <dynamic_screen> | True |  |  | False |
-| Signup Flow |  |  | v1_confim | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
-| Signup Flow |  |  | v1_view_fragile | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
-| Signup Flow |  |  | V1_close | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
-| Signup Flow |  |  | v1_ok | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
-| Signup Flow |  |  | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | v1_update_pricing | click | Insurance | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | v1_view_pricing | click | Insurance | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | v1_confim | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | v1_view_fragile | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | V1_close | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | v1_ok | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |
 |  |  |  |  |  |  |  | False |  |  | False |
 |  |  |  |  |  |  |  | False |  |  | False |
 |  |  |  |  |  |  |  | False |  |  | False |
