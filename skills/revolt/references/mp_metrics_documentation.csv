@@ -23,6 +23,29 @@ Of customers with a payment plan, % who have SPOC (Single Point of Contact) deta
   COUNT(DISTINCT CASE WHEN email <> '' AND entry_page = 'Kyc & Payment Page'
                       THEN consigner_code END) AS spoc_kyc_page
 FROM payment_spoc_raw;  -- model #44378",False,
+Consigner Growth,#Signups,"Aliases: # Cx Demands; Demand Volume; # CODVT Demands; # COD Demands; # Consigners with Demand.
+
+Total demands raised by consigners. 
+Same metric is shown at four grains on the Placement dashboard: Demand grain (COUNT DISTINCT demand_id), CODVT grain (codvt), COD grain (cod), and Consigner grain (consigner_user_code). Pick the grain that matches your question.","-- Demand grain (default):
+SELECT COUNT(DISTINCT demand_id) FROM fact_consigner_demands_lead_source;
+
+-- CODVT grain: SELECT COUNT(DISTINCT codvt) FROM ...
+-- COD grain:   SELECT COUNT(DISTINCT cod) FROM ...
+-- Cx grain:    SELECT COUNT(DISTINCT consigner_user_code) FROM ...",True,Ekta
+,%Signup to acquisition,,,False,
+,%Signup to VT,,,False,
+,%Signup to Demand,,,False,
+,%Signup to DR,,,False,
+,%Signup to Plc,,,False,
+,%Acq to 2nd trip,,,False,
+,%Acq to Onboarding,,,False,
+,%Signup start to signup success,,,False,
+,%Retention,,,False,
+,Penetration in Q3,,,False,
+,Trip activeness in Q3,,,False,
+,App activeness in Q3,,,False,
+,,,,False,
+,,,,False,
 Consigner Growth,# Demands,"Aliases: # Cx Demands; Demand Volume; # CODVT Demands; # COD Demands; # Consigners with Demand.
 
 Total demands raised by consigners. 
