@@ -447,6 +447,60 @@ from (select *
 		)a
 					)
 group by 1,2",True,Ekta
+Consigner Growth,%Acceptance to Trip,"Of placements the FO accepted and that were not auto-cancelled, the share that became a fulfilled trip.","SELECT COUNT(DISTINCT CASE WHEN accepted IS NOT NULL AND auto_cancelled IS NULL
+                            AND trip_flag = 1 THEN demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT CASE WHEN accepted IS NOT NULL AND auto_cancelled IS NULL
+                                  THEN demand_id END), 0)
+FROM (SELECT a.demand_id, a.demand_date, a.trip_flag, fc.accepted, cx.auto_cancelled
+      FROM fact_consigner_demands_lead_source a
+      LEFT JOIN (SELECT demand_id, MAX(gtl_time) AS accepted
+                 FROM mp_analytics_critical.fact_consignments GROUP BY 1) fc
+             ON fc.demand_id = a.demand_id
+      LEFT JOIN (SELECT demand_id,
+                        MAX(CASE WHEN cancel_remarks = 'AUTO_CANCELLED_NO_ACTIVITY'
+                                 THEN cancel_time END) AS auto_cancelled
+                 FROM fact_consignment_cancellations GROUP BY 1) cx
+             ON cx.demand_id = a.demand_id
+      WHERE a.plc_flag = 1);",False,
+Consigner Growth,% Trips with discount,Share of fulfilled trips carrying any discount.,"SELECT COUNT(CASE WHEN COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
+                     + COALESCE(middle_share_bonus,0)
+                     + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0) > 0
+                  THEN demand_id END) * 1.0
+     / NULLIF(COUNT(demand_id), 0)
+FROM mp_demand_details
+WHERE status = 'FULFILLED' AND metadata_plt != 'true'
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
+Consigner Growth,Revenue,Consigner freight fare net of freight differences.,"SELECT SUM(consigner_freight_fare)
+     - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0))
+FROM mp_demand_details
+WHERE status = 'FULFILLED' AND metadata_plt != 'true'
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
+Consigner Growth,Total discount,EDPE + FO activation + middle share + net coupon.,"SELECT SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
+         + COALESCE(middle_share_bonus,0)
+         + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0))
+FROM mp_demand_details
+WHERE status = 'FULFILLED' AND metadata_plt != 'true'
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
+Consigner Growth,% Discount,Total discount over Revenue.,"SELECT SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
+         + COALESCE(middle_share_bonus,0)
+         + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
+     / NULLIF(SUM(consigner_freight_fare)
+            - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0)), 0)
+FROM mp_demand_details
+WHERE status = 'FULFILLED' AND metadata_plt != 'true'
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
+Consigner Growth,Gross take rate,,"SELECT SUM(consigner_freight_fare
+         - consigner_freight_fare / (1.0 + CAST(service_charge AS FLOAT)) + fo_pnl) * 1.0
+     / NULLIF(SUM(consigner_freight_fare), 0)
+FROM mp_demand_details
+WHERE status = 'FULFILLED' AND metadata_plt != 'true'
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
+,,,,False,
+,,,,False,
+,,,,False,
+,,,,False,
+,,,,False,
+,,,,False,
 Consigner Payments,% Billing to DR,"Aliases: Billing → DR %.
 
 Of demands in billing (billing_flag = '1'), % with booking_confirmation_status = '1'. Billing confirmation rate.","SELECT
