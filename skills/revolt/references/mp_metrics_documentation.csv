@@ -50,13 +50,86 @@ Consigner Growth,%Signup to Demand,Share of signups who raised any demand within
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
 FROM fact_consigner_demands_lead_source
 WHERE cx_segment = 'New' AND login_date <= CURRENT_DATE - 30;",False,
-Consigner Growth,%Signup to DR,Share of signups who got a confirmed DR within 30 days.,,False,
-Consigner Growth,%Signup to Plc,,,False,
-Consigner Growth,%Acq to 2nd trip,,,False,
-Consigner Growth,%Acq to Onboarding,,,False,
-Consigner Growth,%Signup start to signup success,,,False,
-Consigner Growth,%Retention,,,False,
-Consigner Growth,Penetration in Q3,,,False,
+Consigner Growth,%Signup to DR,Share of signups who got a confirmed DR within 30 days.,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, dr_date) <= 29
+                           THEN consigner_user_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
+FROM (SELECT consigner_user_code, login_date,
+             MIN(CASE WHEN dr_flag = 1 THEN demand_date END)
+                 OVER (PARTITION BY consigner_user_code) AS dr_date
+      FROM fact_consigner_demands_lead_source WHERE cx_segment = 'New')
+WHERE login_date <= CURRENT_DATE - 30;",False,
+Consigner Growth,%Signup to Plc,Share of signups who got a placement within 30 days. Same as DR with plc_flag.,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, plc_date) <= 29
+                           THEN consigner_user_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
+FROM (SELECT consigner_user_code, login_date,
+             MIN(CASE WHEN plc_flag = 1 THEN demand_date END)
+                 OVER (PARTITION BY consigner_user_code) AS plc_date
+      FROM fact_consigner_demands_lead_source WHERE cx_segment = 'New')
+WHERE login_date <= CURRENT_DATE - 30;",False,
+Consigner Growth,%Acq to 2nd trip,"Of acquired Cxs matured 30 days, the share who took a 2nd trip within 30 days of the first.","SELECT COUNT(DISTINCT CASE WHEN b.demand_date < a.demand_date + 30
+                           THEN a.consigner_user_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT a.consigner_user_code), 0)
+FROM fact_consigner_demands_lead_source a
+LEFT JOIN fact_consigner_demands_lead_source b
+       ON b.consigner_user_code = a.consigner_user_code
+      AND b.demand_time > a.demand_time
+      AND b.trip_flag = 1 AND b.placement_rank = 2
+WHERE a.cx_segment = 'New' AND a.trip_flag = 1
+  AND a.demand_date <= CURRENT_DATE - 30;",False,
+Consigner Growth,%Acq to Onboarding,"Same as above, but reaching the 4th trip.","SELECT COUNT(DISTINCT CASE WHEN b.demand_date < a.demand_date + 30
+                           THEN a.consigner_user_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT a.consigner_user_code), 0)
+FROM fact_consigner_demands_lead_source a
+LEFT JOIN fact_consigner_demands_lead_source b
+       ON b.consigner_user_code = a.consigner_user_code
+      AND b.demand_time > a.demand_time
+      AND b.trip_flag = 1 AND b.placement_rank = 4
+WHERE a.cx_segment = 'New' AND a.trip_flag = 1
+  AND a.demand_date <= CURRENT_DATE - 30;",False,
+Consigner Growth,%Signup start to signup success,"Of users who viewed the basic-details page, the share who reached the signup success bottomsheet. Clickstream, not the demands fact.","SELECT COUNT(DISTINCT CASE WHEN screen_name = 'sign_up_expected_trip_count'
+                            AND event_name  = 'v1_success_bottomsheet'
+                           THEN user_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT CASE WHEN screen_name = 'sign_up_basic_details'
+                                   AND event_name  = 'v1_basic_details'
+                                  THEN user_code END), 0)
+FROM analytics.consigner_app_events_current_v2
+WHERE event_action = 'view';",False,
+Consigner Growth,%Retention,"Cxs with a first trip, who took ≥1 trip within 90 days of that acquisition date are retention base. 
+Share of the qualified cohort that took a trip in a later 90-day bucket.","WITH acq AS (
+    SELECT consigner_user_code,
+           MIN(CASE WHEN trip_rank = 1 THEN latest_acq_time END)::date AS acq_date
+    FROM fact_consigner_demands_lead_source GROUP BY 1
+),
+qualified AS (
+    SELECT a.consigner_user_code, a.acq_date
+    FROM acq a
+    JOIN fact_consigner_demands_lead_source f
+      ON f.consigner_user_code = a.consigner_user_code AND f.trip_flag = 1
+     AND f.demand_date >= a.acq_date AND f.demand_date < a.acq_date + 90
+    WHERE a.acq_date IS NOT NULL
+    GROUP BY 1, 2
+)
+SELECT COUNT(DISTINCT CASE WHEN x.active = 1 THEN x.consigner_user_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT x.consigner_user_code), 0)
+FROM (SELECT q.consigner_user_code, q.acq_date,
+             MAX(CASE WHEN f.trip_flag = 1
+                       AND f.demand_date >= q.acq_date + 181
+                       AND f.demand_date <  q.acq_date + 271 THEN 1 ELSE 0 END) AS active
+      FROM qualified q
+      JOIN fact_consigner_demands_lead_source f
+        ON f.consigner_user_code = q.consigner_user_code
+      GROUP BY 1, 2) x
+WHERE CURRENT_DATE >= x.acq_date + 271",False,
+Consigner Growth,Penetration in Q3,Share of the qualified cohort that raised any demand in days 181–270. Same as %Retention but without the trip_flag condition.,"SELECT COUNT(DISTINCT CASE WHEN x.active = 1 THEN x.consigner_user_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT x.consigner_user_code), 0)
+FROM (SELECT q.consigner_user_code, q.acq_date,
+             MAX(CASE WHEN f.demand_date >= q.acq_date + 181
+                       AND f.demand_date <  q.acq_date + 271 THEN 1 ELSE 0 END) AS active
+      FROM qualified q
+      JOIN fact_consigner_demands_lead_source f
+        ON f.consigner_user_code = q.consigner_user_code
+      GROUP BY 1, 2) x
+WHERE CURRENT_DATE >= x.acq_date + 271;",False,
 Consigner Growth,%Trip activeness,,,False,
 Consigner Growth,%App activeness,,,False,
 Consigner Growth,%Demand activenss,,,False,
