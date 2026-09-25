@@ -23,12 +23,11 @@ Of customers with a payment plan, % who have SPOC (Single Point of Contact) deta
   COUNT(DISTINCT CASE WHEN email <> '' AND entry_page = 'Kyc & Payment Page'
                       THEN consigner_code END) AS spoc_kyc_page
 FROM payment_spoc_raw;  -- model #44378",False,
-Consigner Growth,#Signups,,"-- Demand grain (default):
-SELECT COUNT(DISTINCT demand_id) FROM fact_consigner_demands_lead_source;
-
--- CODVT grain: SELECT COUNT(DISTINCT codvt) FROM ...
--- COD grain:   SELECT COUNT(DISTINCT cod) FROM ...
--- Cx grain:    SELECT COUNT(DISTINCT consigner_user_code) FROM ...",True,Ekta
+Consigner Growth,#Signups,#Consigners who completed signup on a signup-date,"SELECT signup_month, COUNT(DISTINCT consigner_user_code)
+FROM fact_consigner_demands_lead_source
+WHERE cx_segment = 'New'
+  AND login_date <= CURRENT_DATE - 60
+GROUP BY 1;",True,Ekta
 Consigner Growth,%Signup to acquisition,,,False,
 Consigner Growth,%Signup to VT,,,False,
 Consigner Growth,%Signup to Demand,,,False,
