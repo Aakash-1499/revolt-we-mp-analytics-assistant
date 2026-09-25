@@ -23,12 +23,12 @@ Of customers with a payment plan, % who have SPOC (Single Point of Contact) deta
   COUNT(DISTINCT CASE WHEN email <> '' AND entry_page = 'Kyc & Payment Page'
                       THEN consigner_code END) AS spoc_kyc_page
 FROM payment_spoc_raw;  -- model #44378",False,
-Consigner Growth,#Signups,#Consigners who completed signup on a signup-date,"SELECT signup_month, COUNT(DISTINCT consigner_user_code)
+Consigner Growth,#Signups,#Consigners who completed signup process(signup success bottomsheet),"SELECT signup_month, COUNT(DISTINCT consigner_user_code)
 FROM fact_consigner_demands_lead_source
 WHERE cx_segment = 'New'
   AND login_date <= CURRENT_DATE - 60
 GROUP BY 1;",True,Ekta
-Consigner Growth,%Signup to acquisition,"Of signups whose 30-day window has closed, the share whose first trip landed inside it.","SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, acq_date) <= 29
+Consigner Growth,%Signup to acquisition,Of signups whose 1st trip happened within specified n-conversion days,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, acq_date) <= 29
                            THEN consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
 FROM (SELECT consigner_user_code, login_date,
@@ -36,7 +36,7 @@ FROM (SELECT consigner_user_code, login_date,
                  OVER (PARTITION BY consigner_user_code)::date AS acq_date
       FROM fact_consigner_demands_lead_source WHERE cx_segment = 'New')
 WHERE login_date <= CURRENT_DATE - 30;",True,Ekta
-Consigner Growth,%Signup to VT,Share of signups who opened a vehicle-type browsing session within 30 days.,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, f.login_date, v.vt_time) <= 29
+Consigner Growth,%Signup to VT,Share of signups who opened a vehicle-type browsing session within specified n-conversion days,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, f.login_date, v.vt_time) <= 29
                            THEN f.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT f.consigner_user_code), 0)
 FROM fact_consigner_demands_lead_source f
@@ -45,12 +45,12 @@ LEFT JOIN (SELECT consigner_code,
            FROM fact_cx_vt_browsing GROUP BY 1) v
        ON v.consigner_code = f.consigner_user_code
 WHERE f.cx_segment = 'New' AND f.login_date <= CURRENT_DATE - 30;",True,Ekta
-Consigner Growth,%Signup to Demand,Share of signups who raised any demand within 30 days.,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, demand_date) <= 29
+Consigner Growth,%Signup to Demand,Share of signups who raised any demand within specified n-conversion days,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, demand_date) <= 29
                            THEN consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
 FROM fact_consigner_demands_lead_source
 WHERE cx_segment = 'New' AND login_date <= CURRENT_DATE - 30;",True,Ekta
-Consigner Growth,%Signup to DR,Share of signups who got a confirmed DR within 30 days.,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, dr_date) <= 29
+Consigner Growth,%Signup to DR,Share of signups who got a confirmed DR within specified n-conversion days,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, dr_date) <= 29
                            THEN consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
 FROM (SELECT consigner_user_code, login_date,
@@ -58,7 +58,7 @@ FROM (SELECT consigner_user_code, login_date,
                  OVER (PARTITION BY consigner_user_code) AS dr_date
       FROM fact_consigner_demands_lead_source WHERE cx_segment = 'New')
 WHERE login_date <= CURRENT_DATE - 30;",True,Ekta
-Consigner Growth,%Signup to Plc,Share of signups who got a placement within 30 days. Same as DR with plc_flag.,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, plc_date) <= 29
+Consigner Growth,%Signup to Plc,Share of signups who got a placement within specified n-conversion days. Same as DR with plc_flag.,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, plc_date) <= 29
                            THEN consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
 FROM (SELECT consigner_user_code, login_date,
@@ -66,7 +66,7 @@ FROM (SELECT consigner_user_code, login_date,
                  OVER (PARTITION BY consigner_user_code) AS plc_date
       FROM fact_consigner_demands_lead_source WHERE cx_segment = 'New')
 WHERE login_date <= CURRENT_DATE - 30;",True,Ekta
-Consigner Growth,%Acq to 2nd trip,"Of acquired Cxs matured 30 days, the share who took a 2nd trip within 30 days of the first.","SELECT COUNT(DISTINCT CASE WHEN b.demand_date < a.demand_date + 30
+Consigner Growth,%Acq to 2nd trip,"Of acquired Cxs matured 30 days, the share who took a 2nd trip within specified n-conversion days of the first.","SELECT COUNT(DISTINCT CASE WHEN b.demand_date < a.demand_date + 30
                            THEN a.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT a.consigner_user_code), 0)
 FROM fact_consigner_demands_lead_source a
@@ -86,7 +86,7 @@ LEFT JOIN fact_consigner_demands_lead_source b
       AND b.trip_flag = 1 AND b.placement_rank = 4
 WHERE a.cx_segment = 'New' AND a.trip_flag = 1
   AND a.demand_date <= CURRENT_DATE - 30;",True,Ekta
-Consigner Growth,%Signup start to signup success,"Of users who viewed the basic-details page, the share who reached the signup success bottomsheet. Clickstream, not the demands fact.","SELECT COUNT(DISTINCT CASE WHEN screen_name = 'sign_up_expected_trip_count'
+Consigner Growth,%Signup start to signup success,"Of users who viewed the basic-details page, the share who reached the signup success bottomsheet.","SELECT COUNT(DISTINCT CASE WHEN screen_name = 'sign_up_expected_trip_count'
                             AND event_name  = 'v1_success_bottomsheet'
                            THEN user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT CASE WHEN screen_name = 'sign_up_basic_details'
