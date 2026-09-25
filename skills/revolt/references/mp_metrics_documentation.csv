@@ -461,7 +461,7 @@ FROM (SELECT a.demand_id, a.demand_date, a.trip_flag, fc.accepted, cx.auto_cance
                                  THEN cancel_time END) AS auto_cancelled
                  FROM fact_consignment_cancellations GROUP BY 1) cx
              ON cx.demand_id = a.demand_id
-      WHERE a.plc_flag = 1);",False,
+      WHERE a.plc_flag = 1);",True,Ekta
 Consigner Growth,% Trips with discount,Share of fulfilled trips carrying any discount.,"SELECT COUNT(CASE WHEN COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
                      + COALESCE(middle_share_bonus,0)
                      + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0) > 0
@@ -469,18 +469,18 @@ Consigner Growth,% Trips with discount,Share of fulfilled trips carrying any dis
      / NULLIF(COUNT(demand_id), 0)
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
 Consigner Growth,Revenue,Consigner freight fare net of freight differences.,"SELECT SUM(consigner_freight_fare)
      - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0))
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
 Consigner Growth,Total discount,EDPE + FO activation + middle share + net coupon.,"SELECT SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
          + COALESCE(middle_share_bonus,0)
          + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0))
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
 Consigner Growth,% Discount,Total discount over Revenue.,"SELECT SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
          + COALESCE(middle_share_bonus,0)
          + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
@@ -488,32 +488,32 @@ Consigner Growth,% Discount,Total discount over Revenue.,"SELECT SUM(COALESCE(ed
             - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0)), 0)
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
-,%Coupon discount,share of coupon discount of the total discount,"SELECT SUM(COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
+Consigner Growth,%Coupon discount,share of coupon discount of the total discount,"SELECT SUM(COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
      / NULLIF(SUM(wfms_consigner_freight_fare
                 - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0)), 0)
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",False,
-,% Non-Coupon Discount,share of non-coupon discount of the total discount,"SELECT SUM(extra_discount) * 1.0
+WHERE b.trip_flag = 1;",True,Ekta
+Consigner Growth,% Non-Coupon Discount,share of non-coupon discount of the total discount,"SELECT SUM(extra_discount) * 1.0
      / NULLIF(SUM(wfms_consigner_freight_fare
                 - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0)), 0)
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",False,
-,% Middle Share,Markup of base price over what the FO is paid. A markup over supply cost.,"SELECT SUM(b.base_price - a.supplyfare) * 1.0 / NULLIF(SUM(a.supplyfare), 0)
+WHERE b.trip_flag = 1;",True,Ekta
+Consigner Growth,% Middle Share,Markup of base price over what the FO is paid. A markup over supply cost.,"SELECT SUM(b.base_price - a.supplyfare) * 1.0 / NULLIF(SUM(a.supplyfare), 0)
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",False,
-,% Cx Service Charge,Markup of consigner freight fare over base price,"SELECT SUM(consigner_freight_fare - base_price) * 1.0 / NULLIF(SUM(base_price), 0)
-FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",False,
-,GMV,"WFMS freight fare net of shipper discount, over fulfilled trips.","SELECT SUM(wfms_consigner_freight_fare
+WHERE b.trip_flag = 1;",True,Ekta
+Consigner Growth,% Cx Service Charge,Markup of consigner freight fare over base price,"SELECT SUM(consigner_freight_fare - base_price) * 1.0 / NULLIF(SUM(base_price), 0)
+FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta
+Consigner Growth,GMV,"WFMS freight fare net of shipper discount, over fulfilled trips.","SELECT SUM(wfms_consigner_freight_fare
          - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0))
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",False,
-,Avg Trip Revenue,Mean expected margin per trip,"SELECT AVG(pnl_expected)
-FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",False,
+WHERE b.trip_flag = 1;",True,Ekta
+Consigner Growth,Avg Trip Revenue,Mean expected margin per trip,"SELECT AVG(pnl_expected)
+FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta
 Consigner Payments,% Billing to DR,"Aliases: Billing → DR %.
 
 Of demands in billing (billing_flag = '1'), % with booking_confirmation_status = '1'. Billing confirmation rate.","SELECT
