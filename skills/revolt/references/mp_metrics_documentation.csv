@@ -489,18 +489,31 @@ Consigner Growth,% Discount,Total discount over Revenue.,"SELECT SUM(COALESCE(ed
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
   AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
-Consigner Growth,Gross take rate,,"SELECT SUM(consigner_freight_fare
-         - consigner_freight_fare / (1.0 + CAST(service_charge AS FLOAT)) + fo_pnl) * 1.0
-     / NULLIF(SUM(consigner_freight_fare), 0)
-FROM mp_demand_details
-WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
+,%Coupon discount,share of coupon discount of the total discount,"SELECT SUM(COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
+     / NULLIF(SUM(wfms_consigner_freight_fare
+                - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0)), 0)
+FROM mp_demand_details a
+JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
+WHERE b.trip_flag = 1;",False,
+,% Non-Coupon Discount,share of non-coupon discount of the total discount,"SELECT SUM(extra_discount) * 1.0
+     / NULLIF(SUM(wfms_consigner_freight_fare
+                - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0)), 0)
+FROM mp_demand_details a
+JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
+WHERE b.trip_flag = 1;",False,
+,% Middle Share,Markup of base price over what the FO is paid. A markup over supply cost.,"SELECT SUM(b.base_price - a.supplyfare) * 1.0 / NULLIF(SUM(a.supplyfare), 0)
+FROM mp_demand_details a
+JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
+WHERE b.trip_flag = 1;",False,
+,% Cx Service Charge,Markup of consigner freight fare over base price,"SELECT SUM(consigner_freight_fare - base_price) * 1.0 / NULLIF(SUM(base_price), 0)
+FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",False,
+,GMV,"WFMS freight fare net of shipper discount, over fulfilled trips.","SELECT SUM(wfms_consigner_freight_fare
+         - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0))
+FROM mp_demand_details a
+JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
+WHERE b.trip_flag = 1;",False,
+,Avg Trip Revenue,Mean expected margin per trip,"SELECT AVG(pnl_expected)
+FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",False,
 Consigner Payments,% Billing to DR,"Aliases: Billing → DR %.
 
 Of demands in billing (billing_flag = '1'), % with booking_confirmation_status = '1'. Billing confirmation rate.","SELECT
