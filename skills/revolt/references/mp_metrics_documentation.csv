@@ -1070,9 +1070,7 @@ from mp_analytics_core.fact_vehicle_info
 where live_date is not null
 and deboarding_date is null
 group by 1",True,Gajinder
-FO Growth,Operator Base Location,"Aliases : Operator Home Location, Operator Business Location
-
-Operator home location","select a.operator_code, b.district, b.cluster, b.region, b.sub_cluster
+FO Growth,Operator Base Location,"Aliases : Operator Home Location, Operator Business Location","select a.operator_code, b.district, b.cluster, b.region, b.sub_cluster
 from mp_analytics_core.dim_operator_base_district a
 left join mp_analytics_core.dim_mp_districts b on a.district_id=b.district_id",True,Gajinder
 ,,,,False,
