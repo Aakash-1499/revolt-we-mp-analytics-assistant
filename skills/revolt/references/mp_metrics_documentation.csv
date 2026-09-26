@@ -1,4 +1,4 @@
-Category,Metric,Meaning / Logic,SQL,Verified,Owner
+Category,Metric,Meaning / Logic,SQL,Verified,Owner,
 Consigner Exp and Services,% Restricted FS Cx (90 days active),"Aliases: % Restricted FS Cx; FS Restriction Rate.
 
 Avg % of FIELD-SALES customers (active on trips in last 90 days) whose restriction_status is 'RESTRICTED'.","SELECT AVG(daily_pct) FROM (
@@ -10,7 +10,7 @@ Avg % of FIELD-SALES customers (active on trips in last 90 days) whose restricti
         FROM fact_consigner_demands_lead_source) b USING (code)
   WHERE assigned_sales_team = 'FIELD SALES'
   GROUP BY 1
-);",False,
+);",False,,
 Consigner Exp and Services,Payment SPOC Adoption,"Aliases: Overview : Payment SPOC; Payment SPOC : DoD/WoW/MoM; % Customers with SPOC.
 
 Of customers with a payment plan, % who have SPOC (Single Point of Contact) details captured. Also split by entry page: Booking Flow / Payment Page / KYC & Payment. Available as snapshot (Overview card) and time series (DoD/WoW/MoM card).","SELECT
@@ -22,12 +22,12 @@ Of customers with a payment plan, % who have SPOC (Single Point of Contact) deta
                       THEN consigner_code END) AS spoc_payment_page,
   COUNT(DISTINCT CASE WHEN email <> '' AND entry_page = 'Kyc & Payment Page'
                       THEN consigner_code END) AS spoc_kyc_page
-FROM payment_spoc_raw;  -- model #44378",False,
+FROM payment_spoc_raw;  -- model #44378",False,,
 Consigner Growth,#Signups,#Consigners who completed signup process(signup success bottomsheet),"SELECT signup_month, COUNT(DISTINCT consigner_user_code)
 FROM fact_consigner_demands_lead_source
 WHERE cx_segment = 'New'
   AND login_date <= CURRENT_DATE - 60
-GROUP BY 1;",True,Ekta
+GROUP BY 1;",True,Ekta,
 Consigner Growth,%Signup to acquisition,Of signups whose 1st trip happened within specified n-conversion days,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, acq_date) <= 29
                            THEN consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
@@ -35,7 +35,7 @@ FROM (SELECT consigner_user_code, login_date,
              MAX(CASE WHEN trip_rank = 1 THEN latest_acq_time END)
                  OVER (PARTITION BY consigner_user_code)::date AS acq_date
       FROM fact_consigner_demands_lead_source WHERE cx_segment = 'New')
-WHERE login_date <= CURRENT_DATE - 30;",True,Ekta
+WHERE login_date <= CURRENT_DATE - 30;",True,Ekta,
 Consigner Growth,%Signup to VT,Share of signups who opened a vehicle-type browsing session within specified n-conversion days,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, f.login_date, v.vt_time) <= 29
                            THEN f.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT f.consigner_user_code), 0)
@@ -44,12 +44,12 @@ LEFT JOIN (SELECT consigner_code,
                   MIN(TIMESTAMP 'epoch' + created / 1000000.0 * INTERVAL '1 second') AS vt_time
            FROM fact_cx_vt_browsing GROUP BY 1) v
        ON v.consigner_code = f.consigner_user_code
-WHERE f.cx_segment = 'New' AND f.login_date <= CURRENT_DATE - 30;",True,Ekta
+WHERE f.cx_segment = 'New' AND f.login_date <= CURRENT_DATE - 30;",True,Ekta,
 Consigner Growth,%Signup to Demand,Share of signups who raised any demand within specified n-conversion days,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, demand_date) <= 29
                            THEN consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
 FROM fact_consigner_demands_lead_source
-WHERE cx_segment = 'New' AND login_date <= CURRENT_DATE - 30;",True,Ekta
+WHERE cx_segment = 'New' AND login_date <= CURRENT_DATE - 30;",True,Ekta,
 Consigner Growth,%Signup to DR,Share of signups who got a confirmed DR within specified n-conversion days,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, dr_date) <= 29
                            THEN consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
@@ -57,7 +57,7 @@ FROM (SELECT consigner_user_code, login_date,
              MIN(CASE WHEN dr_flag = 1 THEN demand_date END)
                  OVER (PARTITION BY consigner_user_code) AS dr_date
       FROM fact_consigner_demands_lead_source WHERE cx_segment = 'New')
-WHERE login_date <= CURRENT_DATE - 30;",True,Ekta
+WHERE login_date <= CURRENT_DATE - 30;",True,Ekta,
 Consigner Growth,%Signup to Plc,Share of signups who got a placement within specified n-conversion days. Same as DR with plc_flag.,"SELECT COUNT(DISTINCT CASE WHEN DATEDIFF(day, login_date, plc_date) <= 29
                            THEN consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT consigner_user_code), 0)
@@ -65,7 +65,7 @@ FROM (SELECT consigner_user_code, login_date,
              MIN(CASE WHEN plc_flag = 1 THEN demand_date END)
                  OVER (PARTITION BY consigner_user_code) AS plc_date
       FROM fact_consigner_demands_lead_source WHERE cx_segment = 'New')
-WHERE login_date <= CURRENT_DATE - 30;",True,Ekta
+WHERE login_date <= CURRENT_DATE - 30;",True,Ekta,
 Consigner Growth,%Acq to 2nd trip,"Of acquired Cxs matured 30 days, the share who took a 2nd trip within specified n-conversion days of the first.","SELECT COUNT(DISTINCT CASE WHEN b.demand_date < a.demand_date + 30
                            THEN a.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT a.consigner_user_code), 0)
@@ -75,7 +75,7 @@ LEFT JOIN fact_consigner_demands_lead_source b
       AND b.demand_time > a.demand_time
       AND b.trip_flag = 1 AND b.placement_rank = 2
 WHERE a.cx_segment = 'New' AND a.trip_flag = 1
-  AND a.demand_date <= CURRENT_DATE - 30;",True,Ekta
+  AND a.demand_date <= CURRENT_DATE - 30;",True,Ekta,
 Consigner Growth,%Acq to Onboarding,"Same as above, but reaching the 4th trip.","SELECT COUNT(DISTINCT CASE WHEN b.demand_date < a.demand_date + 30
                            THEN a.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT a.consigner_user_code), 0)
@@ -85,7 +85,7 @@ LEFT JOIN fact_consigner_demands_lead_source b
       AND b.demand_time > a.demand_time
       AND b.trip_flag = 1 AND b.placement_rank = 4
 WHERE a.cx_segment = 'New' AND a.trip_flag = 1
-  AND a.demand_date <= CURRENT_DATE - 30;",True,Ekta
+  AND a.demand_date <= CURRENT_DATE - 30;",True,Ekta,
 Consigner Growth,%Signup start to signup success,"Of users who viewed the basic-details page, the share who reached the signup success bottomsheet.","SELECT COUNT(DISTINCT CASE WHEN screen_name = 'sign_up_expected_trip_count'
                             AND event_name  = 'v1_success_bottomsheet'
                            THEN user_code END) * 1.0
@@ -93,7 +93,7 @@ Consigner Growth,%Signup start to signup success,"Of users who viewed the basic-
                                    AND event_name  = 'v1_basic_details'
                                   THEN user_code END), 0)
 FROM analytics.consigner_app_events_current_v2
-WHERE event_action = 'view';",True,Ekta
+WHERE event_action = 'view';",True,Ekta,
 Consigner Growth,%Retention,"Cxs with a first trip, who took ≥1 trip within 90 days of that acquisition date are retention base. 
 Share of the qualified cohort that took a trip in a later 90-day bucket.","WITH acq AS (
     SELECT consigner_user_code,
@@ -119,7 +119,7 @@ FROM (SELECT q.consigner_user_code, q.acq_date,
       JOIN fact_consigner_demands_lead_source f
         ON f.consigner_user_code = q.consigner_user_code
       GROUP BY 1, 2) x
-WHERE CURRENT_DATE >= x.acq_date + 271",True,Ekta
+WHERE CURRENT_DATE >= x.acq_date + 271",True,Ekta,
 Consigner Growth,Penetration in Q3,Share of the qualified cohort that raised any demand in days 181–270. Same as %Retention but without the trip_flag condition.,"SELECT COUNT(DISTINCT CASE WHEN x.active = 1 THEN x.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT x.consigner_user_code), 0)
 FROM (SELECT q.consigner_user_code, q.acq_date,
@@ -129,7 +129,7 @@ FROM (SELECT q.consigner_user_code, q.acq_date,
       JOIN fact_consigner_demands_lead_source f
         ON f.consigner_user_code = q.consigner_user_code
       GROUP BY 1, 2) x
-WHERE CURRENT_DATE >= x.acq_date + 271;",True,Ekta
+WHERE CURRENT_DATE >= x.acq_date + 271;",True,Ekta,
 Consigner Growth,%Trip activeness,Share of the qualified cohort with ≥1 fulfilled trip in the bucket. Identical to %Retention.,"SELECT COUNT(DISTINCT CASE WHEN x.active = 1 THEN x.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT x.consigner_user_code), 0)
 FROM (SELECT q.consigner_user_code, q.acq_date,
@@ -140,7 +140,7 @@ FROM (SELECT q.consigner_user_code, q.acq_date,
       JOIN fact_consigner_demands_lead_source f
         ON f.consigner_user_code = q.consigner_user_code
       GROUP BY 1, 2) x
-WHERE CURRENT_DATE >= x.acq_date + 271;",True,Ekta
+WHERE CURRENT_DATE >= x.acq_date + 271;",True,Ekta,
 Consigner Growth,%App activeness,"Share of the qualified cohort that logged in during the bucket. Uses login_date, so it measures app opens, not transactions.","SELECT COUNT(DISTINCT CASE WHEN x.active = 1 THEN x.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT x.consigner_user_code), 0)
 FROM (SELECT q.consigner_user_code, q.acq_date,
@@ -150,7 +150,7 @@ FROM (SELECT q.consigner_user_code, q.acq_date,
       JOIN fact_consigner_demands_lead_source f
         ON f.consigner_user_code = q.consigner_user_code
       GROUP BY 1, 2) x
-WHERE CURRENT_DATE >= x.acq_date + 271;",True,Ekta
+WHERE CURRENT_DATE >= x.acq_date + 271;",True,Ekta,
 Consigner Growth,%Demand activenss,"Share of the qualified cohort that raised ≥1 demand in the bucket, trip or not.","SELECT COUNT(DISTINCT CASE WHEN x.active = 1 THEN x.consigner_user_code END) * 1.0
      / NULLIF(COUNT(DISTINCT x.consigner_user_code), 0)
 FROM (SELECT q.consigner_user_code, q.acq_date,
@@ -160,7 +160,7 @@ FROM (SELECT q.consigner_user_code, q.acq_date,
       JOIN fact_consigner_demands_lead_source f
         ON f.consigner_user_code = q.consigner_user_code
       GROUP BY 1, 2) x
-WHERE CURRENT_DATE >= x.acq_date + 271;",True,Ekta
+WHERE CURRENT_DATE >= x.acq_date + 271;",True,Ekta,
 Consigner Growth,# Demands,"Aliases: # Cx Demands; Demand Volume; # CODVT Demands; # COD Demands; # Consigners with Demand.
 
 Total demands raised by consigners. 
@@ -169,16 +169,16 @@ SELECT COUNT(DISTINCT demand_id) FROM fact_consigner_demands_lead_source;
 
 -- CODVT grain: SELECT COUNT(DISTINCT codvt) FROM ...
 -- COD grain:   SELECT COUNT(DISTINCT cod) FROM ...
--- Cx grain:    SELECT COUNT(DISTINCT consigner_user_code) FROM ...",True,Ekta
+-- Cx grain:    SELECT COUNT(DISTINCT consigner_user_code) FROM ...",True,Ekta,
 Consigner Growth,# DRs,Demands with confirmed DR.,"SELECT COUNT(DISTINCT demand_id)
 FROM fact_consigner_demands_lead_source
 WHERE dr_flag = 1;
 
--- North Star regional cuts add:  AND demand_region = 'NCR'  (or 'ROI', or NOT IN ('NCR','ROI'))",True,Ekta
+-- North Star regional cuts add:  AND demand_region = 'NCR'  (or 'ROI', or NOT IN ('NCR','ROI'))",True,Ekta,
 Consigner Growth,# Trips,"Aliases: # Fulfilled placements
 Demands that got converted into trips . Same multi-grain logic as # Demands.","SELECT COUNT(DISTINCT demand_id)
 FROM fact_consigner_demands_lead_source
-WHERE trip_flag = 1;",True,Ekta
+WHERE trip_flag = 1;",True,Ekta,
 Consigner Growth,% Acceptance to Trip,% of accepted placements that converted into trips,"select demand_date, count(distinct case when accepted is not null and auto_cancelled is null and trip_flag = 1 then demand_id end)*1.0/nullif(count(distinct case when accepted is not null and auto_cancelled is null then demand_id end),0) as ""% Acceptance to Trip""
 from (
         select a.*
@@ -200,23 +200,23 @@ from (
                         
                         where plc_flag=1 
 )
-group by 1",True,Ekta
+group by 1",True,Ekta,
 Consigner Growth,% Auto Placements,% placements that got placed through the Auto-placement engine,"SELECT
   COUNT(DISTINCT CASE WHEN plc_flag = 1 AND auto_plc = 'YES' THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 THEN demand_id END), 0) AS pct_auto_plc
-FROM fact_consigner_demands_lead_source;",True,Ekta
+FROM fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,% Auto Trips,% trips that got placed through the Auto-placement engine,"SELECT
   COUNT(DISTINCT CASE WHEN trip_flag = 1 AND auto_plc = 'YES' THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END), 0) AS pct_auto_trips
-FROM fact_consigner_demands_lead_source;",True,Ekta
+FROM fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,% Demand to DR,% Demands with confirmed DRs,"SELECT
   COUNT(DISTINCT CASE WHEN dr_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT demand_id), 0) AS pct_demand_to_dr
-FROM fact_consigner_demands_lead_source;",True,Ekta
+FROM fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,% Demand to Trip,%Demands that got converted into trips,"SELECT
   COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT demand_id), 0) AS pct_demand_to_trip
-FROM fact_consigner_demands_lead_source;",True,Ekta
+FROM fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,% DR Cancelled before Plc,% DR cancelled by consigner before placement,"WITH ss AS (
   select * 
         from(
@@ -244,22 +244,22 @@ select case when {{timeframe_type}} like 'DoD' then demand_date
         from mp_analytics_core.fact_consigner_demands_lead_source
                 left join base0 b0 on a.demand_id=b0.demand_id 
         )       
-    group by 1",True,Ekta
+    group by 1",True,Ekta,
 Consigner Growth,% DR to Plc,% DRs that got placed,"SELECT
   COUNT(DISTINCT CASE WHEN plc_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN dr_flag = 1 THEN demand_id END), 0) AS pct_dr_to_plc
-FROM fact_consigner_demands_lead_source;",True,Ekta
+FROM fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,% DR to Plc (≤ L2 and ≤ 90 min),% of DRs that got placed within 90 minutes of DR and at less than L2 price,"SELECT
   COUNT(DISTINCT CASE WHEN plc_flag = 1
                         AND base_price <= base_rate2
                         AND time_to_plc <= 90
                       THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN dr_flag = 1 THEN demand_id END), 0) AS pct_fast_cheap_plc
-FROM fact_consigner_demands_lead_source;",True,Ekta
+FROM fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,% DR to Trip,% DRs that got converted into trips,"SELECT
   COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN dr_flag = 1 THEN demand_id END), 0) AS pct_dr_to_trip
-FROM fact_consigner_demands_lead_source;",True,Ekta
+FROM fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,% GTL Cancellations,% of placements cancelled post acceptance (ACCEPTED to CANCELLED state),"select 
 case when {{timeframe_type}} like 'DoD' then demand_date
          when {{timeframe_type}} like 'WoW' then demand_week
@@ -281,13 +281,13 @@ from (
                 
                 where plc_flag=1
       )
-group by 1",True,Ekta
+group by 1",True,Ekta,
 Consigner Growth,% Placement Cancellations (<30 mins),% placements cancelled by consigner within 30 minutes of placement,"SELECT
   COUNT(DISTINCT CASE WHEN plc_flag = 1 AND trip_flag = 0
                         AND DATEDIFF('minute', last_plc_time, cx_plc_cancel_time) <= 30
                       THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 AND trip_flag = 0 THEN demand_id END), 0) AS pct_quick_cancel
-FROM mp_analytics_core.fact_consigner_demands_lead_source;",True,Ekta
+FROM mp_analytics_core.fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,% Plc to Acceptance,% of placements that were accepted by consigner (SCHEDULED to ACCEPTED state),"select 
 case when {{timeframe_type}} like 'DoD' then demand_date
          when {{timeframe_type}} like 'WoW' then demand_week
@@ -313,11 +313,11 @@ from (
 		
 		where plc_flag=1
 )
-group by 1",True,Ekta
+group by 1",True,Ekta,
 Consigner Growth,% Plc to Trip (Cx),%Placements that got converted into trips,"SELECT
   COUNT(DISTINCT CASE WHEN trip_flag = 1 THEN demand_id END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN plc_flag = 1 THEN demand_id END), 0) AS pct_plc_to_trip
-FROM fact_consigner_demands_lead_source;",True,Ekta
+FROM fact_consigner_demands_lead_source;",True,Ekta,
 Consigner Growth,%App adoption,% Active consigners on app version,"SELECT
   count(DISTINCT case when WHEN cast(split_part(app_version,'.',1) as int)*10000
          + cast(split_part(app_version,'.',2) as int)*100
@@ -325,7 +325,7 @@ Consigner Growth,%App adoption,% Active consigners on app version,"SELECT
       THEN user_code END) * 1.0 then user_code end) * 1.0
   / NULLIF(COUNT(DISTINCT user_code end), 0) AS perc_app_adoption
 FROM mp_analytics_core.fact_cx_event_l3m
-WHERE app_version IS NOT NULL AND app_version <> ''",True,Ekta
+WHERE app_version IS NOT NULL AND app_version <> ''",True,Ekta,
 Consigner Growth,"CX Initiated, CX Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Consigner,"select demand_date, 
 ,count(distinct case when cx_initiated_cx_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_cx_induced""
 from (
@@ -350,7 +350,7 @@ from (
                         group by demand_id
                         ) cxl on a.demand_id = cxl.demand_id
         )a
-group by 1",True,Ekta
+group by 1",True,Ekta,
 Consigner Growth,"CX Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Consigner and induced party was Operator,"select demand_date, 
  ,count(distinct case when cx_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% cx_initiated_fo_induced""
 from (
@@ -375,7 +375,7 @@ from (
 			group by demand_id
 			) cxl on a.demand_id = cxl.demand_id
         )a
-group by 1",True,Ekta
+group by 1",True,Ekta,
 Consigner Growth,"FO Initiated, FO Induced GTL cancellation",% of accepted placements that got cancelled by Operator and induced party was Operator,"select demand_date
  ,count(distinct case when fo_initiated_fo_induced=1 then demand_id end)*1.0/nullif(count(distinct case when accepted=1 then demand_id end),0) as ""% fo_initiated_fo_induced""
 from (
@@ -400,12 +400,12 @@ from (
                         group by demand_id
                         ) cxl on a.demand_id = cxl.demand_id
         )a
-group by 1",True,Ekta
+group by 1",True,Ekta,
 Consigner Growth,Trips / Customer,Avg trips per trip active consigner,"SELECT
   sum(DISTINCT case when trip_flag=1 then demand_id end) * 1.0
   / NULLIF(COUNT(DISTINCT case when trip_flag=1 then customer_code end), 0) AS trips_per_cx
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",True,Ekta
+WHERE demand_status = 'FULFILLED';",True,Ekta,
 Consigner Growth,"Vehicle replacement post GTL Cancellation(Reason : CX Initiated,CX Induced)",% of post GTL cancellation that got re-placed (Cancellation by Consigner and induced party = Consigner),"with cx_cancel as (
     select demand_id, min(cancel_time) as cx_cancel_time
     from mp_analytics_core.fact_consignment_cancellations
@@ -446,7 +446,7 @@ from (select *
 		join fo on a.demand_id = fo.demand_id
 		)a
 					)
-group by 1,2",True,Ekta
+group by 1,2",True,Ekta,
 Consigner Growth,%Acceptance to Trip,"Of placements the FO accepted and that were not auto-cancelled, the share that became a fulfilled trip.","SELECT COUNT(DISTINCT CASE WHEN accepted IS NOT NULL AND auto_cancelled IS NULL
                             AND trip_flag = 1 THEN demand_id END) * 1.0
      / NULLIF(COUNT(DISTINCT CASE WHEN accepted IS NOT NULL AND auto_cancelled IS NULL
@@ -461,7 +461,7 @@ FROM (SELECT a.demand_id, a.demand_date, a.trip_flag, fc.accepted, cx.auto_cance
                                  THEN cancel_time END) AS auto_cancelled
                  FROM fact_consignment_cancellations GROUP BY 1) cx
              ON cx.demand_id = a.demand_id
-      WHERE a.plc_flag = 1);",True,Ekta
+      WHERE a.plc_flag = 1);",True,Ekta,
 Consigner Growth,% Trips with discount,Share of fulfilled trips carrying any discount.,"SELECT COUNT(CASE WHEN COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
                      + COALESCE(middle_share_bonus,0)
                      + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0) > 0
@@ -469,18 +469,29 @@ Consigner Growth,% Trips with discount,Share of fulfilled trips carrying any dis
      / NULLIF(COUNT(demand_id), 0)
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta,
 Consigner Growth,Revenue,Consigner freight fare net of freight differences.,"SELECT SUM(consigner_freight_fare)
      - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0))
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta,
 Consigner Growth,Total discount,EDPE + FO activation + middle share + net coupon.,"SELECT SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
          + COALESCE(middle_share_bonus,0)
          + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0))
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta,"with discount_data as (
+select demand_id, sum(transaction_amount) as discount
+from mp_analytics_critical.fact_billings
+where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIVATION')
+group by 1 )
+
+
+select count(case when c.discount>0 then a.demand_id else null end)*1.0/nullif(count(a.demand_id),0)
+from mp_analytics_core.fact_demands a
+left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
+left join discount_data c on a.demand_id=c.demand_id
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer'"
 Consigner Growth,% Discount,Total discount over Revenue.,"SELECT SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
          + COALESCE(middle_share_bonus,0)
          + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
@@ -488,63 +499,63 @@ Consigner Growth,% Discount,Total discount over Revenue.,"SELECT SUM(COALESCE(ed
             - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0)), 0)
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta,
 Consigner Growth,%Coupon discount,share of coupon discount of the total discount,"SELECT SUM(COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
      / NULLIF(SUM(wfms_consigner_freight_fare
                 - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0)), 0)
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",True,Ekta
+WHERE b.trip_flag = 1;",True,Ekta,
 Consigner Growth,% Non-Coupon Discount,share of non-coupon discount of the total discount,"SELECT SUM(extra_discount) * 1.0
      / NULLIF(SUM(wfms_consigner_freight_fare
                 - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0)), 0)
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",True,Ekta
+WHERE b.trip_flag = 1;",True,Ekta,
 Consigner Growth,% Middle Share,Markup of base price over what the FO is paid. A markup over supply cost.,"SELECT SUM(b.base_price - a.supplyfare) * 1.0 / NULLIF(SUM(a.supplyfare), 0)
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",True,Ekta
+WHERE b.trip_flag = 1;",True,Ekta,
 Consigner Growth,% Cx Service Charge,Markup of consigner freight fare over base price,"SELECT SUM(consigner_freight_fare - base_price) * 1.0 / NULLIF(SUM(base_price), 0)
-FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta
+FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta,
 Consigner Growth,GMV,"WFMS freight fare net of shipper discount, over fulfilled trips.","SELECT SUM(wfms_consigner_freight_fare
          - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0))
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",True,Ekta
+WHERE b.trip_flag = 1;",True,Ekta,
 Consigner Growth,Avg Trip Revenue,Mean expected margin per trip,"SELECT AVG(pnl_expected)
-FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta
+FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta,
 Consigner Payments,% Billing to DR,"Aliases: Billing → DR %.
 
 Of demands in billing (billing_flag = '1'), % with booking_confirmation_status = '1'. Billing confirmation rate.","SELECT
   100.0 * SUM(CASE WHEN TRIM(booking_confirmation_status) = '1' THEN 1 ELSE 0 END)
   / NULLIF(COUNT(*), 0) AS pct_billing_to_dr
 FROM analytics.fact_payment_summary
-WHERE billing_flag = '1';",False,
+WHERE billing_flag = '1';",False,,
 Consigner Payments,% Credit Cost,"Aliases: Credit Cost %; Cost of Credit.
 
 Credit cost as % of receivable — cost of extending credit to consigners.","SELECT
   100.0 * SUM(demand_credit_cost) / NULLIF(SUM(receivable_before_settlement), 0) AS pct_credit_cost
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
+WHERE demand_status = 'FULFILLED';",False,,
 Consigner Payments,% Delay Charges,"Aliases: % Delay Chargers (dashboard typo); % Late Fees.
 
 Delay charges collected as % of receivable (penalty fees on late payments).","SELECT
   100.0 * SUM(delay_amount) / NULLIF(SUM(receivable_before_settlement), 0)
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
+WHERE demand_status = 'FULFILLED';",False,,
 Consigner Payments,% Gross NPA,"Aliases: Gross NPA; GNPA.
 
 Gross non-performing receivable as % of receivable, for the ≥90-day past-due cohort. Early-warning credit-health signal.","SELECT
   100.0 * SUM(demand_gross_npa) / NULLIF(SUM(receivable_before_settlement), 0) AS gross_npa
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 90;",False,
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 90;",False,,
 Consigner Payments,% Net NPA,"Aliases: Net NPA; NNPA.
 
 Net NPA (after recoveries/provisions) as % of receivable, for the ≥180-day past-due cohort. Headline credit-health indicator.","SELECT
   100.0 * SUM(demand_net_npa) / NULLIF(SUM(receivable_before_settlement), 0) AS net_npa
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 180;",False,
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 180;",False,,
 Consigner Payments,% Payment Cost,"Aliases: Overall Cost %; All-In Payment Cost.
 
 Composite cost % over receivable for ≥180-day past-due cohort: (Net NPA + Credit Cost + Sales Team Cost + Central Cost + Legal Cost + |Discount| − Fee − Delay) / Receivable.","SELECT
@@ -553,37 +564,37 @@ Composite cost % over receivable for ≥180-day past-due cohort: (Net NPA + Cred
              - (payment_mode_fee + delay_amount))
   / NULLIF(SUM(receivable_before_settlement), 0) AS pct_payment_cost
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 180;",False,
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 180;",False,,
 Consigner Payments,% Payment Discount,"Aliases: Discount %; % Cx Discount.
 
 Discount given to consigners as % of receivable.","SELECT
   100.0 * SUM(ABS(payment_discount)) / NULLIF(SUM(receivable_before_settlement), 0)
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
+WHERE demand_status = 'FULFILLED';",False,,
 Consigner Payments,% Payment Fee,"Aliases: % Fee Earned; Payment Fee Revenue %.
 
 Payment-mode fee earned as % of receivable (revenue line for Wheelseye, offsets cost).","SELECT
   100.0 * SUM(payment_mode_fee) / NULLIF(SUM(receivable_before_settlement), 0)
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
+WHERE demand_status = 'FULFILLED';",False,,
 Consigner Payments,% Recovery (Due+15),"Aliases: Due+15 Recovery; 15-Day Recovery.
 
 Of receivable ≥15 days past due, % recovered within 15 days of due date.","SELECT
   100.0 * SUM(ABS(recovered_within_15_days)) / NULLIF(SUM(receivable_before_settlement), 0)
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 15;",False,
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 15;",False,,
 Consigner Payments,% Recovery (Due+30),"Aliases: Due+30 Recovery; 30-Day Recovery.
 
 Of receivable ≥30 days past due, % recovered within 30 days of due date.","SELECT
   100.0 * SUM(ABS(recovered_within_30_days)) / NULLIF(SUM(receivable_before_settlement), 0)
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED' AND days_since_due >= 30;",False,
+WHERE demand_status = 'FULFILLED' AND days_since_due >= 30;",False,,
 Consigner Payments,% Recovery (within Due date),"Aliases: On-Time Recovery %; Within Due Date Collection.
 
 Of receivable due, % recovered on or before the due date.","SELECT
   100.0 * SUM(ABS(recovered_within_due_date)) / NULLIF(SUM(receivable_before_settlement), 0)
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
+WHERE demand_status = 'FULFILLED';",False,,
 Consigner Payments,% Revenue Share (Advance+Paul+Bank),"Aliases: Advance Revenue Share; % Upfront Revenue.
 
 % of total receivable from Advance, Paul, and Bank billing modes (billing_submode in A4, A2, A0, F1, F2, F3, F4, F5, C1).","SELECT
@@ -591,7 +602,7 @@ Consigner Payments,% Revenue Share (Advance+Paul+Bank),"Aliases: Advance Revenue
                    THEN receivable_before_settlement ELSE 0 END)
   / NULLIF(SUM(receivable_before_settlement), 0) AS pct_advance_share
 FROM analytics.fact_payment_summary
-WHERE demand_status = 'FULFILLED';",False,
+WHERE demand_status = 'FULFILLED';",False,,
 Consigner Payments,Billing Type : Level Payment Summary,"Aliases: Billing Type Summary; Per-Plan Payment Health.
 
 Per-billing-type table: due amount, % contribution, avg DSO, recovery within due, recovery within due+30/15/90/180, Gross NPA, Net NPA. No sales/region split available.","-- See Payment Plan Usage CASE for billing_type mapping.
@@ -605,7 +616,7 @@ SELECT billing_type,
        -- ... rest analogously ...
 FROM fact_payment_summary
 WHERE demand_status = 'FULFILLED' AND days_since_due >= 0
-GROUP BY billing_type;",False,
+GROUP BY billing_type;",False,,
 Consigner Payments,MoM Cost Scorecard,"Aliases: MoM Cost : New; Cost & Recovery Scorecard; Cost Summary Table.
 
 Combined cost-and-recovery table — per interval: total trips, %_cross_180_days, tilldate received %, tilldate pending %, recovery within due+7/15/30/45/180/240, Gross NPA, Net NPA, Credit Cost, Collection Cost (Central+Sales), Collection Cost (Legal), Discount, Payment Fee, Delay Amount, and Overall Cost %.","-- Each column = its own ratio over receivable, with its own days_since_due cohort filter.
@@ -619,7 +630,7 @@ SELECT date_trunc('month', due_date) AS month,
         - payment_fee - delay) AS overall_cost_pct
 FROM analytics.fact_payment_summary
 WHERE demand_status = 'FULFILLED' AND days_since_due >= 0
-GROUP BY 1;",False,
+GROUP BY 1;",False,,
 Consigner Payments,Payment Plan Usage,"Aliases: Billing Type Mix; Payment Mode Distribution.
 
 Distribution of receivable by Billing Type segment (Pay At Loading / Pay At Unloading / Bank / 10-15 / 15-22 / 30-37 / 40-45 / 60-67 / 70-75 Days Credit). The payment-plan mix per period.","SELECT
@@ -639,7 +650,7 @@ Distribution of receivable by Billing Type segment (Pay At Loading / Pay At Unlo
     / SUM(SUM(receivable_before_settlement)) OVER (PARTITION BY interval) AS pct_share
 FROM analytics.fact_payment_summary
 WHERE demand_status = 'FULFILLED'
-GROUP BY interval, billing_type;",False,
+GROUP BY interval, billing_type;",False,,
 Consigner Payments,Utilisation by Trip Rank,"Aliases: Utilisation : - Trip Rank; Trip-Rank Utilisation Distribution.
 
 For each Trip Rank, % of demands in each utilisation bucket (0-25k / 25-50k / 50-75k / 75k-1L / 1L-1.25L / 1.25L-1.5L / >1.5L) — cumulative distribution. Utilisation = running sum of (Due + Expense − Payment) per customer.","-- 3-source running balance per customer:
@@ -647,7 +658,7 @@ For each Trip Rank, % of demands in each utilisation bucket (0-25k / 25-50k / 50
 --   + wfms_trip_expense (party_type='CONSIGNER', deleted=false) — signed by category
 --   + wfms_consigner_demand_transaction (status='DONE', deleted=false) — signed by category
 -- For each demand: utilization = GREATEST(0, running SUM of signed transactions up to demand_date)
--- Bucket utilisation, then cumulative % within each trip_rank.",False,
+-- Bucket utilisation, then cumulative % within each trip_rank.",False,,
 FO Exp and Services,% Onboarding Trips on Credit,"Aliases: % New FO Trips on Credit.
 
 Of trips by Onboarding FOs (trip_rank ≤ 4) in the first 15/30/45/60 days post first trip, % that used a credit billing mode (billing_submode contains 'W').","SELECT
@@ -657,10 +668,10 @@ Of trips by Onboarding FOs (trip_rank ≤ 4) in the first 15/30/45/60 days post 
   / NULLIF(COUNT(DISTINCT CASE WHEN demand_date <= first_trip_date + 30 THEN demand_id END), 0) AS pct_30d
 FROM analytics.fact_payment_summary
 WHERE demand_status = 'FULFILLED'
-  AND trip_rank <= 4;",False,
+  AND trip_rank <= 4;",False,,
 FO Exp and Services,% Retention Trips on Credit,"Aliases: % Repeat FO Trips on Credit.
 
-Same as Onboarding Trips on Credit but for Retention FOs (trip_rank > 4).","-- Same shape as % Onboarding Trips on Credit, with WHERE trip_rank > 4.",False,
+Same as Onboarding Trips on Credit but for Retention FOs (trip_rank > 4).","-- Same shape as % Onboarding Trips on Credit, with WHERE trip_rank > 4.",False,,
 FO Growth,# Acquired FOs,"Aliases: # 1st Trip FOs; # Newly Tripped FOs, Onboarded FO, Activated
 
 FOs who completed their FIRST trip in the period. Counted on the first event_date where trips_till_date > 0.","SELECT COUNT(DISTINCT operator_code)
@@ -670,7 +681,7 @@ FROM (
   WHERE trips_till_date > 0
   GROUP BY operator_code
 ) t
-WHERE first_trip_date BETWEEN :start_date AND :end_date;",True,Aakash
+WHERE first_trip_date BETWEEN :start_date AND :end_date;",True,Aakash,
 FO Growth,# Acquired FOs - 2nd Trip,"Aliases: # 2nd Trip FOs.
 
 FOs who reached their 2nd trip (trips_till_date > 1). Depth-of-acquisition metric.","SELECT COUNT(DISTINCT operator_code)
@@ -680,24 +691,24 @@ FROM (
   WHERE trips_till_date > 1
   GROUP BY operator_code
 ) t
-WHERE second_trip_date BETWEEN :start_date AND :end_date;",True,Aakash
+WHERE second_trip_date BETWEEN :start_date AND :end_date;",True,Aakash,
 FO Growth,# FO Visitors,"Aliases:  # FOs Landed on MP; Active Base
 
 Distinct Fleet Operators (FOs) who landed on the MP section of the Operator App at any point in the period. The denominator for nearly every FO-side conversion %.","SELECT COUNT(DISTINCT operator_code)
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,# LDP FO,"Aliases: # Load Detail Page Viewers; # LDP FOs, Load FOs 
 
 Distinct FOs who viewed at least one Load Detail Page (is_checked_loads > 0). Browse-stage indicator.","SELECT COUNT(DISTINCT operator_code)
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
-  AND is_checked_loads > 0;",True,Aakash
+  AND is_checked_loads > 0;",True,Aakash,
 FO Growth,# Ready FOs,"Aliases: Ready FOs 
 
 Distinct FOs whose ready_date is not null AND mp_status = 'MP Ready' — sourced from analytics.fact_operators_onb. Different source from events-based # Ready FO; numbers will not tie out.","SELECT COUNT(DISTINCT operator_code)
 FROM analytics.fact_operators_onb
 WHERE ready_date IS NOT NULL
-  AND mp_status = 'MP Ready';",True,Aakash
+  AND mp_status = 'MP Ready';",True,Aakash,
 FO Growth,# Ready FOs Vehicle,"Aliases: # Trucks of Ready FOs, Vehicles of Reday fo Verfied or not verified
 Total truck-class vehicles owned by Ready FOs (sum of vehicles per FO, not distinct FO count).","SELECT SUM(v.veh_count)
 FROM analytics.fact_operators_onb f
@@ -708,33 +719,33 @@ JOIN (
   GROUP BY operator_code
 ) v ON f.operator_code = v.operator_code
 WHERE f.ready_date IS NOT NULL
-  AND f.mp_status = 'MP Ready';",True,Aakash
+  AND f.mp_status = 'MP Ready';",True,Aakash,
 FO Growth,# Ready FOs Verified Vehicle,"Aliases: # Verified Vehicles of Ready FOs.
 
-Variant of # Ready FOs Vehicle, restricted to vehicles with verified attributes.",-- Same as # Ready FOs Vehicle but vehicle filter restricted to verified rows.,True,Aakash
+Variant of # Ready FOs Vehicle, restricted to vehicles with verified attributes.",-- Same as # Ready FOs Vehicle but vehicle filter restricted to verified rows.,True,Aakash,
 FO Growth,# Subscribed FOs,"Aliases: # New Subscribers; # Subs FOs, Who have taken Subscription
 
 Distinct FOs who had a successful subscription transaction within the period (apollo_subscription, deleted=false, transaction_status=SUCCESS), exposed via fact_operators_onb.","SELECT COUNT(DISTINCT operator_code)
 FROM analytics.fact_operators_onb
-WHERE sub_date BETWEEN :start_date AND :end_date;",True,Aakash
+WHERE sub_date BETWEEN :start_date AND :end_date;",True,Aakash,
 FO Growth,# Token Paid FO,"Aliases: # Plc FO (at FO level); # Token Paid FOs (first token paid for Acquisition tab).
 
 Distinct FOs who paid a token for at least one load (is_token_paid > 0). Commercial-intent volume metric.","SELECT COUNT(DISTINCT operator_code)
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
-  AND is_token_paid > 0;",True,Aakash
+  AND is_token_paid > 0;",True,Aakash,
 FO Growth,# Trip FO,"Aliases: # FOs with Trip; # Tripping FOs , Trip FO
 
 Distinct FOs who completed at least one trip (total_trips_loads > 0).","SELECT COUNT(DISTINCT operator_code)
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
-  AND total_trips_loads > 0;",True,Aakash
+  AND total_trips_loads > 0;",True,Aakash,
 FO Growth,# WAU,"Aliases: Weekly Active Users; # 7-Day Active FOs,WOW
 
 Distinct Visitors active in the last 7 days of the period. Subset of # Visitors.","SELECT COUNT(DISTINCT operator_code)
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
-  AND event_date >= CURRENT_DATE - 7;",True,Aakash
+  AND event_date >= CURRENT_DATE - 7;",True,Aakash,
 FO Growth,% Acquired to 2nd Trip,"Aliases: % 1st → 2nd Trip (30/60/180D).
 
 Of FOs acquired (1st trip), % who did 2nd trip within 30/60/180 days of 1st trip.","SELECT
@@ -747,10 +758,10 @@ FROM (
   FROM fact_operators_mp_events
   GROUP BY operator_code
 ) c
-WHERE first_trip_date IS NOT NULL;",True,Aakash
+WHERE first_trip_date IS NOT NULL;",True,Aakash,
 FO Growth,% Acquired to 3rd Trip,"Aliases: % 1st → 3rd Trip (30/60/180D).
 
-Of FOs acquired, % who completed 3 trips within 30/60/180 days of 1st trip.",-- Same shape as % Acquired to 2nd Trip but with trips_till_date >= 3 for the third_trip_date.,True,Aakash
+Of FOs acquired, % who completed 3 trips within 30/60/180 days of 1st trip.",-- Same shape as % Acquired to 2nd Trip but with trips_till_date >= 3 for the third_trip_date.,True,Aakash,
 FO Growth,% Bid Feature FO,"Aliases: % Bidding Adoption; % FO using Bidding.,BID FOs
 
 Share of Visitors who submitted a bid on at least one load (count_of_loads_bid_submit > 0). Data starts Dec-2025.","SELECT
@@ -758,21 +769,21 @@ Share of Visitors who submitted a bid on at least one load (count_of_loads_bid_s
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_bid_fo
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
-  AND event_date >= '2025-12-01';",True,Aakash
+  AND event_date >= '2025-12-01';",True,Aakash,
 FO Growth,% LDP FO,"Aliases: % Visitor to LDP; % Load Detail Page FO.
 
 # LDP FO / # Visitors — share of base that browsed at least one load.","SELECT
   COUNT(DISTINCT CASE WHEN is_checked_loads > 0 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_ldp
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,% LDP to Token Paid,"Aliases: % Load Detail to Token; LDP→Plc%.
 
 # Token Paid FO / # LDP FO — browse-to-pay conversion at FO level.","SELECT
   COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN is_checked_loads > 0 THEN operator_code END), 0) AS pct_ldp_to_token
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,% Matching Feature FO,"Aliases: % Matching Adoption.
 
 Share of Visitors who used the matching feature (is_checked_loads_matching > 0). Data starts Jun-2025.","SELECT
@@ -780,7 +791,7 @@ Share of Visitors who used the matching feature (is_checked_loads_matching > 0).
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_matching
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
-  AND event_date >= '2025-06-01';",True,Aakash
+  AND event_date >= '2025-06-01';",True,Aakash,
 FO Growth,% ODVT Filter FO,"Aliases: % Filter Usage FO; % FO using ODVT Filter.
 
 Share of Visitors who applied a loading or unloading filter (Origin-Destination-Vehicle-Type).","SELECT
@@ -789,7 +800,7 @@ Share of Visitors who applied a loading or unloading filter (Origin-Destination-
                       THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_filter_used
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,% Onboarding Rate (Subs → 1st Trip),"Aliases: % Sub to Trip (7D / 30D / Lifetime).
 
 Of Subscribed FOs, % who completed first trip within the selected window (7D / 30D / Lifetime variants).","SELECT
@@ -800,20 +811,20 @@ Of Subscribed FOs, % who completed first trip within the selected window (7D / 3
 FROM analytics.fact_operators_onb s
 LEFT JOIN fact_operators_mp_events e ON s.operator_code = e.operator_code
 WHERE s.has_sub = 1
-GROUP BY s.sub_date_window;",True,Aakash
+GROUP BY s.sub_date_window;",True,Aakash,
 FO Growth,% Plc to Trip (FO),"Aliases: % Placement to Trip FO.
 
 # Trip FO / # Plc FO — % of paying FOs who actually completed a trip.","SELECT
   COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN total_placed_loads > 0 THEN operator_code END), 0) AS pct_plc_to_trip
-FROM fact_operators_mp_events;",True,Aakash
+FROM fact_operators_mp_events;",True,Aakash,
 FO Growth,% Ready FO,"Aliases: % Visitor to Ready.
 
 # Ready FO / # Visitors — share of base that completed the readiness gate.","SELECT
   COUNT(DISTINCT CASE WHEN ready_fo = 1 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_ready
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,% Ready FO (No Plc in 90 days),"Aliases: % Ready FO; % Ready Not Active in last 90 days
 
 Share of cumulative Ready FOs who have NOT placed any token in the last 90 days — the dormant-Ready pool.","WITH ready AS (
@@ -832,7 +843,7 @@ SELECT
   / NULLIF(COUNT(DISTINCT v.operator_code), 0) AS pct_dormant_ready
 FROM (SELECT DISTINCT operator_code FROM fact_operators_mp_events WHERE landed_on_mp = 1) v
 LEFT JOIN ready r ON v.operator_code = r.operator_code
-LEFT JOIN recent_plc p ON v.operator_code = p.operator_code;",True,Aakash
+LEFT JOIN recent_plc p ON v.operator_code = p.operator_code;",True,Aakash,
 FO Growth,% Reverse Trip FO,"Aliases: % FO doing Reverse Leg.
 
 Share of Trip FOs who completed at least one reverse trip (reverse_loads_trips = 1). Denominator is Trip FOs (not Visitors).","SELECT
@@ -845,27 +856,27 @@ FROM (
   FROM fact_operators_mp_events
   GROUP BY operator_code
 ) c
-WHERE first_trip_date IS NOT NULL;",True,Aakash
+WHERE first_trip_date IS NOT NULL;",True,Aakash,
 FO Growth,% Token Paid FO,"Aliases: % Plc FO; % Visitor to Token Paid.
 
 # Token Paid FO / # Visitors. Share of base that committed via token payment.","SELECT
   COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_token_paid
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,% Token Paid to Plc,"Aliases: % Token to Placement.
 
 # Plc FO / # Token Paid FO. Note: in most readings Plc and Token Paid are synonymous;","SELECT
   COUNT(DISTINCT CASE WHEN total_placed_loads > 0 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END), 0) AS pct_token_to_plc
-FROM fact_operators_mp_events;",True,Aakash
+FROM fact_operators_mp_events;",True,Aakash,
 FO Growth,% Trip FO,"Aliases: % Visitor to Trip; % Trip Conversion.,Trip FO
 
 # Trip FO / # Visitors — end-to-end Visitor → Trip conversion at FO level.","SELECT
   COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_trip_fo
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,% VA Feature FO,"Aliases: % Vehicle Availability Feature Usage.
 
 Share of Visitors who marked Vehicle Available OR Vehicle Not Available (used the VA feature). Data starts Nov-2025.","SELECT
@@ -875,21 +886,21 @@ Share of Visitors who marked Vehicle Available OR Vehicle Not Available (used th
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_va_feature
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
-  AND event_date >= '2025-11-01';",True,Aakash
+  AND event_date >= '2025-11-01';",True,Aakash,
 FO Growth,% Vehicle Available,"Aliases: % VA Positive Mark; % FO marked Available.,Vehicle Available Marked
 
 Share of Visitors who explicitly marked vehicle as Available (is_marked_veh_available = 1 , 0 for is_marked_veh_not_available) — positive-intent only, excludes 'Not Available' marks.","SELECT
   COUNT(DISTINCT CASE WHEN is_marked_veh_available = 1 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_va_positive
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,% WAU,"Aliases: % Weekly Active.
 
 # WAU divided by # Visitors. Tells you what share of the cumulative base is currently active.","SELECT
   COUNT(DISTINCT CASE WHEN event_date >= CURRENT_DATE - 7 THEN operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT operator_code), 0) AS pct_wau
 FROM fact_operators_mp_events
-WHERE landed_on_mp = 1;",True,Aakash
+WHERE landed_on_mp = 1;",True,Aakash,
 FO Growth,Churned FOs,"Aliases: % Churn; Lapsed FOs.
 
 Of Trip FOs in the cohort month, count and % whose LAST trip date is more than 1 month before today — i.e., have stopped tripping.","WITH cohort AS (
@@ -909,7 +920,7 @@ SELECT
                       THEN c.operator_code END) * 1.0
   / NULLIF(COUNT(DISTINCT c.operator_code), 0) AS churn_pct
 FROM cohort c JOIN last_trip l USING (operator_code)
-GROUP BY c.cohort_month;",True,Aakash
+GROUP BY c.cohort_month;",True,Aakash,
 FO Growth,FO Segment (Trip-Rank Cohort),"Aliases: fo_segment; FO Cohort by Trips; Trip-Rank Segment.
 
 Lifecycle cohort tag assigned to each FO based on number of completed trips. Values:
@@ -928,33 +939,33 @@ SELECT
   COUNT(DISTINCT operator_code) AS fo_count
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
-GROUP BY fo_segment;",True,Aakash
+GROUP BY fo_segment;",True,Aakash,
 FO Growth,"FO State , cluster ,district , region","Alias - FO state , fo base region , states , cluster , district
 
  to find fo state , cluster and district , fo region related use this metrics","select a.operator_code, b.district, b.cluster, b.region, b.tier
 from mp_analytics_core.dim_operator_base_district a
 left join mp_analytics_core.dim_mp_districts b
-ON a.district_id = b.district_id",True,Gajinder
+ON a.district_id = b.district_id",True,Gajinder,
 FO Growth,Token per FO,"Aliases: Tokens / Customer; # Token Per FO.
 
 Avg token-paid loads per Token-Paid FO. Underlying column is historically doubled — use card output, don't recompute.","SELECT
   SUM(CASE WHEN is_token_paid > 0 THEN is_token_paid_loads END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN is_token_paid > 0 THEN operator_code END), 0) AS tokens_per_fo
 FROM fact_operators_mp_events;
--- WARN: is_token_paid_loads is doubled in source; dashboard divides accordingly.",True,Aakash
+-- WARN: is_token_paid_loads is doubled in source; dashboard divides accordingly.",True,Aakash,
 FO Growth,Trip per FO,"Aliases: Trips / Customer (FO side); # Trip Per FO.
 
 Avg trips per Trip-FO: SUM(total_trips_loads where >0) / COUNT(DISTINCT FO where trips>0).","SELECT
   SUM(CASE WHEN total_trips_loads > 0 THEN total_trips_loads END) * 1.0
   / NULLIF(COUNT(DISTINCT CASE WHEN total_trips_loads > 0 THEN operator_code END), 0) AS trips_per_fo
-FROM fact_operators_mp_events;",True,Aakash
+FROM fact_operators_mp_events;",True,Aakash,
 FO Growth,Visitors - Vehicle Attributes - Collection,"Aliases: % Vehicle Attributes Collected; Vehicle Attr by Source.
 
 Of Subscribed Visitors (Apr-2026 onwards), % who had vehicle attributes (number, body, length, tyre) collected — split by collection point: Onboarding flow / Token flow / Homepage. Also reports % vehicles verified.","-- Visitors scope: landed_on_mp = 1 AND fo_sub_type = 'Subs' from 2026-04-01.
 -- Vehicle attributes parsed from operator_app_events_current.miscellaneous on screens:
 --   web_active_loads, web_confirm_load, web_preffered_vehicle.
 -- Output: % attr verified overall, split by Onboarding flow / Token flow / Homepage,
---         and % vehicles verified (apollo_operator_vehicle.attribute_verified_by NOT NULL).",True,Aakash
+--         and % vehicles verified (apollo_operator_vehicle.attribute_verified_by NOT NULL).",True,Aakash,
 Pricing,% Gross Take Rate,"Aliases: Gross TR, pnl_wo_discount, Take Rate (without Discount)
 
 Expected (pre-cost) P&L divided by consigner freight fare on trips.","with consignments_data as (
@@ -991,10 +1002,10 @@ left join
 select demand_id, supplyfare as prev_supplyfare, operator_code as prev_operator_code
 from consignments_data
 where consignment_rank=1 ) d
-on a.demand_id=d.demand_id",True,Gajinder
+on a.demand_id=d.demand_id",True,Gajinder,
 Pricing,% Trip Gross Take Rate,"Aliases: Trip Gross TR; % Gross Margin per Trip, Take Rate (without Discount and without Replacement Cost)","select sum(pnl_expected)*1.0/sum(consigner_freight_fare)
 from mp_analytics_core.fact_consigner_demands_lead_source
-where trip_flag=1",True,Gajinder
+where trip_flag=1",True,Gajinder,
 Pricing,% Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
 
 Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","with consignments_data as (
@@ -1040,7 +1051,50 @@ select demand_id, sum(transaction_amount) as discount
 from mp_analytics_critical.fact_billings
 where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIVATION')
 group by 1 ) e
-on a.demand_id=e.demand_id",True,Gajinder
+on a.demand_id=e.demand_id",True,Gajinder,"with consignments_data as (
+select consignment_id, demand_id, supplyfare, operator_code, consignment_rank
+from mp_analytics_critical.fact_consignments_full
+) 
+
+
+select 
+sum(coalesce(pnl_expected,0) + coalesce(supplyfare,0) -coalesce(prev_supplyfare,0) + coalesce(e.discount,0))*1.0/sum(consigner_freight_fare)
+from
+(
+select demand_id, pnl_expected, consigner_freight_fare, trip_flag
+from mp_analytics_core.fact_consigner_demands_lead_source
+where trip_flag=1) a
+
+left join
+
+( 
+select demand_id, latest_consignment_id
+from mp_analytics_critical.fact_demands_full ) b
+on a.demand_id=b.demand_id
+
+left join
+
+( 
+select consignment_id, supplyfare
+from consignments_data ) c
+on b.latest_consignment_id=c.consignment_id
+
+left join
+
+( 
+select demand_id, supplyfare as prev_supplyfare, operator_code as prev_operator_code
+from consignments_data
+where consignment_rank=1 ) d
+on a.demand_id=d.demand_id
+
+left join
+
+( 
+select demand_id, sum(transaction_amount) as discount
+from mp_analytics_critical.fact_billings
+where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIVATION')
+group by 1 ) e
+on a.demand_id=e.demand_id"
 Pricing,% Trip Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
 
 Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","select 
@@ -1058,7 +1112,22 @@ select demand_id, sum(transaction_amount) as discount
 from mp_analytics_critical.fact_billings
 where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIVATION')
 group by 1 ) e
-on a.demand_id=e.demand_id",True,Gajinder
+on a.demand_id=e.demand_id",True,Gajinder,"select 
+sum(coalesce(pnl_expected,0) + coalesce(e.discount,0))*1.0/sum(consigner_freight_fare)
+from
+(
+select demand_id, pnl_expected, consigner_freight_fare, trip_flag
+from mp_analytics_core.fact_consigner_demands_lead_source
+where trip_flag=1) a
+
+left join
+
+( 
+select demand_id, sum(transaction_amount) as discount
+from mp_analytics_critical.fact_billings
+where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIVATION')
+group by 1 ) e
+on a.demand_id=e.demand_id"
 FO Growth,Operator Fleet Size,"Aliases : Fleet Size
 
 Number of vehicles owned by Operator and operator fleet categorization.","select operator_code, count(vehicle_id) as vehicle_count,
@@ -1069,940 +1138,940 @@ else null end as fleet_size
 from mp_analytics_core.fact_vehicle_info
 where live_date is not null
 and deboarding_date is null
-group by 1",True,Gajinder
+group by 1",True,Gajinder,
 FO Growth,Operator Base Location,"Aliases : Operator Home Location, Operator Business Location","select a.operator_code, b.district, b.cluster, b.region, b.sub_cluster
 from mp_analytics_core.dim_operator_base_district a
-left join mp_analytics_core.dim_mp_districts b on a.district_id=b.district_id",True,Gajinder
+left join mp_analytics_core.dim_mp_districts b on a.district_id=b.district_id",True,Gajinder,
 Matching,Bid per Demand,Operator have given bid against demands,"select demand_id, 
 count(distinct operator_code) as bids
 from mp_analytics_core.fact_operator_tokens
-group by 1",True,Gajinder
+group by 1",True,Gajinder,
 Matching,Token per Demand,"Aliases : Token Bids, Bids with Token
 
 Operator have given bid and token amount against demands","select demand_id, 
 count(distinct case when status in ('SUCCESS','PAYMENT_SUCCESS','REFUNDED','PAYMENT_INITIATED','PARTIALLY_REFUNDED','FORFEITED') then operator_code else null end) as token_bids
 from mp_analytics_core.fact_operator_tokens
-group by 1",True,Gajinder
+group by 1",True,Gajinder,
 Matching,Valid Bid per Demand,"Aliases : VD Vids, Vehicle Details against Bid
 
 Operator have given bid, token amounts, and vehicle details against demands","select demand_id, 
 count(distinct case when vehicle_submitted_time is not null then operator_code else null end) as valid_bids
 from mp_analytics_core.fact_operator_tokens
-group by 1",True,Gajinder
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
-,,,,False,
+group by 1",True,Gajinder,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
+,,,,False,,
