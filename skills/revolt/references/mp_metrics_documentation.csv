@@ -1,4 +1,4 @@
-Category,Metric,Meaning / Logic,SQL,Verified,Owner,
+Category,Metric,Meaning / Logic,SQL,Verified,Owner,-
 Consigner Exp and Services,% Restricted FS Cx (90 days active),"Aliases: % Restricted FS Cx; FS Restriction Rate.
 
 Avg % of FIELD-SALES customers (active on trips in last 90 days) whose restriction_status is 'RESTRICTED'.","SELECT AVG(daily_pct) FROM (
