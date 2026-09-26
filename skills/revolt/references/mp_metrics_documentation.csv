@@ -994,8 +994,14 @@ where consignment_rank=1 ) d
 on a.demand_id=d.demand_id",True,Gajinder
 Pricing,% Trip Gross Take Rate,"Aliases: Trip Gross TR; % Gross Margin per Trip, Take Rate (without Discount and without Replacement Cost)","select sum(pnl_expected)*1.0/sum(consigner_freight_fare)
 from mp_analytics_core.fact_consigner_demands_lead_source
-where trip_flag=1",False,
+where trip_flag=1",True,Gajinder
 Pricing,% Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
+
+Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","SELECT
+  SUM(CASE WHEN trip_flag = 1 THEN pnl END) * 1.0
+  / NULLIF(SUM(CASE WHEN trip_flag = 1 THEN consigner_freight_fare END), 0) AS net_take_rate
+FROM mp_analytics_core.fact_consigner_demands_lead_source",True,Gajinder
+Pricing,% Trip Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
 
 Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","SELECT
   SUM(CASE WHEN trip_flag = 1 THEN pnl END) * 1.0
