@@ -13,7 +13,11 @@ The rest of the fields are present in the mentioned table
 | Flow/ Feature Name | Defines the flow name or the feature name by which it is commonly addressed eg. Signup flow, Demand flow, VIP Pass feature |  |
 | Describe Screen | Defines the name of the screen where the event gets triggerred |  |
 | Describe User Action | Defines the user action or system action that causes the event to trigger |  |
+
+Critical Step
+
 | Event name | Defines the name of the event | eventname |
+| --- | --- | --- |
 | Event action | Defines the action type:  Click or View | event_action |
 | Event Category | Defines the event category | event_category |
 | Screen name | Defines the screen name. This is not same as 'Describe Screen' field. | screen_name |
