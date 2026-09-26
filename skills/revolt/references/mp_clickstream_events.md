@@ -4,17 +4,17 @@
 
 **Overview:** This sheet lists the clickstream event details for Markeplace related journeys on the consigner and operator apps/website
 
-**How to read 'Consigner App' tab:** The below table lists all the fields, their meanings and the equivalent mapping names that can be used to join with similar fields in the 'mp_analytics_core.fact_cx_events_l3m' table.
-The fields 'Flow/ Feature Name', 'Describe Screen', 'Describe User Action' are defined in this sheet to describe and classify the events and not present in any database table. The stakeholder's query should be mapped to these fields to find the right Flow/Feature name > Screen > User Action that the stakeholder is talking about.
-The rest of the fields are present in the mentioned table
+**How to read 'Consigner App' tab:** The below table lists all the fields, their meanings and the equivalent mapping names (can be used to join with similar fields in the 'mp_analytics_core.fact_cx_events_l3m' table)
+The fields 'Flow/ Feature Name', 'Describe Screen', 'Describe Action','Critical Step' are defined in this sheet to describe and classify the events and not present in any database table. The stakeholder's query should be mapped to these fields to find the right Flow/Feature name, Stages, Actions that the stakeholder is talking about.
+The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'  table
 
-| Field | Description | Mapping_name |
+| Field | Description | Mapping Name |
 | --- | --- | --- |
 | Flow/ Feature Name | Defines the flow name or the feature name by which it is commonly addressed eg. Signup flow, Demand flow, VIP Pass feature |  |
 | Describe Stage | Defines the stage within the flow where the event gets triggerred |  |
 | Describe Action | Defines the user/system actions within a stage that causes the event to trigger |  |
-| Critical Step | Defines whether the |  |
-| Event name | Defines the name of the event | eventname |
+| Critical Step | Defines whether the 'Describe Action' is a critical step or not |  |
+| Event name | Defines the name of the event. | eventname |
 | Event action | Defines the action type:  Click or View | event_action |
 | Event Category | Defines the event category | event_category |
 | Screen name | Defines the screen name. This is not same as 'Describe Screen' field. | screen_name |
@@ -27,7 +27,7 @@ The rest of the fields are present in the mentioned table
 
 | Flow/ Feature Name | Describe Stage | Describe Action | Critical Step | Event Name | Event Action | Event Category | Screen Name | Demand ID | Entity id | Miscellaneous | user_code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Signup Flow | Login/Signup | Impression | False | v1_offer_signup_screen | view |  | offer_screen | False |  |  | True |
+| Signup Flow | Login/Signup |  | False | v1_offer_signup_screen | view |  | offer_screen | False |  |  | True |
 | Signup Flow | Name |  | True | v1_basic_details | view |  | sign_up_basic_details | False |  |  | True |
 | Signup Flow | Name | Clicks 'Name' field | False | v1_enter_name | click |  | sign_up_basic_details | False |  |  | True |
 | Signup Flow | Name | Clicks 'Sales Representative' field | False | v1_enter_salesrep | click |  | sign_up_basic_details | False |  |  | True |
