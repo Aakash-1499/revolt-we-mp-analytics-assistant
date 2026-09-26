@@ -997,16 +997,53 @@ from mp_analytics_core.fact_consigner_demands_lead_source
 where trip_flag=1",True,Gajinder
 Pricing,% Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
 
-Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","SELECT
-  SUM(CASE WHEN trip_flag = 1 THEN pnl END) * 1.0
-  / NULLIF(SUM(CASE WHEN trip_flag = 1 THEN consigner_freight_fare END), 0) AS net_take_rate
-FROM mp_analytics_core.fact_consigner_demands_lead_source",True,Gajinder
+Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","with consignments_data as (
+select consignment_id, demand_id, supplyfare, operator_code, consignment_rank
+from mp_analytics_critical.fact_consignments_full
+) 
+
+
+select 
+sum(coalesce(pnl_expected,0) +coalesce(supplyfare,0) -coalesce(prev_supplyfare,0) + coalesce(discount,0))*1.0/sum(consigner_freight_fare)
+from
+(
+select demand_id, pnl_expected, consigner_freight_fare, trip_flag
+from mp_analytics_core.fact_consigner_demands_lead_source
+where trip_flag=1) a
+
+left join
+
+( 
+select demand_id, latest_consignment_id
+from mp_analytics_critical.fact_demands_full ) b
+on a.demand_id=b.demand_id
+
+left join
+
+( 
+select consignment_id, supplyfare
+from consignments_data ) c
+on b.latest_consignment_id=c.consignment_id
+
+left join
+
+( 
+select demand_id, supplyfare as prev_supplyfare, operator_code as prev_operator_code
+from consignments_data
+where consignment_rank=1 ) d
+on a.demand_id=d.demand_id
+
+left join
+
+( 
+select demand_id, sum(transaction_amount) as discount
+from mp_analytics_critical.fact_billings
+where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIVATION')
+group by 1 ) e
+on a.demand_id=e.demand_id",True,Gajinder
 Pricing,% Trip Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
 
-Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","SELECT
-  SUM(CASE WHEN trip_flag = 1 THEN pnl END) * 1.0
-  / NULLIF(SUM(CASE WHEN trip_flag = 1 THEN consigner_freight_fare END), 0) AS net_take_rate
-FROM mp_analytics_core.fact_consigner_demands_lead_source",True,Gajinder
+Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.",,True,Gajinder
 FO Growth,Operator Fleet Size,"Aliases : Fleet Size
 
 Number of vehicles owned by Operator and operator fleet categorization.","select operator_code, count(vehicle_id) as vehicle_count,
