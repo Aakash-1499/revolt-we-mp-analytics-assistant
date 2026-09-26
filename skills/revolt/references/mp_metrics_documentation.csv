@@ -176,7 +176,8 @@ WHERE dr_flag = 1;
 
 -- North Star regional cuts add:  AND demand_region = 'NCR'  (or 'ROI', or NOT IN ('NCR','ROI'))",True,Ekta,
 Consigner Growth,# Trips,"Aliases: # Fulfilled placements
-Demands that got converted into trips . Same multi-grain logic as # Demands.","SELECT COUNT(DISTINCT demand_id)
+Demands that got converted into trips.
+When counting trips use trip_end_time in group by.","SELECT COUNT(DISTINCT demand_id)
 FROM fact_consigner_demands_lead_source
 WHERE trip_flag = 1;",True,Ekta,
 Consigner Growth,% Acceptance to Trip,% of accepted placements that converted into trips,"select demand_date, count(distinct case when accepted is not null and auto_cancelled is null and trip_flag = 1 then demand_id end)*1.0/nullif(count(distinct case when accepted is not null and auto_cancelled is null then demand_id end),0) as ""% Acceptance to Trip""
