@@ -11,13 +11,10 @@ The rest of the fields are present in the mentioned table
 | Field | Description | Mapping_name |
 | --- | --- | --- |
 | Flow/ Feature Name | Defines the flow name or the feature name by which it is commonly addressed eg. Signup flow, Demand flow, VIP Pass feature |  |
-| Describe Screen | Defines the name of the screen where the event gets triggerred |  |
-| Describe User Action | Defines the user action or system action that causes the event to trigger |  |
-
-Critical Step
-
+| Describe Stage | Defines the stage within the flow where the event gets triggerred |  |
+| Describe Action | Defines the user/system actions within a stage that causes the event to trigger |  |
+| Critical Step | Defines whether the |  |
 | Event name | Defines the name of the event | eventname |
-| --- | --- | --- |
 | Event action | Defines the action type:  Click or View | event_action |
 | Event Category | Defines the event category | event_category |
 | Screen name | Defines the screen name. This is not same as 'Describe Screen' field. | screen_name |
@@ -28,7 +25,7 @@ Critical Step
 
 ## Consigner App
 
-| Flow/ Feature Name | Describe Stage | Describe User Action | Critical Step | Event Name | Event Action | Event Category | Screen Name | Demand ID | Entity id | Miscellaneous | user_code |
+| Flow/ Feature Name | Describe Stage | Describe Action | Critical Step | Event Name | Event Action | Event Category | Screen Name | Demand ID | Entity id | Miscellaneous | user_code |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Signup Flow | Login/Signup | Impression | False | v1_offer_signup_screen | view |  | offer_screen | False |  |  | True |
 | Signup Flow | Name |  | True | v1_basic_details | view |  | sign_up_basic_details | False |  |  | True |
