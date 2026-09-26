@@ -476,7 +476,7 @@ where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIV
 group by 1 )
 
 
-select count(case when c.discount>0 then a.demand_id else null end)*1.0/nullif(count(a.demand_id),0)
+select count(case when c.discount>0 then distinct a.demand_id else null end)*1.0/nullif(count(distinct a.demand_id),0)
 from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 left join discount_data c on a.demand_id=c.demand_id
