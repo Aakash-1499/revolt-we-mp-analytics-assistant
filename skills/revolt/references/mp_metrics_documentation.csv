@@ -1218,7 +1218,7 @@ DR which were active minimum x minutes to find vehicle. Standard is 30 minutes i
 from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'
-and ( a.plc_flag=1 or datediff('minutes', a.dr_time, coalesce(a.demand_cancel_by_cx_time, a.demand_cancel_by_sys_time))>=30 )",True,Gajinder,
+and (case when a.plc_flag=0 then datediff('minutes', a.dr_time, coalesce(a.demand_cancel_by_cx_time, a.demand_cancel_by_sys_time)) else 10000 end) >= 30",True,Gajinder,
 ,,,,False,,
 ,,,,False,,
 ,,,,False,,
