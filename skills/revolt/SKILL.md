@@ -49,7 +49,7 @@ Proceed only once all 7 are loaded.
 - Always read the 'Glossary' tab before reading the 'Experiment Variants' tab and finding out the right experiment that the stakeholder is referring to. If the user names an experiment that isn't available in references/mp_ab_experiments.md, then state the complete list of experiments which are currently live to the user and ask the user to name the experiment from the list provided by you.
 - ‘Experiment Type’ is a critical field and has 2 possible values: ‘User level’ and ‘Non-User level’. In case of ‘User level’, you can map users to each ‘Confid ID’ (commonly called as variant) by mapping 'Config ID' with the field 'config_id' in the table ‘mp_analytics_core.fact_experiment_user_allocation’. In case the experiment is ‘Non-User’ level, then you can map demands to each ‘Confid ID’ by mapping 'Variant Name' with the field 'experiment_name' in the table ‘mp_analytics_core.fact_demands’. Note that 'experiment_name' field has multiple variant names separated by commas so you would have to do a text search.
 
-**3.3 Clickstream events:** Resolve event wording in order: Glossary tab → Consigner / Operator tab (pick the tab matching the stakeholder question). Never guess an event name — if the user's phrasing doesn't map to a listed event, list the closest available events and ask which one they mean. Use the canonical event name in the output.
+**3.3 User Journeys:** Once you have identified that the question is around user journeys then you must refer to references/mp_clickstream_events.md to proceed further.
 
 ## **4. Writing SQL: Points to Remember**
 
