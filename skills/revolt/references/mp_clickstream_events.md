@@ -23,7 +23,7 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Miscellaneous | Defines the extra field which can contain additional metadata related to the event | miscellaneous |
 | user_code | Defines whether user_code is populated on the given event or not | user_code |
 
-## Consigner App
+## Consigner
 
 | Flow/ Feature Name | Describe Stage | Describe Action | Critical Step | Event Name | Event Action | Event Category | Screen Name | Demand ID | Entity id | Miscellaneous | user_code | android_version | ios_version | web_version |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -58,7 +58,7 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 
-## Operator App
+## Operator
 
 | Journey | Feature Description | Page Description | Event Description | Important Details | Event name | Event action | Event Category | Screen name | Miscellaneous | Entity id |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
