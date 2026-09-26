@@ -1212,7 +1212,9 @@ Operator have given bid, token amounts, and vehicle details against demands","se
 count(distinct case when vehicle_submitted_time is not null then operator_code else null end) as valid_bids
 from mp_analytics_core.fact_operator_tokens
 group by 1",True,Gajinder,
-,,,,False,,
+Matching,DR with minimum time for Matching,"Aliases: DR with minimum time for BA, DR with minimum time for Booking Automation
+
+DR which were active minimum x minutes to find vehicle",,False,,
 ,,,,False,,
 ,,,,False,,
 ,,,,False,,
