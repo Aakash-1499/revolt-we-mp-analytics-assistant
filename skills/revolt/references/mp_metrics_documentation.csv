@@ -1214,7 +1214,11 @@ from mp_analytics_core.fact_operator_tokens
 group by 1",True,Gajinder,
 Matching,DR with minimum time for Matching,"Aliases: DR with minimum time for BA, DR with minimum time for Booking Automation
 
-DR which were active minimum x minutes to find vehicle",,False,,
+DR which were active minimum x minutes to find vehicle. Standard is 30 minutes is not specified.","select count(a.demand_id)
+from mp_analytics_core.fact_demands a
+left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'
+and ( a.plc_flag=1 or datediff('minutes', a.dr_time, coalesce(a.demand_cancel_by_cx_time, a.demand_cancel_by_sys_time))>=30 )",True,Gajinder,
 ,,,,False,,
 ,,,,False,,
 ,,,,False,,
