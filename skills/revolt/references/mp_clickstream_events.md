@@ -24,38 +24,38 @@ The rest of the fields are present in the mentioned table
 
 ## Consigner App
 
-| Flow/ Feature Name | Describe Screen | Describe User Action | Event Name | Event Action | Event Category | Screen Name | Demand ID | Entity id | Miscellaneous | user_code |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Signup Flow | Login/Signup | Impression | v1_offer_signup_screen | view |  | offer_screen | False |  |  | False |
-| Signup Flow | Basic Details Input | Impression | v1_basic_details | view |  | sign_up_basic_details | False |  |  | False |
-| Signup Flow | Basic Details Input | Clicks 'Name' field | v1_enter_name | click |  | sign_up_basic_details | False |  |  | False |
-| Signup Flow | Basic Details Input | Clicks 'Sales Representative' field | v1_enter_salesrep | click |  | sign_up_basic_details | False |  |  | False |
-| Signup Flow | Basic Details Input |  | v1_sales_contact | click |  | sign_up_basic_details | False |  |  | False |
-| Signup Flow | Basic Details Input |  | v1_next | click |  | sign_up_basic_details | False |  |  | False |
-| Signup Flow | Basic Details Input |  | v1_back | click |  | sign_up_basic_details | False |  |  | False |
-| Signup Flow | Business Category Input |  | v1_business_category | view |  | sign_up_business_category | False |  |  | False |
-| Signup Flow | Business Category Input |  | v1_next | click |  | sign_up_business_category | False |  | business_category - id | False |
-| Signup Flow | Business Category Input |  | v1_previous | click |  | sign_up_business_category | False |  |  | False |
-| Signup Flow | Business Category Input |  | v1_back | click |  | sign_up_business_category | False |  |  | False |
-| Signup Flow | Trip Potential Input |  | v1_expected_trip_count | view |  | sign_up_expected_trip_count | False |  |  | False |
-| Signup Flow | Trip Potential Input |  | v1_submit | click |  | sign_up_expected_trip_count | False |  | expected_trip_count- id | False |
-| Signup Flow | Trip Potential Input |  | v1_previous | click |  | sign_up_expected_trip_count | False |  |  | False |
-| Signup Flow | Trip Potential Input |  | v1_back | click |  | sign_up_expected_trip_count | False |  |  | False |
-| Signup Flow | Trip Potential Input |  | v1_success_bottomsheet | view |  | sign_up_expected_trip_count | False |  |  | False |
-| Signup Flow | Insurance Opt in |  | v1_pricing_type | click | insurance_pricing | insurance | True |  | type:fragile/non-fragile | False |
-| Signup Flow | Insurance Opt in |  | v1_update_pricing | click | Insurance | <dynamic_screen> | True |  |  | False |
-| Signup Flow | Insurance Opt in |  | v1_view_pricing | click | Insurance | <dynamic_screen> | True |  |  | False |
-| Signup Flow | Insurance Opt in |  | v1_confim | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
-| Signup Flow | Insurance Opt in |  | v1_view_fragile | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
-| Signup Flow | Insurance Opt in |  | V1_close | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
-| Signup Flow | Insurance Opt in |  | v1_ok | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
-| Signup Flow | Insurance Opt in |  | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |
-|  |  |  |  |  |  |  | False |  |  | False |
-|  |  |  |  |  |  |  | False |  |  | False |
-|  |  |  |  |  |  |  | False |  |  | False |
-|  |  |  |  |  |  |  | False |  |  | False |
-|  |  |  |  |  |  |  | False |  |  | False |
-|  |  |  |  |  |  |  | False |  |  | False |
+| Flow/ Feature Name | Describe Screen | Describe User Action | Critical Step | Event Name | Event Action | Event Category | Screen Name | Demand ID | Entity id | Miscellaneous | user_code |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Signup Flow | Login/Signup | Impression | False | v1_offer_signup_screen | view |  | offer_screen | False |  |  | False |
+| Signup Flow | Basic Details Input |  | True | v1_basic_details | view |  | sign_up_basic_details | False |  |  | False |
+| Signup Flow | Basic Details Input | Clicks 'Name' field | False | v1_enter_name | click |  | sign_up_basic_details | False |  |  | False |
+| Signup Flow | Basic Details Input | Clicks 'Sales Representative' field | False | v1_enter_salesrep | click |  | sign_up_basic_details | False |  |  | False |
+| Signup Flow | Basic Details Input | Clicks 'Sales Representative' field | False | v1_sales_contact | click |  | sign_up_basic_details | False |  |  | False |
+| Signup Flow | Basic Details Input | Clicks 'Next' button | False | v1_next | click |  | sign_up_basic_details | False |  |  | False |
+| Signup Flow | Basic Details Input | Clicks 'Back' arrow | False | v1_back | click |  | sign_up_basic_details | False |  |  | False |
+| Signup Flow | Business Category Input |  | True | v1_business_category | view |  | sign_up_business_category | False |  |  | False |
+| Signup Flow | Business Category Input | Clicks 'Next' button | False | v1_next | click |  | sign_up_business_category | False |  | business_category - id | False |
+| Signup Flow | Business Category Input | Clicks 'Previous' button | False | v1_previous | click |  | sign_up_business_category | False |  |  | False |
+| Signup Flow | Business Category Input | Clicks 'Back' arrow | False | v1_back | click |  | sign_up_business_category | False |  |  | False |
+| Signup Flow | Trip Potential Input |  | False | v1_expected_trip_count | view |  | sign_up_expected_trip_count | False |  |  | False |
+| Signup Flow | Trip Potential Input |  | False | v1_submit | click |  | sign_up_expected_trip_count | False |  | expected_trip_count- id | False |
+| Signup Flow | Trip Potential Input |  | False | v1_previous | click |  | sign_up_expected_trip_count | False |  |  | False |
+| Signup Flow | Trip Potential Input |  | False | v1_back | click |  | sign_up_expected_trip_count | False |  |  | False |
+| Signup Flow | Trip Potential Input |  | False | v1_success_bottomsheet | view |  | sign_up_expected_trip_count | False |  |  | False |
+| Signup Flow | Insurance Opt in |  | True | v1_pricing_type | click | insurance_pricing | insurance | True |  | type:fragile/non-fragile | False |
+| Signup Flow | Insurance Opt in |  | True | v1_update_pricing | click | Insurance | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | True | v1_view_pricing | click | Insurance | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | True | v1_confim | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | True | v1_view_fragile | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | True | V1_close | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | True | v1_ok | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |
+| Signup Flow | Insurance Opt in |  | True | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |
+|  |  |  | False |  |  |  |  | False |  |  | False |
+|  |  |  | False |  |  |  |  | False |  |  | False |
+|  |  |  | False |  |  |  |  | False |  |  | False |
+|  |  |  | False |  |  |  |  | False |  |  | False |
+|  |  |  | False |  |  |  |  | False |  |  | False |
+|  |  |  | False |  |  |  |  | False |  |  | False |
 
 ## Operator App
 
