@@ -480,7 +480,7 @@ select count(case when c.discount>0 then a.demand_id else null end)*1.0/nullif(c
 from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 left join discount_data c on a.demand_id=c.demand_id
-where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer'"
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'"
 Consigner Growth,Revenue,Consigner freight fare net of freight differences.,"SELECT SUM(consigner_freight_fare)
      - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0))
 FROM mp_demand_details
@@ -502,7 +502,7 @@ select -sum(c.discount)
 from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 left join discount_data c on a.demand_id=c.demand_id
-where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer'"
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'"
 Consigner Growth,% Discount,Total discount over Revenue.,"SELECT SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
          + COALESCE(middle_share_bonus,0)
          + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
@@ -522,7 +522,7 @@ from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 left join discount_data c on a.demand_id=c.demand_id
 left join mp_analytics_core.fact_consignments d on a.latest_consignment_id=d.consignment_id
-where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer'"
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'"
 Consigner Growth,%Coupon discount,share of coupon discount of the total discount,"SELECT SUM(COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) * 1.0
      / NULLIF(SUM(wfms_consigner_freight_fare
                 - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0)), 0)
@@ -543,7 +543,7 @@ from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 left join discount_data c on a.demand_id=c.demand_id
 left join mp_analytics_core.fact_consignments d on a.latest_consignment_id=d.consignment_id
-where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer'"
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'"
 Consigner Growth,% Non-Coupon Discount,share of non-coupon discount of the total discount,"SELECT SUM(extra_discount) * 1.0
      / NULLIF(SUM(wfms_consigner_freight_fare
                 - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0)), 0)
@@ -564,7 +564,7 @@ from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 left join discount_data c on a.demand_id=c.demand_id
 left join mp_analytics_core.fact_consignments d on a.latest_consignment_id=d.consignment_id
-where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer'"
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'"
 Consigner Growth,% Middle Share,Markup of base price over what the FO is paid. A markup over supply cost.,"SELECT SUM(b.base_price - a.supplyfare) * 1.0 / NULLIF(SUM(a.supplyfare), 0)
 FROM mp_demand_details a
 JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
