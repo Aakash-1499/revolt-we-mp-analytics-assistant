@@ -994,12 +994,6 @@ SELECT
 FROM fact_operators_mp_events
 WHERE landed_on_mp = 1
 GROUP BY fo_segment;",True,Aakash,
-FO Growth,"FO State , cluster ,district , region","Alias - FO state , fo base region , states , cluster , district
-
- to find fo state , cluster and district , fo region related use this metrics","select a.operator_code, b.district, b.cluster, b.region, b.tier
-from mp_analytics_core.dim_operator_base_district a
-left join mp_analytics_core.dim_mp_districts b
-ON a.district_id = b.district_id",True,Gajinder,
 FO Growth,Token per FO,"Aliases: Tokens / Customer; # Token Per FO.
 
 Avg token-paid loads per Token-Paid FO. Underlying column is historically doubled — use card output, don't recompute.","SELECT
@@ -1197,7 +1191,7 @@ from mp_analytics_core.fact_vehicle_info
 where live_date is not null
 and deboarding_date is null
 group by 1",True,Gajinder,
-FO Growth,Operator Base Location,"Aliases : Operator Home Location, Operator Business Location","select a.operator_code, b.district, b.cluster, b.region, b.sub_cluster
+FO Growth,Operator Base Location,"Aliases : Operator Home Location, Operator Business Location","select a.operator_code, b.district, b.cluster, b.region, b.sub_cluster, b.tier
 from mp_analytics_core.dim_operator_base_district a
 left join mp_analytics_core.dim_mp_districts b on a.district_id=b.district_id",True,Gajinder,
 Matching,Bid per Demand,Operator have given bid against demands,"select demand_id, 
