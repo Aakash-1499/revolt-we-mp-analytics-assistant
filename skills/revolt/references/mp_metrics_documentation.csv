@@ -975,7 +975,7 @@ from mp_analytics_critical.fact_consignments_full
 
 
 select 
-sum(pnl_expected+supplyfare-prev_supplyfare)*1.0/sum(consigner_freight_fare)
+sum(coalesce(pnl_expected,0) + coalesce(supplyfare,0) -coalesce(prev_supplyfare,0))*1.0/sum(consigner_freight_fare)
 from
 (
 select demand_id, pnl_expected, consigner_freight_fare, trip_flag
@@ -1010,7 +1010,7 @@ Pricing,% Net Take Rate,"Aliases: Net TR; % Net Margin per Trip, pnl, Take Rate
 
 Net P&L (after costs) divided by consigner freight fare, on trip demands only. Headline profitability per trip.","with consignments_data as (
 select consignment_id, demand_id, supplyfare, operator_code, consignment_rank
-from mp_analytics_critical.fact_consignments_full
+from mp_analytics_core.fact_consignments
 ) 
 
 
@@ -1026,7 +1026,7 @@ left join
 
 ( 
 select demand_id, latest_consignment_id
-from mp_analytics_critical.fact_demands_full ) b
+from mp_analytics_core.fact_demands ) b
 on a.demand_id=b.demand_id
 
 left join
@@ -1047,13 +1047,15 @@ on a.demand_id=d.demand_id
 left join
 
 ( 
-select demand_id, sum(transaction_amount) as discount
-from mp_analytics_critical.fact_billings
-where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIVATION')
+select demand_id,
+SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
+         + COALESCE(middle_share_bonus,0)
+         + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) as discount
+from mp_analytics_core.mp_demand_details
 group by 1 ) e
 on a.demand_id=e.demand_id",True,Gajinder,"with consignments_data as (
 select consignment_id, demand_id, supplyfare, operator_code, consignment_rank
-from mp_analytics_critical.fact_consignments_full
+from mp_analytics_core.fact_consignments
 ) 
 
 
@@ -1069,7 +1071,7 @@ left join
 
 ( 
 select demand_id, latest_consignment_id
-from mp_analytics_critical.fact_demands_full ) b
+from mp_analytics_core.fact_demands ) b
 on a.demand_id=b.demand_id
 
 left join
@@ -1108,9 +1110,11 @@ where trip_flag=1) a
 left join
 
 ( 
-select demand_id, sum(transaction_amount) as discount
-from mp_analytics_critical.fact_billings
-where transaction_sub_type in ('GROWTH_DISCOUNT','EDPE','MIDDLE_SHARE','FO_ACTIVATION')
+select demand_id,
+SUM(COALESCE(edpe_bonus,0) + COALESCE(fo_activation_bonus,0)
+         + COALESCE(middle_share_bonus,0)
+         + COALESCE(shipper_discount,0) - COALESCE(shipper_discount_reversal,0)) as discount
+from mp_analytics_core.mp_demand_details
 group by 1 ) e
 on a.demand_id=e.demand_id",True,Gajinder,"select 
 sum(coalesce(pnl_expected,0) + coalesce(e.discount,0))*1.0/sum(consigner_freight_fare)
