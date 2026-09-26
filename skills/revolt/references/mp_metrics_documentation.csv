@@ -1073,14 +1073,22 @@ group by 1",True,Gajinder
 FO Growth,Operator Base Location,"Aliases : Operator Home Location, Operator Business Location","select a.operator_code, b.district, b.cluster, b.region, b.sub_cluster
 from mp_analytics_core.dim_operator_base_district a
 left join mp_analytics_core.dim_mp_districts b on a.district_id=b.district_id",True,Gajinder
-Matching,Token per Demand,,"select demand_id, 
-count(distinct operator_code) as bids,
-count(distinct case when status in ('SUCCESS','PAYMENT_SUCCESS','REFUNDED','PAYMENT_INITIATED','PARTIALLY_REFUNDED','FORFEITED') then operator_code else null end) as token_bids,
+Matching,Bid per Demand,Operator have given bid against demands,"select demand_id, 
+count(distinct operator_code) as bids
+from mp_analytics_core.fact_operator_tokens
+group by 1",True,Gajinder
+Matching,Token per Demand,"Aliases : Token Bids, Bids with Token
+
+Operator have given bid and token amount against demands","select demand_id, 
+count(distinct case when status in ('SUCCESS','PAYMENT_SUCCESS','REFUNDED','PAYMENT_INITIATED','PARTIALLY_REFUNDED','FORFEITED') then operator_code else null end) as token_bids
+from mp_analytics_core.fact_operator_tokens
+group by 1",True,Gajinder
+Matching,Valid Bid per Demand,"Aliases : VD Vids, Vehicle Details against Bid
+
+Operator have given bid, token amounts, and vehicle details against demands","select demand_id, 
 count(distinct case when vehicle_submitted_time is not null then operator_code else null end) as valid_bids
 from mp_analytics_core.fact_operator_tokens
 group by 1",True,Gajinder
-,,,,False,
-,,,,False,
 ,,,,False,
 ,,,,False,
 ,,,,False,
