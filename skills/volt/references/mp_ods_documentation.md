@@ -117,7 +117,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 64 | ccvt_fo | <missing in Glossary> | (NULL) | — | ? |
 | 74 | consigner_city | Do Not Use | NOT AVAILABLE | — | ? |
 | 75 | consigner_state | It depicts the state of the consigner | NOT AVAILABLE | — | ? |
-| 76 | consigner_region | Consigner's resolved region (sales geography region).<br>It depicts the region of the consigner and can have three values :<br>Not Available-when the consigner location is not available <br>NCR-when the consigner is from NCR region <br>ROI-when the consigner is from rest of india or not from NCR<br>New Serviceable | NEW SERVICEABLE | — |  |
+| 76 | consigner_region | Consigner's resolved region (sales geography region).<br>It depicts the region of the consigner and can have three values :<br>R2 (Next 24 clusters)<br>R3 (ROI)<br>NCR<br>R1 (Top 5 clusters) | NEW SERVICEABLE | — |  |
 | 77 | consigner_state_segment | Consigner's state-level segment classification (sales geography segmentation).<br>Consigner region is extracted from the very first source in this priority - FIELD SALES>SIGNUP>VT>DEMAND>WEB | NOT AVAILABLE | — | DNU |
 | 83 | original_lead_source_detailed | This defines the first source of any given lead: <br>App (Organic)<br>App (Paid)<br>Cold Visit<br>Web (Organic)<br>Web (Paid)<br>Others | App (Organic) | — |  |
 | 84 | utm_source | UTM parameter for campaign tracking (source) |  | — |  |
@@ -725,7 +725,7 @@ Columns (Description pulled from Glossary via VLOOKUP)
 | 19 | first_sales_team_date | DO NOT USE | 2026-08-12 (= 13 Aug IST) | — | USE |
 | 20 | consigner_city | Do Not Use | NEW DELHI | — | USE |
 | 21 | consigner_state | It depicts the state of the consigner | NCR | — | USE |
-| 22 | consigner_region | Consigner's resolved region (sales geography region).<br>It depicts the region of the consigner and can have three values :<br>Not Available-when the consigner location is not available <br>NCR-when the consigner is from NCR region <br>ROI-when the consigner is from rest of india or not from NCR<br>New Serviceable | ROI | — | USE |
+| 22 | consigner_region | Consigner's resolved region (sales geography region).<br>It depicts the region of the consigner and can have three values :<br>R2 (Next 24 clusters)<br>R3 (ROI)<br>NCR<br>R1 (Top 5 clusters) | ROI | — | USE |
 | 23 | consigner_state_segment | Consigner's state-level segment classification (sales geography segmentation).<br>Consigner region is extracted from the very first source in this priority - FIELD SALES>SIGNUP>VT>DEMAND>WEB | SIGNUP | — | USE |
 | 24 | cx_potential | Consigner Potential as provided by Sales team | LP | — | USE |
 | 25 | cx_business_category | Business Category provided by user during signup like<br>MANUFACTURER, TRADER, INDIVIDUAL, SERVICE PROVIDER, etc. | TRANSPORTER | — | USE |
