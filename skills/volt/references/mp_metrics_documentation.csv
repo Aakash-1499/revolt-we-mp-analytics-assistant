@@ -455,7 +455,7 @@ Consigner Growth,Revenue,Consigner freight fare net of freight differences.,"SEL
      - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0))
 FROM mp_demand_details
 WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Ekta
+  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Gajinder
 Consigner Growth,Total discount,EDPE + FO activation + middle share + net coupon.,"with discount_data as (
 select demand_id, sum(transaction_amount) as discount
 from mp_analytics_critical.fact_billings
