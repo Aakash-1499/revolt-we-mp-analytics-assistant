@@ -451,11 +451,11 @@ from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 left join discount_data c on a.demand_id=c.demand_id
 where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'",True,Gajinder
-Consigner Growth,Revenue,Consigner freight fare net of freight differences.,"SELECT SUM(consigner_freight_fare)
-     - SUM(COALESCE(freight_difference,0) - COALESCE(freight_difference_reversal,0))
-FROM mp_demand_details
-WHERE status = 'FULFILLED' AND metadata_plt != 'true'
-  AND customer_type ILIKE '%sme%' AND customer_flag = 'WE_Customer';",True,Gajinder
+Consigner Growth,Revenue,Consigner freight fare net of freight differences.,"select sum(revenue)-sum(freight_difference)
+from mp_analytics_core.fact_demands a
+left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
+left join mp_analytics_core.fact_consignments c on a.latest_consignment_id=c.consignment_id
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'",True,Gajinder
 Consigner Growth,Total discount,EDPE + FO activation + middle share + net coupon.,"with discount_data as (
 select demand_id, sum(transaction_amount) as discount
 from mp_analytics_critical.fact_billings
