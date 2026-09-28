@@ -51,13 +51,13 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Signup | Insurance Opt in |  | False | V1_close | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |  |  |  |
 | Signup | Insurance Opt in |  | False | v1_ok | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |  |  |  |
 | Signup | Insurance Opt in |  | False | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |  |  |  |
-| Browsing | Browsing | Flow Entry Point (Discovery Started) | False |  |  |  |  | False |  |  | False |  |  |  |
+| Browsing |  | Flow Entry Point (Discovery Started) | False |  |  |  |  | False |  |  | False |  |  |  |
 | Browsing |  | Price Discovery | False |  |  |  |  | False |  |  | False |  |  |  |
-| Demand | Demand | Demand Created | False |  |  |  |  | False |  |  | False |  |  |  |
+| Demand |  | Demand Created | False |  |  |  |  | False |  |  | False |  |  |  |
 | Demand |  | Demand Confirmed (DR) | False |  |  |  |  | False |  |  | False |  |  |  |
-| Price Confirmation | Price Confirmation | Final Price Given | False |  |  |  |  | False |  |  | False |  |  |  |
+| Price Confirmation |  | Final Price Given | False |  |  |  |  | False |  |  | False |  |  |  |
 | Price Confirmation |  | Price Accepted | False |  |  |  |  | False |  |  | False |  |  |  |
-| Fulfilment | Fulfilment | At Loading | False |  |  |  |  | False |  |  | False |  |  |  |
+| Fulfilment |  | At Loading | False |  |  |  |  | False |  |  | False |  |  |  |
 | Fulfilment |  | Trip Started | False |  |  |  |  | False |  |  | False |  |  |  |
 | Fulfilment |  | At Unloading | False |  |  |  |  | False |  |  | False |  |  |  |
 | Fulfilment |  | Trip Completed | False |  |  |  |  | False |  |  | False |  |  |  |
