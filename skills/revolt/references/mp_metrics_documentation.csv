@@ -1219,32 +1219,352 @@ from mp_analytics_core.fact_demands a
 left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
 where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'
 and (case when a.plc_flag=0 then datediff('minutes', a.dr_time, coalesce(a.demand_cancel_by_cx_time, a.demand_cancel_by_sys_time)) else 10000 end) >= 30",True,Gajinder,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
-,,,,False,,
+FO Growth,Avg Opsearch FOs per DR,"Aliases: 2A. Avg Opsearch FOs Per DR; Supply Quantity Appearing in DRs.
+
+Average number of distinct operators surfaced by Opsearch against a confirmed DR. Measures how deep the matchable supply pool is per demand. Split by Demand Region (NCR / ROI / Others) or Overall; weekly grain.","SELECT
+    DATE_TRUNC('week', f.demand_date)::date              AS week_start,
+    f.demand_region                                      AS split,
+    COUNT(DISTINCT CASE WHEN f.dr_flag = 1 THEN f.demand_id END) AS total_drs,
+
+    -- Avg Opsearch FOs per DR
+    ROUND(AVG(CASE WHEN f.dr_flag = 1 THEN o.total_operators::float END), 1) AS avg_opsearch_fos_per_dr,
+
+
+FROM mp_analytics_core.mp_demand_details f
+LEFT JOIN mp_analytics_core.fact_demand_opsearch_summary o
+       ON o.demandid = f.demand_id
+WHERE f.metadata_plt != 'true'
+  AND f.customer_type != 'ENTERPRISE'
+  AND f.customer_flag  = 'WE_Customer'
+  AND (f.consigner_freight_fare > 1000 OR f.consigner_freight_fare IS NULL)
+  AND f.demand_date >= DATEADD(week, -12, DATE_TRUNC('week', CURRENT_DATE))
+  AND f.demand_date <  DATE_TRUNC('week', CURRENT_DATE)
+GROUP BY 1, 2
+ORDER BY 1, 2;",True,Mohit,
+FO Growth,Avg Trip FO Ratio per DR,"Aliases: 2B. Avg Trip FO Ratio Per DR; Quality of Supply in DR.
+
+Of the operators surfaced in Opsearch for a DR, the share that are already trip-experienced (had their 1st trip before the demand date). Ratio = Avg Trip-Opsearch FOs per DR / Avg Opsearch FOs per DR. Tells whether the matched pool is real supply or dormant supply.","SELECT
+    DATE_TRUNC('week', f.demand_date)::date              AS week_start,
+    f.demand_region                                      AS split,
+    COUNT(DISTINCT CASE WHEN f.dr_flag = 1 THEN f.demand_id END) AS total_drs,
+
+
+    -- Avg Trip FOs per DR
+    ROUND(AVG(CASE WHEN f.dr_flag = 1 THEN o.trip_fo::float END), 1)         AS avg_trip_fos_per_dr,
+
+    -- Trip FO Ratio
+    AVG(CASE WHEN f.dr_flag = 1 THEN o.trip_fo::float END)
+      / NULLIF(AVG(CASE WHEN f.dr_flag = 1 THEN o.total_operators::float END), 0) AS trip_fo_ratio
+
+FROM mp_analytics_core.mp_demand_details f
+LEFT JOIN mp_analytics_core.fact_demand_opsearch_summary o
+       ON o.demandid = f.demand_id
+WHERE f.metadata_plt != 'true'
+  AND f.customer_type != 'ENTERPRISE'
+  AND f.customer_flag  = 'WE_Customer'
+  AND (f.consigner_freight_fare > 1000 OR f.consigner_freight_fare IS NULL)
+  AND f.demand_date >= DATEADD(week, -12, DATE_TRUNC('week', CURRENT_DATE))
+  AND f.demand_date <  DATE_TRUNC('week', CURRENT_DATE)
+GROUP BY 1, 2
+ORDER BY 1, 2;",False,Mohit,
+FO Growth,# New Token FOs,"Aliases: 3A. Supply Quality Funnel - New Token FO's; First-Time Token Payers.
+
+Operators who paid a token in the period AND had never paid one before (token_till_date - is_token_paid_loads = 0). Distinct from '# Token Paid FO', which counts all token payers including repeats.","SELECT DATE_TRUNC('week', e.event_date)::date AS week_start,
+       COUNT(DISTINCT CASE WHEN e.is_token_paid > 0
+                            AND (e.token_till_date - e.is_token_paid_loads) = 0
+                           THEN e.operator_code END) AS new_token_fos
+FROM analytics.fact_operators_mp_events e
+WHERE e.landed_on_mp = 1 AND e.fo_sub_type = 'Subs'
+GROUP BY 1;",False,Mohit,
+FO Growth,# Newly Activated FOs,"Aliases: 4C. Newly Activated FOs; New Trip FOs; First-Trip Activations.
+
+Operators who took a trip in the period AND had zero trips before it (trips_till_date - total_trips_loads = 0). This is the supply-side activation counter on the Supply Quality Funnel; '# Acquired FOs' is the equivalent on the FO Growth dashboard.","SELECT DATE_TRUNC('week', e.event_date)::date AS week_start,
+       COUNT(DISTINCT CASE WHEN e.total_trips_loads > 0
+                            AND (e.trips_till_date - e.total_trips_loads) = 0
+                           THEN e.operator_code END) AS newly_activated_fos
+FROM analytics.fact_operators_mp_events e
+WHERE e.fo_sub_type = 'Subs'
+GROUP BY 1;",False,Mohit,
+FO Growth,% Visitor to VA,"Aliases: visitor_to_va_pct; Visitor → Vehicle Available %.
+
+Of operators who landed on MP in the week, the share who marked a vehicle AVAILABLE in the availability snapshot. Step 2 of the Supply Quality Funnel (Visitors → VA → LDP → Token → Trip). Note: VA numerator comes from a separate snapshot table, so region splits must join on week+region.","WITH veh_avail AS (
+  SELECT DATE_TRUNC('week', avs.snapshot_time)::date AS week_start,
+         COUNT(DISTINCT CASE WHEN avs.remark='AVAILABLE' THEN avs.op_code END) AS avail_fos
+  FROM analytics.apollo_vehicle_availability_snapshot avs
+  JOIN analytics.fact_operators_onb onb ON avs.op_code = onb.operator_code AND onb.sub_date > '1970-01-01'
+  JOIN analytics.fact_operators_mp_events fp ON fp.operator_code = avs.op_code AND fp.landed_on_mp = 1
+  GROUP BY 1)
+SELECT DATE_TRUNC('week', e.event_date)::date AS week_start,
+       100.0 * va.avail_fos / NULLIF(COUNT(DISTINCT e.operator_code),0) AS visitor_to_va_pct
+FROM analytics.fact_operators_mp_events e
+LEFT JOIN veh_avail va ON va.week_start = DATE_TRUNC('week', e.event_date)::date
+WHERE e.landed_on_mp = 1 AND e.fo_sub_type = 'Subs'
+GROUP BY 1, va.avail_fos;",False,Mohit,
+FO Growth,% 1st Trip to 2nd Trip (n-day cohort),"Aliases: First to 2nd Trip Activation (In 7/14/30/60/90 Days); FO Trip Cohort.
+
+Cohort of FOs by the week of their FIRST trip; share who took a 2nd (or 3rd) trip within n days of it. n = 7 / 14 / 30 / 60 / 90 for 2nd trip, 7 / 14 / 21 for 3rd. Available Pan-India and split by FO Region (NCR / ROI / OTHERS). More granular version of '% Acquired to 2nd Trip'.","WITH raw_ AS (
+  SELECT c.operator_code, c.consignment_time::date AS placement_date,
+         ROW_NUMBER() OVER (PARTITION BY c.operator_code ORDER BY c.consignment_time) AS ranker
+  FROM mp_analytics_core.fact_consignments_full c
+  WHERE c.consignment_state != 'CANCELLED'
+    AND c.demand_id IN (SELECT demand_id FROM mp_analytics_core.mp_demand_details
+                        WHERE metadata_plt != 'true' AND customer_type != 'ENTERPRISE'
+                          AND customer_flag = 'WE_Customer'
+                          AND (consigner_freight_fare > 1000 OR consigner_freight_fare IS NULL))
+), cohort AS (
+  SELECT operator_code,
+         MAX(CASE WHEN ranker=1 THEN placement_date END) AS first_trip_date,
+         MAX(CASE WHEN ranker=2 THEN placement_date END) AS second_trip_date
+  FROM raw_ GROUP BY 1)
+SELECT date_trunc('week', first_trip_date)::date AS week,
+       COUNT(DISTINCT operator_code) AS first_trip_fos,
+       100.0 * COUNT(DISTINCT CASE WHEN second_trip_date <= first_trip_date + 30 THEN operator_code END)
+             / NULLIF(COUNT(DISTINCT operator_code),0) AS pct_2nd_trip_30d
+FROM cohort GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,% Pickup Ontime,"Aliases: Consignment Pickup - Ontime %; Reached at Loading Ontime.
+
+Share of completed trips where the vehicle reached the loading point on time (gtl_delay = 'ontime'). Denominator = trips completed in the period (by unloading_done_time). FTL only.","SELECT date_trunc('month', s.unloading_done_time) AS trip_completion_time,
+       COUNT(DISTINCT CASE WHEN s.gtl_delay = 'ontime' THEN s.demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT s.demand_id), 0) AS pickup_ontime_pct
+FROM mp_analytics_core.fact_consigner_service_stats s
+WHERE s.business_type = 'FTL' AND s.unloading_done_time IS NOT NULL
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,% Delivery Ontime (In TAT),"Aliases: Consignment Delivery - Ontime %; In TAT - Delivery.
+
+Share of completed trips that reached unloading within the system transit TAT. CAUTION: two different flag values are in use across cards — sys_trnst_dly = 'in_tat' on the Pickup card and sys_trnst_dly = 'ontime' on the NPS/Critical-Delays cards. Confirm which the consuming card uses before comparing numbers.","SELECT date_trunc('month', s.unloading_done_time) AS trip_completion_time,
+       COUNT(DISTINCT CASE WHEN s.sys_trnst_dly = 'in_tat' THEN s.demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT s.demand_id), 0) AS delivery_ontime_pct
+FROM mp_analytics_core.fact_consigner_service_stats s
+WHERE s.unloading_done_time IS NOT NULL
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,% Critical Delays,"Aliases: Transit Critical Delays %; Over 20% TAT Trips.
+
+Share of completed trips where transit overshot the system TAT by more than 20% (sys_trnst_dly = 'over_20%_TAT'). Feeds the 'Churn - Critical Cases' watchlist along with damage trips.","SELECT date_trunc('month', s.unloading_done_time) AS trip_completion_time,
+       COUNT(DISTINCT CASE WHEN s.sys_trnst_dly = 'over_20%_TAT' THEN s.demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT s.demand_id), 0) AS critical_delays_pct
+FROM mp_analytics_core.fact_consigner_service_stats s
+WHERE s.unloading_done_time IS NOT NULL
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,% Damage Trips,"Aliases: Damage Trips %; Damage Occurred in Trips %; YoY Damage Trips %.
+
+Share of completed trips with any damage/shortage recorded, i.e. damage type NOT IN ('nan','NO_DAMAGE','None',''). Split available NCR vs ROI and New vs Onboarded.","SELECT date_trunc('month', s.unloading_done_time) AS trip_completion_time,
+       COUNT(DISTINCT CASE WHEN s.type NOT IN ('nan','NO_DAMAGE','None','') THEN s.demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT s.demand_id), 0) AS damage_trips_pct
+FROM mp_analytics_core.fact_consigner_service_stats s
+WHERE s.unloading_done_time IS NOT NULL
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,Trip NPS,"Aliases: Trip NPS; NPS.
+
+Net Promoter Score on post-trip ratings. Promoters = rating 5; Passives = rating 4; Detractors = rating 1-3. NPS = %Promoters − %Detractors, both taken over RATED trips only (rating > 0), not all trips. Split by NCR vs ROI, New vs Onboarded, HP vs LP.","SELECT date_trunc('month', unloading_done_time) AS trip_completion_time,
+       COUNT(DISTINCT CASE WHEN rating = 5 THEN demand_id END) * 1.0
+         / NULLIF(COUNT(DISTINCT CASE WHEN rating > 0 THEN demand_id END), 0)
+     - COUNT(DISTINCT CASE WHEN rating IN (1,2,3) THEN demand_id END) * 1.0
+         / NULLIF(COUNT(DISTINCT CASE WHEN rating > 0 THEN demand_id END), 0) AS nps
+FROM mp_analytics_core.fact_consigner_service_stats
+WHERE unloading_done_time IS NOT NULL
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,% Bad Rated Trips,"Aliases: Bad Rated Trips %.
+
+CAUTION — two definitions coexist on the dashboard. NPS-family cards use rating IN (1,2,3); the Pickup/Service-Overview card uses rating IN (1,2). Denominator in both is ALL completed trips, not rated trips. Always state which cut is being quoted.","-- NPS-family definition (rating 1-3):
+SELECT date_trunc('month', unloading_done_time) AS trip_completion_time,
+       COUNT(DISTINCT CASE WHEN rating IN (1,2,3) THEN demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT demand_id), 0) AS bad_rated_trips_pct
+FROM mp_analytics_core.fact_consigner_service_stats
+WHERE unloading_done_time IS NOT NULL
+GROUP BY 1;
+
+-- Service-Overview definition swaps the numerator to: rating IN (1,2)",False,Mohit,
+Consigner Exp and Services,% Rated Trips,"Aliases: Total Trips V/s Rating Received Trips; Rated_Trips%.
+
+Share of completed trips that received any rating (rating > 0). This is the coverage denominator for NPS and Average Trip Rating — a low value means NPS is being read off a thin, self-selected sample.","SELECT date_trunc('month', unloading_done_time) AS trip_completion_time,
+       COUNT(DISTINCT CASE WHEN rating > 0 THEN demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT demand_id), 0) AS rated_trips_pct
+FROM mp_analytics_core.fact_consigner_service_stats
+WHERE unloading_done_time IS NOT NULL
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,Cx Tickets per Trip,"Aliases: Tickets Per Trip; CX - Tickets WOW/MOM; Tickets per Trip - App / Manual Split.
+
+Consigner tickets raised per completed trip. Tickets from mp_analytics_core.fact_cx_tickets (by ticket_created_time), trips from fact_consigner_service_stats (by unloading_done_time). Split by source APP vs ODIN, and available excluding 'PAYMENT MAPPING' sub-issues.","WITH trips AS (
+  SELECT date_trunc('month', unloading_done_time) AS timeline, COUNT(DISTINCT code) AS trips
+  FROM mp_analytics_core.fact_consigner_service_stats
+  WHERE unloading_done_time IS NOT NULL GROUP BY 1),
+tickets AS (
+  SELECT date_trunc('month', ticket_created_time) AS timeline,
+         COUNT(DISTINCT ticket_code) AS tickets,
+         COUNT(DISTINCT CASE WHEN source = 'APP'  THEN ticket_code END) AS app_tickets,
+         COUNT(DISTINCT CASE WHEN source = 'ODIN' THEN ticket_code END) AS odin_tickets
+  FROM mp_analytics_core.fact_cx_tickets GROUP BY 1)
+SELECT t.timeline,
+       k.tickets * 1.0 / NULLIF(t.trips, 0) AS tickets_per_trip,
+       k.app_tickets  * 1.0 / NULLIF(k.tickets, 0) AS app_tickets_pct,
+       k.odin_tickets * 1.0 / NULLIF(k.tickets, 0) AS odin_tickets_pct
+FROM trips t LEFT JOIN tickets k ON k.timeline = t.timeline;",False,Mohit,
+Consigner Exp and Services,% Escalation Raised in Trips,"Aliases: escalation_raised_in_trips%.
+
+Share of completed trips on which the consigner raised at least one ticket. Trip-level (unlike Tickets per Trip, which is ticket-level and can exceed 1).","SELECT date_trunc('month', s.unloading_done_time) AS trip_completion_time,
+       COUNT(DISTINCT CASE WHEN tk.ticket_code IS NOT NULL THEN s.demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT s.demand_id), 0) AS escalation_raised_pct
+FROM mp_analytics_core.fact_consigner_service_stats s
+LEFT JOIN mp_analytics_core.fact_cx_tickets tk ON tk.demand_id = s.demand_id
+WHERE s.unloading_done_time IS NOT NULL
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,% In TAT Resolution (Cx),"Aliases: Escalation Solved Ontime %; In TAT Resolution % - App & Manual Tickets.
+
+Share of consigner tickets resolved within their issue-wise TAT (tat_resolve_cat = 1). Also reported split by source (APP vs ODIN).","SELECT date_trunc('month', ticket_created_time) AS ticket_created_time,
+       COUNT(DISTINCT CASE WHEN tat_resolve_cat = 1 THEN ticket_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT ticket_code), 0) AS in_tat_resolution_pct,
+       COUNT(DISTINCT CASE WHEN tat_resolve_cat = 1 AND source = 'APP' THEN ticket_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT CASE WHEN source = 'APP' THEN ticket_code END), 0) AS app_in_tat_pct
+FROM mp_analytics_core.fact_cx_tickets
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,App Tickets CSAT,"Aliases: App Tickets CSAT; good_feeback_on_app_tkts%.
+
+Of app-raised consigner tickets that received feedback, the share marked GOOD. Feedback coverage is reported alongside as feebacks_on_app_tkts% = (GOOD + BAD) / app tickets. Overall CSAT uses the same formula without the source = 'APP' filter.","SELECT date_trunc('month', ticket_created_time) AS ticket_created_time,
+       COUNT(DISTINCT CASE WHEN source='APP' AND ticket_feedback='GOOD' THEN ticket_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT CASE WHEN source='APP' AND ticket_feedback IN ('GOOD','BAD') THEN ticket_code END), 0)
+         AS good_feedback_on_app_tkts_pct,
+       COUNT(DISTINCT CASE WHEN source='APP' AND ticket_feedback IN ('GOOD','BAD') THEN ticket_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT CASE WHEN source='APP' THEN ticket_code END), 0) AS feedback_coverage_pct
+FROM mp_analytics_core.fact_cx_tickets
+GROUP BY 1;",False,Mohit,
+Consigner Exp and Services,"% Operator Backout (Post-Acceptance, FO-induced)","Aliases: Operator Backout %; Post-Acceptance-Fo-ind%.
+
+Of ACCEPTED placements, the share cancelled after acceptance with induced_party = 'Operator'. Attribution overrides: cancelled_by containing 'SYSTEM', or cancel_remarks containing 'RETRY_BETTER_PRICE', are re-attributed to Consigner. Also reported pre-acceptance (FO / Cx induced) and as a demand-loss cut.","WITH cons AS (
+  SELECT fc.demand_id, fc.consignment_code, fc.consignment_time, fc.gtl_time AS acceptance,
+         CASE WHEN strpos(upper(COALESCE(fcc.cancelled_by,'')),'SYSTEM') > 0 THEN 'Consigner'
+              WHEN strpos(upper(COALESCE(fcc.cancel_remarks,'')),'RETRY_BETTER_PRICE') > 0 THEN 'Consigner'
+              ELSE fcc.induced_party END AS induced_party,
+         fcc.cancel_time
+  FROM mp_analytics_critical.fact_consignments fc
+  LEFT JOIN mp_analytics_core.fact_consignment_cancellations fcc ON fcc.consignment_code = fc.consignment_code),
+scope AS (SELECT demand_id, status FROM mp_analytics_core.mp_demand_details
+          WHERE metadata_plt != 'true' AND customer_type != 'ENTERPRISE' AND customer_flag = 'WE_Customer'
+            AND (consigner_freight_fare > 1000 OR consigner_freight_fare IS NULL))
+SELECT date_trunc('week', DATE(c.consignment_time)) AS timeline,
+       COUNT(DISTINCT CASE WHEN c.acceptance IS NOT NULL AND c.cancel_time > c.acceptance
+                            AND c.induced_party = 'Operator' THEN c.demand_id END) * 1.0
+     / NULLIF(COUNT(DISTINCT CASE WHEN c.acceptance IS NOT NULL THEN c.demand_id END), 0) AS post_acceptance_fo_ind_pct
+FROM cons c JOIN scope s ON s.demand_id = c.demand_id
+GROUP BY 1;",False,Mohit,
+FO Exp and Services,Balance Payment TAT (post valid POD upload),"Aliases: Balance Payment On Basis Of Valid POD Upload.
+
+Same bucketing as Balance Payment TAT but the clock starts at the POD collection entry time (or trip end, whichever is later) instead of trip end. Use this when the question is 'how fast do we pay once the FO has done their part'; use the trip-end version for the FO's lived experience.","-- Identical to Balance Payment TAT (post Trip End), except the reference time is:
+--   finl_time = GREATEST(unloading_done_time, pod_collection_entry_time)
+-- bal_time_diff = DATEDIFF(minute, finl_time, bal_pay_time)
+-- Buckets: <=120 / <=360 / <=720 / <=1440 / >1440 minutes over the same 'balance_paid' denominator.",False,Mohit,
+FO Exp and Services,Advance Payment TAT,"Aliases: Operator Advance Payment; LessThan1Hr/2Hr/6Hr/12Hr/24Hr %.
+
+Of trips where an advance was paid, the share disbursed within 1 / 2 / 6 / 12 / 24 hrs of trip start. Trip start = otp_entry_time, falling back to in_transit_time when OTP is missing. Advance = latest SUCCESS DEBIT txn of type 'ADVANCE'. Optional NCR flag filter.","SELECT date_trunc('month', unloading_done_time)::date AS month,
+       COUNT(DISTINCT code) AS total_trips,
+       COUNT(CASE WHEN time_dispose IS NOT NULL THEN code END) AS advance_paid,
+       ROUND(COUNT(DISTINCT CASE WHEN adv_time_diff <= 60   THEN code END)*100.0/NULLIF(advance_paid,0),2) AS lt1hr_pct,
+       ROUND(COUNT(DISTINCT CASE WHEN adv_time_diff <= 360  THEN code END)*100.0/NULLIF(advance_paid,0),2) AS lt6hr_pct,
+       ROUND(COUNT(DISTINCT CASE WHEN adv_time_diff <= 1440 THEN code END)*100.0/NULLIF(advance_paid,0),2) AS lt24hr_pct
+FROM (
+  -- trip_start_time = COALESCE(otp_entry_time, in_transit_time)
+  -- adv_time_diff  = DATEDIFF(minute, trip_start_time, adv_pay_time)
+  SELECT ... FROM mp_analytics_critical.fact_consignments c
+  LEFT JOIN mp_analytics_ops.fact_operator_consignment_transaction x
+         ON split_part(c.consignment_code,'-',2) = x.consignment_id
+        AND x.type='ADVANCE' AND x.status='SUCCESS' AND x.category='DEBIT'
+  WHERE c.consignment_state = 'TRIP_END')
+GROUP BY 1;",False,Mohit,
+FO Exp and Services,FO Tickets per Trip,"Aliases: Tickets Per Trip Fulfilled Trips; Tickets Per Trip Placed Trips; Operator Tickets Per Trip.
+
+Operator tickets raised per trip. Two denominators are in use — Fulfilled trips and Placed trips — and they are NOT interchangeable; the placed-trip version is always lower. Tickets from mp_analytics_core.fact_operator_tickets (a_created); trips from fact_consignments where consignment_state != 'CANCELLED', with the standard non-PTL / non-Enterprise / WE_Customer / fare>1000 scope.","WITH a AS (
+  SELECT date_trunc('day', t.a_created::timestamp) AS date_trip,
+         COUNT(DISTINCT t.ticket_code) AS tickets
+  FROM mp_analytics_core.fact_operator_tickets t GROUP BY 1),
+trips AS (
+  SELECT date_trunc('day', c.consignment_time) AS date_trip,
+         COUNT(DISTINCT c.consignment_code) AS trips_done
+  FROM mp_analytics_critical.fact_consignments c
+  LEFT JOIN mp_analytics_core.mp_demand_details d ON d.demand_id = c.demand_id
+  WHERE c.consignment_state != 'CANCELLED'
+    AND metadata_plt != 'true' AND customer_type != 'ENTERPRISE' AND customer_flag = 'WE_Customer'
+    AND (consigner_freight_fare > 1000 OR consigner_freight_fare IS NULL)
+  GROUP BY 1)
+SELECT date_trunc('month', trips.date_trip) AS month,
+       SUM(tickets) * 1.0 / NULLIF(SUM(trips_done), 0) AS tickets_per_trip
+FROM trips LEFT JOIN a ON a.date_trip = trips.date_trip
+GROUP BY 1;",False,Mohit,
+FO Exp and Services,% In TAT Resolution (FO),"Aliases: IN TAT Resolution %; IN_TAT_%.
+
+Share of operator tickets resolved within an issue-wise TAT measured in HOURS. TAT lookup is per issue_identified (e.g. Operator Backout 1h, No Response from Customer 2h, most charge/detention issues 3h, Delay in POD 6h, Advance/Balance Payment 12h, Delay in Loading/Unloading 24h, UTR issues 72h, Damage/Shortage 168h). Duration = resolved_dur for RESOLVED/CLOSED, open_from for ACTIVE/HOLD. Note: open_from carries a known IST-offset quirk, preserved from the legacy query.","WITH tat_calc AS (
+  SELECT t.ticket_code, t.a_created::timestamp AS a_created, t.issue_identified, t.status,
+         CASE WHEN t.status IN ('RESOLVED','CLOSED') THEN t.resolved_dur
+              WHEN t.status IN ('ACTIVE','HOLD')     THEN t.open_from END AS resolved_duration,
+         CASE WHEN t.issue_identified = 'Operator Backout' THEN 1
+              WHEN t.issue_identified = 'No Response from Customer' THEN 2
+              WHEN t.issue_identified IN ('Delay in Bilti','Loading Charge','Unloading Charge',
+                   'Loading Detention','Unloading Detention','Extra Distance') THEN 3
+              WHEN t.issue_identified = 'Delay in POD' THEN 6
+              WHEN t.issue_identified IN ('Advance Payment','Balance Payment') THEN 12
+              WHEN t.issue_identified IN ('Delay in Loading','Delay in Unloading') THEN 24
+              WHEN t.issue_identified IN ('Advance UTR Not Generated','Balance UTR Not Generated') THEN 72
+              WHEN t.issue_identified = 'Damage / Shortage Issue' THEN 168
+              /* ...full lookup in card 31305... */ END AS tat
+  FROM mp_analytics_core.fact_operator_tickets t WHERE t.a_created::timestamp >= '2024-04-01')
+SELECT date_trunc('month', a_created) AS month_,
+       COUNT(DISTINCT CASE WHEN resolved_duration <= tat THEN ticket_code END) * 1.0
+     / NULLIF(COUNT(DISTINCT ticket_code), 0) AS in_tat_pct
+FROM tat_calc GROUP BY 1;",False,Mohit,
+FO Exp and Services,Overall FO Queries per Trip,"Aliases: Overall FO Queries; tickets_per_trip / calls_per_trip / chats_per_trip / rm_calls_per_trip.
+
+Single scorecard putting every FO contact channel on one per-trip denominator: tickets (fact_operator_tickets), CC calls (cc_acd_raw), chats (tesseract_help_chat_session), and RM calls (mp_rm_call_details_raw, CONNECTED only, split MP_Load_Support_Inbound vs _Outbound). Use it to see channel substitution — chat deflection should push tickets_per_trip down, not just chats_per_trip up.","-- trips: fact_consignments (state != 'CANCELLED', non-PTL, non-Enterprise, WE_Customer, fare>1000)
+-- tickets: COUNT(DISTINCT ticket_code) FROM mp_analytics_core.fact_operator_tickets
+-- calls:   COUNT(DISTINCT call_id) FROM cc_acd_raw JOIN cc_crm_raw (product='Marketplace', c_type='Customer')
+-- chats:   COUNT(DISTINCT sessionid) FROM mp_analytics_sandbox.tesseract_help_chat_session
+-- rm:      COUNT(DISTINCT call_id) FROM analytics.mp_rm_call_details_raw WHERE system_disposition='CONNECTED'
+SELECT month,
+       total_tickets * 1.0 / NULLIF(total_trips,0) AS tickets_per_trip,
+       total_calls   * 1.0 / NULLIF(total_trips,0) AS calls_per_trip,
+       total_chats   * 1.0 / NULLIF(total_trips,0) AS chats_per_trip,
+       rm_total_calls * 1.0 / NULLIF(total_trips,0) AS rm_calls_per_trip
+FROM base_agg LEFT JOIN rm_calls_agg USING (month);",False,Mohit,
+FO Exp and Services,% Chats Converted to Ticket,"Aliases: Operator App (Chat Auto Redressal); chats_converted_to_ticket%.
+
+Of operator help-chat sessions, the share that ended up creating a ticket (ticket created at or after chat start). This is the inverse of auto-redressal: lower = the bot resolved it. Sessions where the linked ticket predates the chat are classified 'ticket_created_before_chat' and excluded from the numerator.","SELECT date_trunc('month', chat_created) AS chat_created,
+       COUNT(DISTINCT sessionid) AS unique_chat_sessions,
+       COUNT(DISTINCT CASE WHEN ticket_chat_chck = 'ticket_created_in_chat' THEN sessionid END) * 1.0
+     / NULLIF(COUNT(DISTINCT sessionid), 0) AS chats_converted_to_ticket_pct
+FROM (
+  SELECT cs.sessionid, cs.created_ts + interval '5h30m' AS chat_created,
+         CASE WHEN datediff(min, cs.created_ts + interval '5h30m', tms.ticket_creation) >= 0
+              THEN 'ticket_created_in_chat'
+              WHEN datediff(min, cs.created_ts + interval '5h30m', tms.ticket_creation) < 0
+              THEN 'ticket_created_before_chat' END AS ticket_chat_chck
+  FROM mp_analytics_sandbox.tesseract_help_chat_session cs
+  LEFT JOIN (SELECT DISTINCT ticket_code, created + interval '5h30m' AS ticket_creation
+             FROM trucking.dpdtms_ticket) tms ON tms.ticket_code = cs.ticketid)
+GROUP BY 1;",False,Mohit,
+FO Exp and Services,Chat CSAT,"Aliases: Chats CSAT; Overall Chat CSAT; chats_recieved_good_feebacks%.
+
+Of operator chat sessions that received feedback, the share with feedbackcategory = 'SATISFIED'. IMPORTANT: tesseract_help_chat_feedback is CDC-replicated with multiple rows per sessionid — dedup to the latest row per session (ROW_NUMBER over updated desc, id desc) before aggregating, or sessions double-count into both good and bad buckets.","WITH cf AS (
+  SELECT sessionid, feedbackcategory FROM (
+    SELECT sessionid, feedbackcategory,
+           row_number() OVER (PARTITION BY sessionid ORDER BY updated DESC, id DESC) AS rn
+    FROM mp_analytics_sandbox.tesseract_help_chat_feedback WHERE deleted = false)
+  WHERE rn = 1)
+SELECT date_trunc('month', cs.created_ts + interval '5h30m') AS chat_created,
+       COUNT(DISTINCT CASE WHEN cf.feedbackcategory = 'SATISFIED' THEN cs.sessionid END) * 1.0
+     / NULLIF(COUNT(DISTINCT CASE WHEN cf.feedbackcategory IS NOT NULL THEN cs.sessionid END), 0)
+         AS chat_csat
+FROM mp_analytics_sandbox.tesseract_help_chat_session cs
+LEFT JOIN cf ON cf.sessionid = cs.sessionid
+GROUP BY 1;",False,Mohit,
+FO Exp and Services,FO Ticket Feedback Rate & CSAT,"Aliases: Overall FO Ticket Feedbacks : MP; %feedback / %feedback_- / %feedback_+.
+
+Three things on one card: (1) feedback coverage = tickets with feedback / total tickets; (2) negative rate = NOT_SATISFIED / tickets with feedback; (3) dissatisfaction reason mix over total tickets — DELAY_IN_RESOLUTION, INAPPROPRIATE_RESOLUTION, NO_UPDATES, TEAM_MISCONDUCT, OTHERS. Reason % denominators are TOTAL tickets, not feedback-received, so they will not sum to the negative rate.","SELECT date_trunc('month', a_created::date) AS ticket_creation,
+       COUNT(DISTINCT ticket_code) AS total_tickets,
+       COUNT(DISTINCT CASE WHEN len(ticket_feedback) > 3 THEN ticket_code END) AS feedback_received,
+       feedback_received * 1.0 / NULLIF(total_tickets, 0) AS ""%feedback"",
+       COUNT(DISTINCT CASE WHEN ticket_feedback = 'NOT_SATISFIED' THEN ticket_code END) * 1.0
+         / NULLIF(feedback_received, 0) AS ""%feedback_-"",
+       COUNT(DISTINCT CASE WHEN ticket_feedback_reason ILIKE '%DELAY_IN_RESOLUTION%' THEN ticket_code END) * 1.0
+         / NULLIF(total_tickets, 0) AS ""delay_in_resolution%""
+FROM mp_analytics_core.fact_operator_tickets
+GROUP BY 1;",False,Mohit,
 ,,,,False,,
 ,,,,False,,
 ,,,,False,,
