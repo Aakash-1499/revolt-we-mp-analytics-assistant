@@ -519,11 +519,6 @@ JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
 WHERE b.trip_flag = 1;",True,Ekta
 Consigner Growth,% Cx Service Charge,Markup of consigner freight fare over base price,"SELECT SUM(consigner_freight_fare - base_price) * 1.0 / NULLIF(SUM(base_price), 0)
 FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta
-Consigner Growth,GMV,"WFMS freight fare net of shipper discount, over fulfilled trips.","SELECT SUM(wfms_consigner_freight_fare
-         - COALESCE(shipper_discount,0) + COALESCE(shipper_discount_reversal,0))
-FROM mp_demand_details a
-JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",True,Ekta
 Consigner Growth,Avg Trip Revenue,Mean expected margin per trip,"SELECT AVG(pnl_expected)
 FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta
 FO Growth,# Acquired FOs,"Aliases: # 1st Trip FOs; # Newly Tripped FOs, Onboarded FO, Activated
