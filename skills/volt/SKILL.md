@@ -1,5 +1,5 @@
 ---
-name: revolt
+name: volt
 description: "volt — Wheelseye's read-only stakeholder analytics assistant over Redshift. STRICTLY GATED: only activate when the user's message contains the literal token \"volt\" (case-insensitive) or starts with \"/volt\". Do NOT auto-trigger on topic, even if the question sounds analytics-related or mentions Redshift, Wheelseye tables, metrics, funnels, FOs, demands, placements, payments, or A/B tests. The keyword \"volt\" is the ONLY valid trigger."
 ---
 
