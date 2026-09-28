@@ -513,10 +513,11 @@ left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigne
 left join discount_data c on a.demand_id=c.demand_id
 left join mp_analytics_core.fact_consignments d on a.latest_consignment_id=d.consignment_id
 where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'",True,Gajinder
-Consigner Growth,% Middle Share,Markup of base price over what the FO is paid. A markup over supply cost.,"SELECT SUM(b.base_price - a.supplyfare) * 1.0 / NULLIF(SUM(a.supplyfare), 0)
-FROM mp_demand_details a
-JOIN fact_consigner_demands_lead_source b ON b.demand_id = a.demand_id
-WHERE b.trip_flag = 1;",True,Ekta
+Consigner Growth,% Middle Share,Markup of base price over what the FO is paid. A markup over supply cost.,"select sum(c.base_price_shown - c.supplyfare)*1.0/nullif(sum(c.supplyfare), 0)
+from mp_analytics_core.fact_demands a
+left join mp_analytics_core.dim_consigners b on a.consigner_user_code=b.consigner_user_code
+left join mp_analytics_core.fact_consignments c on a.latest_consignment_id=c.consignment_id
+where a.load_type='FTL' and b.customer_type ilike '%%sme%%' and b.customer_flag='WE_Customer' and a.status='FULFILLED'",True,Gajinder
 Consigner Growth,% Cx Service Charge,Markup of consigner freight fare over base price,"SELECT SUM(consigner_freight_fare - base_price) * 1.0 / NULLIF(SUM(base_price), 0)
 FROM fact_consigner_demands_lead_source WHERE trip_flag = 1;",True,Ekta
 Consigner Growth,Avg Trip Revenue,Mean expected margin per trip,"SELECT AVG(pnl_expected)
