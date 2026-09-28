@@ -65,12 +65,12 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+| Signup |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+| Signup |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+| Signup |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+| Signup |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+| Signup |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+| Signup |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
