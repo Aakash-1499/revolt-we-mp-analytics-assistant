@@ -52,16 +52,16 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Signup | Insurance Opt in |  | False | v1_ok | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |  |  |  |
 | Signup | Insurance Opt in |  | False | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |  |  |  |
 | Browsing | Enter Tonnage |  | False | v1_tonnage | view |  | tonnage_req_v1 | False |  |  | False |  |  |  |
-| Browsing | Enter Tonnage |  | False | v1_input_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
-| Browsing | Enter Tonnage |  | False | v1_choose_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
-| Browsing | Enter Tonnage |  | False | v1_dont_know_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
-| Browsing | Enter Tonnage |  | False | v1_submit | click |  | tonnage_req_v1 | False |  | wt | False |  |  |  |
-| Browsing | Enter Tonnage |  | False | v1_back | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
-| Browsing | Enter Tonnage |  | False | v1_edit_add | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
-| Browsing | Enter Tonnage |  | False | v1_add_loading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
-| Browsing | Enter Tonnage |  | False | v1_add_unloading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing | Enter Tonnage | Enters tonnage | False | v1_input_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing | Enter Tonnage | Chooses tonnage option | False | v1_choose_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing | Enter Tonnage | Clicks 'I don't know my material weight' | False | v1_dont_know_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing | Enter Tonnage | Clicks 'Submit' | False | v1_submit | click |  | tonnage_req_v1 | False |  | wt | False |  |  |  |
+| Browsing | Enter Tonnage | Clicks 'Back' arrow | False | v1_back | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing | Enter Tonnage | Clicks 'Edit' button | False | v1_edit_add | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing | Enter Tonnage | Clicks 'Add loading' button | False | v1_add_loading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing | Enter Tonnage | Clicks 'Add unloading' button | False | v1_add_unloading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_veh_options | view |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing | VT Browsing |  | False | v1_enter_wt | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing | Clicks 'Enter weight' button | False | v1_enter_wt | click |  | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_body_type | click |  | tonnage_req | False |  | 0 : Open; <br>1 : Container, <br>2 : Trailer | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_veh_opted | click |  | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_height | click |  | tonnage_req | False |  |  | False |  |  |  |
