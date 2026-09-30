@@ -60,23 +60,23 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Browsing | Enter Tonnage |  | False | v1_edit_add | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
 | Browsing | Enter Tonnage |  | False | v1_add_loading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
 | Browsing | Enter Tonnage |  | False | v1_add_unloading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_veh_options | view |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_enter_wt | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_body_type | click |  | tonnage_req | False |  | 0 for Open/1 for Container/2 for Trailer | False |  |  |  |
-| Browsing |  |  | False | v1_veh_opted | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_height | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_spcl_req | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_cnf_veh | click |  | tonnage_req | False |  | chosen option index | False |  |  |  |
-| Browsing |  |  | False | v1_spcl_req_bottomsheet | view |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_continue | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_scroll | view |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_veh_unavailable | view |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_change_tonnage | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_wt_bottomsheet | view | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_enter_wt | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_choose_wt | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
-| Browsing |  |  | False | v1_cnf_wt | click | enter_wt_bottomsheet | tonnage_req | False |  | weight | False |  |  |  |
-| Browsing |  |  | False | v1_close | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_veh_options | view |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_enter_wt | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_body_type | click |  | tonnage_req | False |  | 0 : Open; <br>1 : Container, <br>2 : Trailer | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_veh_opted | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_height | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_spcl_req | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_cnf_veh | click |  | tonnage_req | False |  | chosen option index | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_spcl_req_bottomsheet | view |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_continue | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_scroll | view |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_veh_unavailable | view |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_change_tonnage | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_wt_bottomsheet | view | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_enter_wt | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_choose_wt | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_cnf_wt | click | enter_wt_bottomsheet | tonnage_req | False |  | weight | False |  |  |  |
+| Browsing | VT Browsing |  | False | v1_close | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
 | Demand |  | Demand Created | False |  |  |  |  | False |  |  | False |  |  |  |
 | Demand |  | Demand Confirmed (DR) | False |  |  |  |  | False |  |  | False |  |  |  |
 | Price Confirmation |  | Final Price Given | False |  |  |  |  | False |  |  | False |  |  |  |
