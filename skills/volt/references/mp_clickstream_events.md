@@ -51,22 +51,30 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Signup | Insurance Opt in |  | False | V1_close | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |  |  |  |
 | Signup | Insurance Opt in |  | False | v1_ok | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |  |  |  |
 | Signup | Insurance Opt in |  | False | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |  |  |  |
-| Browsing |  | Flow Entry Point (Discovery Started) | False | v1_tonnage | view |  |  | False |  |  | False |  |  |  |
-| Browsing |  | Price Discovery | False | v1_input_wt | click |  |  | False |  |  | False |  |  |  |
-|  |  |  | False | v1_choose_wt | click |  |  | False |  |  | False |  |  |  |
-|  |  |  | False | v1_dont_know_wt | click |  |  | False |  |  | False |  |  |  |
-|  |  |  | False | v1_submit | click |  |  | False |  | wt | False |  |  |  |
-|  |  |  | False | v1_back | click |  |  | False |  |  | False |  |  |  |
-|  |  |  | False | v1_edit_add | click |  |  | False |  |  | False |  |  |  |
-|  |  |  | False | v1_add_loading | click |  |  | False |  |  | False |  |  |  |
-|  |  |  | False | v1_add_unloading | click |  |  | False |  |  | False |  |  |  |
+| Browsing |  | Flow Entry Point (Discovery Started) | False | v1_tonnage | view |  | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing |  | Price Discovery | False | v1_input_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_choose_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_dont_know_wt | click |  | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_submit | click |  | tonnage_req_v1 | False |  | wt | False |  |  |  |
+| Browsing |  |  | False | v1_back | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_edit_add | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_add_loading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_add_unloading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_veh_options(view) | view |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_enter_wt(click) | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_body_type(click)(misc:0 for Open/1 for Container/2 for Trailer) | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_veh_opted(click) | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_height(click) | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing |  |  | False | v1_spcl_req(click) | click |  | tonnage_req | False |  |  | False |  |  |  |
+|  |  |  | False | v1_cnf_veh(misc:chosen option index) | click |  | tonnage_req | False |  |  | False |  |  |  |
+|  |  |  | False | v1_spcl_req_bottomsheet(view) | view |  | tonnage_req | False |  |  | False |  |  |  |
+|  |  |  | False | v1_continue | click |  | tonnage_req | False |  |  | False |  |  |  |
+|  |  |  | False | v1_scroll | view |  | tonnage_req | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+| Browsing |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 | Demand |  | Demand Created | False |  |  |  |  | False |  |  | False |  |  |  |
 | Demand |  | Demand Confirmed (DR) | False |  |  |  |  | False |  |  | False |  |  |  |
 | Price Confirmation |  | Final Price Given | False |  |  |  |  | False |  |  | False |  |  |  |
