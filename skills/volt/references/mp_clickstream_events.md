@@ -53,6 +53,20 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Signup | Insurance Opt in |  | False | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |  |  |  |
 | Browsing |  | Flow Entry Point (Discovery Started) | False |  |  |  |  | False |  |  | False |  |  |  |
 | Browsing |  | Price Discovery | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 | Demand |  | Demand Created | False |  |  |  |  | False |  |  | False |  |  |  |
 | Demand |  | Demand Confirmed (DR) | False |  |  |  |  | False |  |  | False |  |  |  |
 | Price Confirmation |  | Final Price Given | False |  |  |  |  | False |  |  | False |  |  |  |
