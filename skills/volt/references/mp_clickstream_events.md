@@ -62,16 +62,16 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Browsing | Enter Tonnage | Clicks 'Add unloading' button | False | v1_add_unloading | click | top_nav | tonnage_req_v1 | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_veh_options | view |  | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing | Clicks 'Enter weight' button | False | v1_enter_wt | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing | VT Browsing |  | False | v1_body_type | click |  | tonnage_req | False |  | 0 : Open; <br>1 : Container, <br>2 : Trailer | False |  |  |  |
-| Browsing | VT Browsing |  | False | v1_veh_opted | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing | VT Browsing |  | False | v1_height | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing | VT Browsing |  | False | v1_spcl_req | click |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing | VT Browsing |  | False | v1_cnf_veh | click |  | tonnage_req | False |  | chosen option index | False |  |  |  |
+| Browsing | VT Browsing | Clicks 'Open/Container/Trailer' options | False | v1_body_type | click |  | tonnage_req | False |  | 0 : Open; <br>1 : Container, <br>2 : Trailer | False |  |  |  |
+| Browsing | VT Browsing | Clicks any VT card | False | v1_veh_opted | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing | Clicks 'height' option | False | v1_height | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing | Clicks  any special request choice | False | v1_spcl_req | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing | Clicks 'Confirm <VT>' | False | v1_cnf_veh | click |  | tonnage_req | False |  | chosen option index | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_spcl_req_bottomsheet | view |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing | VT Browsing |  | False | v1_continue | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing | Clicks 'Okay, Got it' button | False | v1_continue | click | special_req_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_scroll | view |  | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_veh_unavailable | view |  | tonnage_req | False |  |  | False |  |  |  |
-| Browsing | VT Browsing |  | False | v1_change_tonnage | click |  | tonnage_req | False |  |  | False |  |  |  |
+| Browsing | VT Browsing | Clicks 'Change Tonnage' | False | v1_change_tonnage | click |  | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_wt_bottomsheet | view | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_enter_wt | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing |  | False | v1_choose_wt | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
