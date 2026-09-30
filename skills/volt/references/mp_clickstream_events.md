@@ -51,15 +51,15 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Signup | Insurance Opt in |  | False | V1_close | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |  |  |  |
 | Signup | Insurance Opt in |  | False | v1_ok | click | update_ins_pricing | <dynamic_screen> | True |  |  | False |  |  |  |
 | Signup | Insurance Opt in |  | False | v1_ok | click | fragile_items_list | <dynamic_screen> | True |  |  | False |  |  |  |
-| Browsing |  | Flow Entry Point (Discovery Started) | False |  |  |  |  | False |  |  | False |  |  |  |
-| Browsing |  | Price Discovery | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
+| Browsing |  | Flow Entry Point (Discovery Started) | False | v1_tonnage | view |  |  | False |  |  | False |  |  |  |
+| Browsing |  | Price Discovery | False | v1_input_wt | click |  |  | False |  |  | False |  |  |  |
+|  |  |  | False | v1_choose_wt | click |  |  | False |  |  | False |  |  |  |
+|  |  |  | False | v1_dont_know_wt | click |  |  | False |  |  | False |  |  |  |
+|  |  |  | False | v1_submit | click |  |  | False |  | wt | False |  |  |  |
+|  |  |  | False | v1_back | click |  |  | False |  |  | False |  |  |  |
+|  |  |  | False | v1_edit_add | click |  |  | False |  |  | False |  |  |  |
+|  |  |  | False | v1_add_loading | click |  |  | False |  |  | False |  |  |  |
+|  |  |  | False | v1_add_unloading | click |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  |  | False |  |  | False |  |  |  |
