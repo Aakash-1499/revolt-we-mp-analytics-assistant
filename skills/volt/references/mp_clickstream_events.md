@@ -77,14 +77,13 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 | Browsing | VT Browsing | Clicks tonnage option | False | v1_choose_wt | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
 | Browsing | VT Browsing | Clicks 'Submit' | False | v1_cnf_wt | click | enter_wt_bottomsheet | tonnage_req | False |  | weight | False |  |  |  |
 | Browsing | VT Browsing | Clicks 'Close' button | False | v1_close | click | enter_wt_bottomsheet | tonnage_req | False |  |  | False |  |  |  |
-| Demand |  | Demand Created | False | v1_demand_price_range(view)(misc : demandid) | view |  | demand_price_range | False |  |  | False |  |  |  |
-| Demand |  | Demand Confirmed (DR) | False | v1_back_btn | click |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False | v1_cancel | click |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False | v1_edit_add | click |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False | v1_edit_veh | click |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False | v1_price_range | view |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False | v1_mode | click |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False | v1_confirm_btn(click)(misc: mode:quick_confirmation/best_price) | click |  | demand_price_range | True |  |  | False |  |  |  |
+| Demand |  |  | False | v1_demand_price_range(view)(misc : demandid) | view |  | demand_price_range | False |  |  | False |  |  |  |
+| Demand |  |  | False | v1_back_btn | click | top_nav | demand_price_range | False |  |  | False |  |  |  |
+|  |  |  | False | v1_cancel | click | top_nav | demand_price_range | False |  |  | False |  |  |  |
+|  |  |  | False | v1_edit_add | click | top_nav | demand_price_range | False |  |  | False |  |  |  |
+|  |  |  | False | v1_edit_veh | click | top_nav | demand_price_range | False |  |  | False |  |  |  |
+|  |  |  | False | v1_mode | click | search_modes | demand_price_range | False |  |  | False |  |  |  |
+|  |  |  | False | v1_confirm_btn | click | bottom_nav | demand_price_range | True |  | mode:quick_confirmation/best_price | False |  |  |  |
 |  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
