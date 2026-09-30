@@ -87,17 +87,6 @@ The rest of the fields are present in the 'mp_analytics_core.fact_cx_events_l3m'
 |  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
 |  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-|  |  |  | False |  |  |  | demand_price_range | False |  |  | False |  |  |  |
-| Price Confirmation |  | Final Price Given | False |  |  |  |  | False |  |  | False |  |  |  |
-| Price Confirmation |  | Price Accepted | False |  |  |  |  | False |  |  | False |  |  |  |
 | Fulfilment |  | At Loading | False |  |  |  |  | False |  |  | False |  |  |  |
 | Fulfilment |  | Trip Started | False |  |  |  |  | False |  |  | False |  |  |  |
 | Fulfilment |  | At Unloading | False |  |  |  |  | False |  |  | False |  |  |  |
